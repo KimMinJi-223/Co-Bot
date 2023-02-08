@@ -1,0 +1,5 @@
+- cobot_main, setting, settings
+<a href="https://www.flaticon.com/free-icons/gear" title="gear icons">Gear icons created by Google - Flaticon</a>
+
+- cobot_main, start, start(1)
+<a href="https://www.flaticon.com/free-icons/start-button" title="start-button icons">Start-button icons created by Freepik - Flaticon</a>
