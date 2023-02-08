@@ -13,5 +13,6 @@ ACPP_Cobot_GameMode::ACPP_Cobot_GameMode()
 
 void ACPP_Cobot_GameMode::PostLogin(APlayerController* NewPlayer)
 {
+	UE_LOG(LogTemp, Warning, TEXT("PostLogin"));
 	Super::PostLogin(NewPlayer);
 }
