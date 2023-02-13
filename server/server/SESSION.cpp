@@ -36,13 +36,13 @@ void SESSION::recv_packet()
 
 void SESSION::send_packet(char* packet)
 {
-	OVER_EX over;
-	over.wsabuf.len = packet[0];
-	over.wsabuf.buf = over.buffer;
-	ZeroMemory(&over.over, sizeof(over.over));
-	over.mode = IO_SEND;
-	memcpy(over.buffer, packet, packet[0]);
-	int ret = WSASend(sock, &over.wsabuf, 1, 0, 0, &over.over, 0);
+	OVER_EX* over = new OVER_EX;
+	over->wsabuf.buf = reinterpret_cast<char*>(packet);
+	over->wsabuf.len = packet[0];
+	ZeroMemory(&over->over, sizeof(over->over));
+	over->mode = IO_SEND;
+	memcpy(over->buffer, packet, packet[0]);
+	int ret = WSASend(sock, &over->wsabuf, 1, 0, 0, &over->over, 0);
 	if (ret == SOCKET_ERROR)
 	{
 		int err = WSAGetLastError();

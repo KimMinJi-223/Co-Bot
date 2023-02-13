@@ -189,8 +189,11 @@ void ServerMain::worker_thread()
         {
             /*
                 delete 해줘야 하는게 맞는데 왜 이거만 키면 오류가 나는지 모르겠다.
+                할당하지도 않은 메모리 영역을 해제하려고 해서 생긴 오류였다.
+                send_packet() 함수에서 new OVER_EX로 하여 오류를 해결하였다.
+                근데 꼭 new/delete로 안해도 될것 같긴 하다.
             */
-            //delete over_ex;
+            delete over_ex;
         } break;
         }
     }
