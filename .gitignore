@@ -79,7 +79,7 @@ DerivedDataCache/*
 passplz/DerivedDataCache/*
 
 
-/server/x64
+server/server/x64
 *.exe
 *.ilk
 *.pdb
