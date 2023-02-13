@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "CoreMinimal.h"
+#include "passplz.h"
 #include "Blueprint/UserWidget.h"
 #include "CPP_StartWidget.generated.h"
 
@@ -19,6 +19,9 @@ public:
 	void IDprint() {
 		UE_LOG(LogTemp, Warning, TEXT("%s, %s"), *ID, *Passward );
 	};*/
+protected:
+	UFUNCTION(BlueprintCallable)
+	bool Is_Set_IDPW_Controller();
 
 protected:
 	UPROPERTY(BlueprintReadWrite)

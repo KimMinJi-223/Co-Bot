@@ -7,8 +7,25 @@
 ACPP_Cobot::ACPP_Cobot()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 	UE_LOG(LogTemp, Warning, TEXT("ACPP_Cobot"));
+
+	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
+	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
+
+	SpringArm->SetupAttachment(GetCapsuleComponent());
+	Camera->SetupAttachment(SpringArm);
+
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -40.0f), FRotator(0.0f, -90.0f, 0.0f));
+	SpringArm->TargetArmLength = 400.0f;
+	SpringArm->SetRelativeRotation(FRotator(-15.0f, 0.0f, 0.0f));
+	GetCapsuleComponent()->SetCapsuleSize(30.f, 40.f);
+
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_COBOT(TEXT("/Game/model/PLAYER/cobot.cobot"));
+	if (SK_COBOT.Succeeded()) {
+		GetMesh()->SetSkeletalMesh(SK_COBOT.Object);
+	}
+
 }
 
 // Called when the game starts or when spawned
