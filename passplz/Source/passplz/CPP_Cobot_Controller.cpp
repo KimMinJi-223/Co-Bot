@@ -80,8 +80,7 @@ void ACPP_Cobot_Controller::BeginPlay()
 
     //서버! 상대 플레이어를 생성한다. 
     //서버에서 상대 플레이어의 초기 위치를 받아주세요
-    Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(0.0f, 0.0f, 150.0f/*여기에 초기 위치 넣어주면 됨*/), FRotator(0.0f, 0.0f, 0.0f));
-   
+    Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(30.0f, 200.0f, 150.0f/*여기에 초기 위치 넣어주면 됨*/), FRotator(0.0f, 0.0f, 0.0f));
 }
 
 void ACPP_Cobot_Controller::PostInitializeComponents()
