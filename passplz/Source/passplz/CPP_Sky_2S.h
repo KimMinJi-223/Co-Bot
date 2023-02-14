@@ -22,8 +22,10 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	virtual void PostInitializeComponents() override;
 
 private:
+
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* CenterSky;
 
@@ -41,8 +43,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 		int32 move_value;
-
-	virtual void PostInitializeComponents() override;
 
 	UFUNCTION()
 		void OnButtonOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

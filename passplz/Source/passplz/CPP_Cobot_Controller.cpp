@@ -137,6 +137,7 @@ void ACPP_Cobot_Controller::BeginPlay()
     UE_LOG(LogTemp, Warning, TEXT("ÄÚº¿»ý¼º"));
 
     Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(p2_x, p2_y, p2_z), FRotator(0.0f, 0.0f, 0.0f));
+   
 }
 
 void ACPP_Cobot_Controller::PostInitializeComponents()
