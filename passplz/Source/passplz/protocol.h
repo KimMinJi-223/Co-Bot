@@ -5,7 +5,12 @@ constexpr int BUF_SIZE = 2048;
 
 constexpr int MAX_USER = 10;
 
-enum class type { cs_move, sc_move };
+enum class type { cs_login, cs_move, sc_move };
+
+struct cs_login_packet {
+	char size;
+	char type;
+};
 
 struct cs_move_packet {
 	char size;

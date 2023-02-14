@@ -30,10 +30,14 @@ class PASSPLZ_API ACPP_Cobot_Controller : public APlayerController
 private:
 	SOCKET sock;
 	double x, y, z;
+	int	id;
 	RingBuffer ring_buff;
 	// TMap<int, AActor*> actorList;
 
+	double p2_x, p2_y, p2_z;
+
 private:
+	virtual void Tick(float DeltaTime) override;
 	void RecvPacket();
 	void ProcessPacket(char* packet);
 

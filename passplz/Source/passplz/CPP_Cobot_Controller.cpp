@@ -15,6 +15,8 @@ ACPP_Cobot_Controller::ACPP_Cobot_Controller()
     UE_LOG(LogTemp, Warning, TEXT("Start connect server!"));
     //int retval;
 
+    // PrimaryActorTick.bCanEverTick = false;
+
     // 윈속 초기화
 
     WSADATA wsaData;
@@ -35,7 +37,25 @@ ACPP_Cobot_Controller::ACPP_Cobot_Controller()
     nRet = connect(sock, (sockaddr*)&stServerAddr, sizeof(sockaddr));
     //if (nRet == SOCKET_ERROR) return false;
 
+    u_long nonBlockingMode = 1;
+    ioctlsocket(sock, FIONBIO, &nonBlockingMode); // sock을 논블로킹 모드로 설정
+
     UE_LOG(LogTemp, Warning, TEXT("Success server connect"));
+
+    // 서버한테 들어왔다고 알려주는 거
+    cs_login_packet login_pack;
+    login_pack.size = sizeof(login_pack);
+    login_pack.type = static_cast<char>(type::cs_login);
+
+    int ret = send(sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
+}
+
+void ACPP_Cobot_Controller::Tick(float DeltaTime)
+{
+    Super::Tick(DeltaTime);
+
+    RecvPacket();
+    //UE_LOG(LogTemp, Warning, TEXT("Tick"));
 }
 
 void ACPP_Cobot_Controller::RecvPacket()
@@ -47,6 +67,7 @@ void ACPP_Cobot_Controller::RecvPacket()
     {
         GetLastError();
         std::cout << "recv() fail!" << std::endl;
+        return;
     }
 
     ring_buff.enqueue(buff, ret);
@@ -64,11 +85,48 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
 {
     switch (packet[1])
     {
+    case static_cast<int>(type::sc_login):
+    {
+        sc_login_packet* pack = reinterpret_cast<sc_login_packet*>(packet);
+        id = pack->id;
+        x = pack->x;
+        y = pack->y;
+        z = pack->z;
+
+        UE_LOG(LogTemp, Warning, TEXT("recv login packet"));
+    } break;
+    case static_cast<int>(type::sc_add_player):
+    {
+        sc_add_player_packet* pack = reinterpret_cast<sc_add_player_packet*>(packet);
+        p2_x = pack->x;
+        p2_y = pack->y;
+        p2_z = pack->z;
+
+        //서버! 상대 플레이어를 생성한다. 
+        //서버에서 상대 플레이어의 초기 위치를 받아주세요
+        //RecvPacket();
+        
+
+        UE_LOG(LogTemp, Warning, TEXT("recv add player packet"));
+    } break;
     case static_cast<int>(type::sc_move):
     {
         sc_move_packet* pack = reinterpret_cast<sc_move_packet*>(packet);
+        if (pack->client_id != id) {
+            p2_x = pack->x;
+            p2_y = pack->y;
+            p2_z = pack->z;
 
-        UE_LOG(LogTemp, Warning, TEXT("recv packet success!"));
+            Player_2->SetActorLocation(FVector(p2_x, p2_y, p2_z));
+
+            //UE_LOG(LogTemp, Warning, TEXT("recv p2 move packet"));
+        } else {
+            x = pack->x;
+            y = pack->y;
+            z = pack->z;
+
+            //UE_LOG(LogTemp, Warning, TEXT("recv my move packet"));
+        }        
     } break;
     }
 }
@@ -78,10 +136,7 @@ void ACPP_Cobot_Controller::BeginPlay()
     Super::BeginPlay();
     UE_LOG(LogTemp, Warning, TEXT("코봇생성"));
 
-    //서버! 상대 플레이어를 생성한다. 
-    //서버에서 상대 플레이어의 초기 위치를 받아주세요
-    Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(0.0f, 0.0f, 150.0f/*여기에 초기 위치 넣어주면 됨*/), FRotator(0.0f, 0.0f, 0.0f));
-   
+    Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(p2_x, p2_y, p2_z), FRotator(0.0f, 0.0f, 0.0f));
 }
 
 void ACPP_Cobot_Controller::PostInitializeComponents()
@@ -143,9 +198,10 @@ void ACPP_Cobot_Controller::Move_Forward(float NewAxisValue)
 
         // 이게 패킷 받는거
         // 패킷 받을 곳에 복붙해서 놓으면 됨
-        RecvPacket();
+        //RecvPacket();
     }
 
+    //RecvPacket();
 }
 
 void ACPP_Cobot_Controller::Rotate(float NewAxisValue)

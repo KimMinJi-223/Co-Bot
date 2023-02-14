@@ -7,7 +7,7 @@
 
 #include <string.h>
 
-constexpr int BUFFER_SIZE = 2000;
+constexpr int BUFFER_SIZE = 20000;
 
 class RingBuffer
 {

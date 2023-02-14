@@ -3,6 +3,7 @@
 #include <iostream>
 
 SESSION::SESSION()
+	: state(STATE::NOT_INGAME)
 {
 	//ZeroMemory(&recv_over.over, sizeof(recv_over.over));
 	//recv_over.wsabuf.buf = recv_over.buffer;
@@ -48,4 +49,30 @@ void SESSION::send_packet(char* packet)
 		int err = WSAGetLastError();
 		std::cout << err << std::endl;
 	}
+}
+
+void SESSION::send_login_packet()
+{
+	sc_login_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(type::sc_login);
+	pack.id = id;
+	pack.x = x;
+	pack.y = y;
+	pack.z = z;
+	
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_add_player(int client_id, double x, double y, double z)
+{
+	sc_add_player_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<int>(type::sc_add_player);
+	//pack.id = client_id;
+	pack.x = x;
+	pack.y = y;
+	pack.z = z;
+
+	send_packet(reinterpret_cast<char*>(&pack));
 }

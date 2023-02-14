@@ -144,8 +144,10 @@ void ServerMain::worker_thread()
                 */
                 clients[client_id].id = client_id;
                 clients[client_id].sock = client_sock;
-                clients[client_id].state = STATE::INGAME;
-
+                //clients[client_id].state = STATE::INGAME;
+                clients[client_id].x = -7700.f + static_cast<double>(client_id * 100);
+                clients[client_id].y = 2180.f + static_cast<double>(client_id * 100);
+                clients[client_id].z = 64.741069f + static_cast<double>(client_id * 100);
 
                 // 접속을 다시 받기 위해서
                 if (!AssociateSocketWithIOCP(client_sock, client_id))
@@ -189,6 +191,8 @@ void ServerMain::worker_thread()
         {
             /*
                 delete 해줘야 하는게 맞는데 왜 이거만 키면 오류가 나는지 모르겠다.
+
+                <해결>
                 할당하지도 않은 메모리 영역을 해제하려고 해서 생긴 오류였다.
                 send_packet() 함수에서 new OVER_EX로 하여 오류를 해결하였다.
                 근데 꼭 new/delete로 안해도 될것 같긴 하다.
@@ -217,11 +221,37 @@ void ServerMain::process_packet(char* packet, int client_id)
 {
     switch (packet[1]) 
     {
+    case static_cast<int>(type::cs_login):
+    {
+        printf("%d client로부터 login packet을 받았습니다.\n", client_id);
+        clients[client_id].state = STATE::INGAME;
+        clients[client_id].send_login_packet();
+
+        SESSION login_player = clients[client_id];
+
+        for (int i{}; i < MAX_USER; ++i)
+        {
+            if (clients[i].state == STATE::INGAME && client_id != i)
+            {
+                // 상대방에게 자신의 입장을 알리는 것
+                clients[i].send_add_player(client_id, login_player.x, login_player.y, login_player.z);
+                printf("%d client에게 %d client의 입장을 알립니다.\n", i, client_id);
+
+                // 자신에게 미리 있던 상대방의 정보를 받는 것
+                clients[client_id].send_add_player(i, clients[i].x, clients[i].y, clients[i].z);
+                printf("%d client에게 %d client의 입장을 알립니다.\n", client_id, i);
+            }
+        }
+
+
+    } break;
     case static_cast<int>(type::cs_move):
     {
         cs_move_packet* pack = reinterpret_cast<cs_move_packet*>(packet);
-        printf("%d ID를 가진 클라이언트가 %lf, %lf, %lf 로 이동하였습니다.\n", client_id, pack->x, pack->y, pack->z);
-
+        printf("%d ID를 가진 클라이언트가 %f, %f, %f 로 이동하였습니다.\n", client_id, pack->x, pack->y, pack->z);
+        clients[client_id].x = pack->x;
+        clients[client_id].y = pack->y;
+        clients[client_id].z = pack->z;
         // 움직인 것을 다른 클라들한테 보내주기
         // 23.2.11
         // 현재는 클라에서 움직임을 다 한 후 서버로 위치를 보내준다.
@@ -235,16 +265,17 @@ void ServerMain::process_packet(char* packet, int client_id)
         sc_move_packet send_pack;
         send_pack.size = sizeof(send_pack);
         send_pack.type = static_cast<char>(type::sc_move);
-        send_pack.client_id = 0;
-        send_pack.x = 0;
-        send_pack.y = 0;
-        send_pack.z = 0;
+        send_pack.client_id = client_id;
+        send_pack.x = clients[client_id].x;
+        send_pack.y = clients[client_id].y;
+        send_pack.z = clients[client_id].z;
 
         for (int i{}; i < MAX_USER; ++i)
         {
-            if (i == client_id)
+            if (clients[i].state == STATE::INGAME)
             {
-                clients[client_id].send_packet(reinterpret_cast<char*>(&send_pack));
+                clients[i].send_packet(reinterpret_cast<char*>(&send_pack));
+                printf("%d client에게 %d client의 위치 정보를 보냅니다.\n", i, client_id);
             }
         }
     } break;
