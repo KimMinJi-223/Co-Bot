@@ -8,9 +8,8 @@
 #include "Engine/World.h"
 
 ACPP_Cobot_Controller::ACPP_Cobot_Controller()
-    : x(0.f)
-    , y(0.f)
-    , z(0.f)
+    : x(0.f), y(0.f), z(0.f), yaw(0.f)
+    , tm_x(0.f), tm_y(0.f), tm_z(0.f), tm_yaw(0.f)
 {
     UE_LOG(LogTemp, Warning, TEXT("Start connect server!"));
     //int retval;
@@ -48,6 +47,26 @@ ACPP_Cobot_Controller::ACPP_Cobot_Controller()
     login_pack.type = static_cast<char>(type::cs_login);
 
     int ret = send(sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
+}
+
+ACPP_Cobot_Controller::~ACPP_Cobot_Controller()
+{
+    cs_logout_packet pack;
+    pack.size = sizeof(pack);
+    pack.type = static_cast<int>(type::cs_logout);
+
+    send(sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+
+    closesocket(sock);
+    WSACleanup();
+}
+
+void ACPP_Cobot_Controller::BeginPlay()
+{
+    Super::BeginPlay();
+    UE_LOG(LogTemp, Warning, TEXT("코봇생성"));
+
+    Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(tm_x, tm_y, tm_z), FRotator(0.0f, 0.f, 0.0f));
 }
 
 void ACPP_Cobot_Controller::Tick(float DeltaTime)
@@ -92,51 +111,38 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
         x = pack->x;
         y = pack->y;
         z = pack->z;
+        yaw = pack->yaw;
+        tm_x = pack->tm_x;
+        tm_y = pack->tm_y;
+        tm_z = pack->tm_z;
+        tm_yaw = pack->tm_yaw;
+
+       
 
         UE_LOG(LogTemp, Warning, TEXT("recv login packet"));
-    } break;
-    case static_cast<int>(type::sc_add_player):
-    {
-        sc_add_player_packet* pack = reinterpret_cast<sc_add_player_packet*>(packet);
-        p2_x = pack->x;
-        p2_y = pack->y;
-        p2_z = pack->z;
-
-        //서버! 상대 플레이어를 생성한다. 
-        //서버에서 상대 플레이어의 초기 위치를 받아주세요
-        //RecvPacket();
-        
-
-        UE_LOG(LogTemp, Warning, TEXT("recv add player packet"));
     } break;
     case static_cast<int>(type::sc_move):
     {
         sc_move_packet* pack = reinterpret_cast<sc_move_packet*>(packet);
         if (pack->client_id != id) {
-            p2_x = pack->x;
-            p2_y = pack->y;
-            p2_z = pack->z;
+            tm_x = pack->x;
+            tm_y = pack->y;
+            tm_z = pack->z;
+            tm_yaw = pack->yaw;
 
-            Player_2->SetActorLocation(FVector(p2_x, p2_y, p2_z));
+            Player_2->SetActorLocation(FVector(tm_x, tm_y, tm_z));
+            Player_2->SetActorRotation(FRotator(0.f, tm_yaw, 0.f));
 
             //UE_LOG(LogTemp, Warning, TEXT("recv p2 move packet"));
         } else {
             x = pack->x;
             y = pack->y;
             z = pack->z;
-
+            yaw = pack->yaw;
             //UE_LOG(LogTemp, Warning, TEXT("recv my move packet"));
         }        
     } break;
     }
-}
-
-void ACPP_Cobot_Controller::BeginPlay()
-{
-    Super::BeginPlay();
-    UE_LOG(LogTemp, Warning, TEXT("코봇생성"));
-
-    Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(p2_x, p2_y, p2_z), FRotator(0.0f, 0.0f, 0.0f));
 }
 
 void ACPP_Cobot_Controller::PostInitializeComponents()
@@ -181,11 +187,17 @@ void ACPP_Cobot_Controller::Move_Forward(float NewAxisValue)
     여기는 일단 내가 움직이는 거 위치 받아오려고 해둔 곳
     추후에 어디가 움직이는 곳인지 보고 고쳐야 함
  */
-    if (x != player->GetActorLocation().X || y != player->GetActorLocation().Y || z != player->GetActorLocation().Z)
+
+    //double yaw1 = player->GetActorRotation().Yaw;
+
+    //UE_LOG(LogTemp, Warning, TEXT("Yaw: %lf"), yaw1);
+
+    if (x != player->GetActorLocation().X || y != player->GetActorLocation().Y || z != player->GetActorLocation().Z || yaw != player->GetActorRotation().Yaw)
     {
         x = player->GetActorLocation().X;
         y = player->GetActorLocation().Y;
         z = player->GetActorLocation().Z;
+        yaw = player->GetActorRotation().Yaw;
 
         cs_move_packet pack;
         pack.size = sizeof(pack);
@@ -193,6 +205,7 @@ void ACPP_Cobot_Controller::Move_Forward(float NewAxisValue)
         pack.x = x;
         pack.y = y;
         pack.z = z;
+        pack.yaw = yaw;
 
         int ret = send(sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 
@@ -214,6 +227,10 @@ bool ACPP_Cobot_Controller::Is_Set_IDPW(FString I, FString p)
 {
     /*서버! 여기에 서버에 send해줘야함 false라면 바로 리턴 true면 아래 작업 후 리턴*/
     ID = I;
-    Passward = p; 
+    Passward = p;
+
+
+
+    //UE_LOG(LogTemp, Warning, TEXT("ID: %s, PW: %s"), ID, Passward);
     return true; 
 }

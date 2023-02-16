@@ -26,23 +26,27 @@ class PASSPLZ_API ACPP_Cobot_Controller : public APlayerController
 	GENERATED_BODY()
 
 		ACPP_Cobot_Controller();
+		~ACPP_Cobot_Controller();
 
 private:
 	SOCKET sock;
 	double x, y, z;
+	double yaw;
 	int	id;
 	RingBuffer ring_buff;
 	// TMap<int, AActor*> actorList;
 
-	double p2_x, p2_y, p2_z;
+	double tm_x, tm_y, tm_z;
+	double tm_yaw;
+
+protected:
+	virtual void BeginPlay() override;
 
 private:
 	virtual void Tick(float DeltaTime) override;
 	void RecvPacket();
 	void ProcessPacket(char* packet);
 
-protected:
-	virtual void BeginPlay() override;
 public:
 	virtual void PostInitializeComponents() override;
 	virtual void OnPossess(APawn* aPawn) override;
