@@ -2,6 +2,8 @@
 
 #include "../../../server/server/protocol.h"
 
+//#include <wchar.t>
+
 #include "CPP_Cobot_Controller.h"
 #include "CPP_Cobot.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -39,14 +41,14 @@ ACPP_Cobot_Controller::ACPP_Cobot_Controller()
     u_long nonBlockingMode = 1;
     ioctlsocket(sock, FIONBIO, &nonBlockingMode); // sock을 논블로킹 모드로 설정
 
-    UE_LOG(LogTemp, Warning, TEXT("Success server connect"));
-
-    // 서버한테 들어왔다고 알려주는 거
     cs_login_packet login_pack;
     login_pack.size = sizeof(login_pack);
     login_pack.type = static_cast<char>(type::cs_login);
 
     int ret = send(sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
+
+    UE_LOG(LogTemp, Warning, TEXT("Success server connect"));
+
 }
 
 ACPP_Cobot_Controller::~ACPP_Cobot_Controller()
@@ -226,11 +228,22 @@ void ACPP_Cobot_Controller::Rotate(float NewAxisValue)
 bool ACPP_Cobot_Controller::Is_Set_IDPW(FString I, FString p)
 {
     /*서버! 여기에 서버에 send해줘야함 false라면 바로 리턴 true면 아래 작업 후 리턴*/
-    ID = I;
-    Passward = p;
+    //ID = I;
+    //Passward = p;
+
+    //const wchar_t* input_id = TCHAR_TO_WCHAR(*I);
+    //const wchar_t* input_pw = TCHAR_TO_WCHAR(*p);
+
+    //// 서버한테 들어왔다고 알려주는 거
+    //cs_login_packet login_pack;
+    //login_pack.size = sizeof(login_pack);
+    //login_pack.type = static_cast<char>(type::cs_login);
+    ////wcscpy_s(login_pack.id, MAX_LOGIN_LEN, input_id);
+    ////wcscpy_s(login_pack.passward, MAX_LOGIN_LEN, input_pw);
+
+    //int ret = send(sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
 
 
-
-    //UE_LOG(LogTemp, Warning, TEXT("ID: %s, PW: %s"), ID, Passward);
+    //UE_LOG(LogTemp, Warning, TEXT("ID: %s, PW: %s"), input_id, input_pw);
     return true; 
 }

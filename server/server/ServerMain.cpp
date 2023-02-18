@@ -239,7 +239,12 @@ void ServerMain::process_packet(char* packet, int client_id)
     {
     case static_cast<int>(type::cs_login):
     {
+        cs_login_packet* pack = reinterpret_cast<cs_login_packet*>(packet);
         printf("%d client로부터 login packet을 받았습니다.\n", client_id);
+       /* wchar_t player_id[MAX_LOGIN_LEN], player_pw[MAX_LOGIN_LEN];
+        wcscpy_s(player_id, MAX_LOGIN_LEN, pack->id);
+        wcscpy_s(player_pw, MAX_LOGIN_LEN, pack->passward);*/
+        //printf("%d client의 ID: %s, PW: %s\n", client_id, player_id, player_pw);
         {
             std::lock_guard<std::mutex> lock{ clients[client_id].lock };
             clients[client_id].state = state::ingame;

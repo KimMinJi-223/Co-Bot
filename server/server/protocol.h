@@ -11,8 +11,8 @@ enum class type { cs_login, sc_login, sc_add_player, cs_move, sc_move, cs_logout
 struct cs_login_packet {
 	char size;
 	char type;
-	//char id[MAX_LOGIN_LEN];
-	//char passward[MAX_LOGIN_LEN];
+	//wchar_t id[MAX_LOGIN_LEN];
+	//wchar_t passward[MAX_LOGIN_LEN];
 };
 
 struct sc_login_packet {
