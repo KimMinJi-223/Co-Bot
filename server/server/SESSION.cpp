@@ -3,7 +3,7 @@
 #include <iostream>
 
 SESSION::SESSION()
-	: state(STATE::NOT_INGAME)
+	: state(state::free)
 {
 	//ZeroMemory(&recv_over.over, sizeof(recv_over.over));
 	//recv_over.wsabuf.buf = recv_over.buffer;
@@ -60,19 +60,36 @@ void SESSION::send_login_packet()
 	pack.x = x;
 	pack.y = y;
 	pack.z = z;
+	pack.yaw = yaw;
+	pack.tm_x = tm_x;
+	pack.tm_y = tm_y;
+	pack.tm_z = tm_z;
+	pack.tm_yaw = tm_yaw;
 	
 	send_packet(reinterpret_cast<char*>(&pack));
 }
 
-void SESSION::send_add_player(int client_id, double x, double y, double z)
+void SESSION::send_move_packet(int client_id)
 {
-	sc_add_player_packet pack;
+	sc_move_packet pack;
 	pack.size = sizeof(pack);
-	pack.type = static_cast<int>(type::sc_add_player);
-	//pack.id = client_id;
-	pack.x = x;
-	pack.y = y;
-	pack.z = z;
+	pack.type = static_cast<int>(type::sc_move);
+	pack.client_id = client_id;
+	if (client_id == id)
+	{
+		pack.x = x;
+		pack.y = y;
+		pack.z = z;
+		pack.yaw = yaw;
+	}
+	else
+	{
+		pack.x = tm_x;
+		pack.y = tm_y;
+		pack.z = tm_z;
+		pack.yaw = tm_yaw;
+	}
 
 	send_packet(reinterpret_cast<char*>(&pack));
 }
+

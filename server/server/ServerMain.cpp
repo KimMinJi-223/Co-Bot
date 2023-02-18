@@ -5,6 +5,7 @@
 #include <thread>
 #include <iostream>
 #include <array>
+#include <mutex>
 
 #pragma comment(lib, "mswsock.lib")
 
@@ -136,18 +137,23 @@ void ServerMain::worker_thread()
 
             std::cout << client_id << "번째 ID를 가진 클라가 입장하였습니다." << std::endl;
 
-            if (client_id >= 0)
+            if (client_id != -1)
             {
-                /*
-                    유저 정보 초기화
-                    SESSION에 정보 추가할 때마다 여기서 초기값 정해주도록 하자
+                {
+                    std::lock_guard<std::mutex> lock(clients[client_id].lock);
+                    clients[client_id].state = state::alloc;
+                }
+				/*
+	                유저 정보 초기화
+	                SESSION에 정보 추가할 때마다 여기서 초기값 정해주도록 하자
                 */
                 clients[client_id].id = client_id;
                 clients[client_id].sock = client_sock;
-                //clients[client_id].state = STATE::INGAME;
-                clients[client_id].x = -7700.f + static_cast<double>(client_id * 100);
-                clients[client_id].y = 2180.f + static_cast<double>(client_id * 100);
-                clients[client_id].z = 64.741069f + static_cast<double>(client_id * 100);
+                clients[client_id].tm_id = 1 - client_id; /* 여기도 매칭 시스템 이후 바꿔야 함 */
+                clients[client_id].x = -7700.f + static_cast<double>(client_id * 300);
+                clients[client_id].y = 2180.f + static_cast<double>(client_id * 300);
+                clients[client_id].z = 64.741069f; // +static_cast<double>(client_id * 300);
+                clients[client_id].yaw = 0.f;
 
                 // 접속을 다시 받기 위해서
                 if (!AssociateSocketWithIOCP(client_sock, client_id))
@@ -155,10 +161,15 @@ void ServerMain::worker_thread()
                     GetLastError();
                     continue;
                 }
-                
+
                 clients[client_id].recv_packet();
 
                 client_sock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
+
+            }
+            else
+            {
+                std::cout << "Max user!\n";
             }
 
             overlapped.wsabuf.len = BUF_SIZE;
@@ -212,9 +223,14 @@ int ServerMain::get_client_id() // 고유한 client id 제공
         추후에 고쳐야 한다. 
     */
 
-    static int i = 0;
+    for (int i{}; i < MAX_USER; ++i)
+    {
+        std::lock_guard<std::mutex> lock{ clients[i].lock };
+        if (clients[i].state == state::free)
+            return i;
+    }
 
-    return i++;
+    return -1;
 }
 
 void ServerMain::process_packet(char* packet, int client_id)
@@ -223,27 +239,35 @@ void ServerMain::process_packet(char* packet, int client_id)
     {
     case static_cast<int>(type::cs_login):
     {
+        cs_login_packet* pack = reinterpret_cast<cs_login_packet*>(packet);
         printf("%d client로부터 login packet을 받았습니다.\n", client_id);
-        clients[client_id].state = STATE::INGAME;
-        clients[client_id].send_login_packet();
-
-        SESSION login_player = clients[client_id];
-
-        for (int i{}; i < MAX_USER; ++i)
+       /* wchar_t player_id[MAX_LOGIN_LEN], player_pw[MAX_LOGIN_LEN];
+        wcscpy_s(player_id, MAX_LOGIN_LEN, pack->id);
+        wcscpy_s(player_pw, MAX_LOGIN_LEN, pack->passward);*/
+        //printf("%d client의 ID: %s, PW: %s\n", client_id, player_id, player_pw);
         {
-            if (clients[i].state == STATE::INGAME && client_id != i)
-            {
-                // 상대방에게 자신의 입장을 알리는 것
-                clients[i].send_add_player(client_id, login_player.x, login_player.y, login_player.z);
-                printf("%d client에게 %d client의 입장을 알립니다.\n", i, client_id);
-
-                // 자신에게 미리 있던 상대방의 정보를 받는 것
-                clients[client_id].send_add_player(i, clients[i].x, clients[i].y, clients[i].z);
-                printf("%d client에게 %d client의 입장을 알립니다.\n", client_id, i);
-            }
+            std::lock_guard<std::mutex> lock{ clients[client_id].lock };
+            clients[client_id].state = state::ingame;
         }
 
+        // MMORPG가 아닌 2인 협동 게임이기 때문에 팀원을 기다린다.
+        // 이건 어디까지나 매칭 시스템을 만들기 전 떼우는 코드
+        while (true)
+        {
+            //std::lock_guard<std::mutex> lock(clients[client_id].lock);
+            //std::lock_guard<std::mutex> llock(clients[clients[client_id].tm_id].lock);
+            if (state::ingame == clients[client_id].state && state::ingame == clients[clients[client_id].tm_id].state)
+                break;
+        }
 
+        // 상대방 좌표 기억하게 하기
+        clients[client_id].tm_x = clients[clients[client_id].tm_id].x;
+        clients[client_id].tm_y = clients[clients[client_id].tm_id].y;
+        clients[client_id].tm_z = clients[clients[client_id].tm_id].z;
+        clients[client_id].tm_yaw = clients[clients[client_id].tm_id].yaw;
+
+        // 두 명 입장이 되어야 로그인이 됨
+        clients[client_id].send_login_packet();
     } break;
     case static_cast<int>(type::cs_move):
     {
@@ -252,6 +276,11 @@ void ServerMain::process_packet(char* packet, int client_id)
         clients[client_id].x = pack->x;
         clients[client_id].y = pack->y;
         clients[client_id].z = pack->z;
+        clients[client_id].yaw = pack->yaw;
+        clients[clients[client_id].tm_id].tm_x = pack->x;
+        clients[clients[client_id].tm_id].tm_y = pack->y;
+        clients[clients[client_id].tm_id].tm_z = pack->z;
+        clients[clients[client_id].tm_id].tm_yaw = pack->yaw;
         // 움직인 것을 다른 클라들한테 보내주기
         // 23.2.11
         // 현재는 클라에서 움직임을 다 한 후 서버로 위치를 보내준다.
@@ -262,22 +291,17 @@ void ServerMain::process_packet(char* packet, int client_id)
         // 클라 CPP에서 실행하면 클라 한명 당 2개의 접속이 되고 있다.
         // 따라서 접속도 안되어 있는 클라가 INGAME으로 표시되는 오류가 있다.
         // 이건 클라쪽에서 수정해야 할 듯 하다.
-        sc_move_packet send_pack;
-        send_pack.size = sizeof(send_pack);
-        send_pack.type = static_cast<char>(type::sc_move);
-        send_pack.client_id = client_id;
-        send_pack.x = clients[client_id].x;
-        send_pack.y = clients[client_id].y;
-        send_pack.z = clients[client_id].z;
-
-        for (int i{}; i < MAX_USER; ++i)
-        {
-            if (clients[i].state == STATE::INGAME)
-            {
-                clients[i].send_packet(reinterpret_cast<char*>(&send_pack));
-                printf("%d client에게 %d client의 위치 정보를 보냅니다.\n", i, client_id);
-            }
-        }
+        clients[client_id].send_move_packet(client_id); // 움직인 클라한테 보내기
+        clients[clients[client_id].tm_id].send_move_packet(client_id); // 상대 클라한테 보내기
+    } break;
+    case static_cast<int>(type::cs_logout):
+    {
+        std::cout << client_id << "client가 logout 하였습니다.\n";
+        closesocket(clients[client_id].sock);
+        std::lock_guard<std::mutex> lock(clients[client_id].lock);
+        clients[client_id].state = state::free;
+        if (clients[client_id].state == state::free)
+            std::cout << client_id << "client state is free\n";
     } break;
     }
 }
