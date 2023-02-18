@@ -43,6 +43,22 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* Key;
 
+
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* forward_Key_collision;
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* back_Key_collision;
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* right_Key_collision;
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* left_Key_collision;
+
+
+
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* Key_frame;
 
@@ -79,6 +95,15 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		bool Is_left;
 
+	UPROPERTY(VisibleAnywhere)
+		int32 move_forward;
+
+	UPROPERTY(VisibleAnywhere)
+		int32 turn_right;
+
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* floor;
+
 	UFUNCTION()
 		void OnForwardLeverOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
@@ -102,4 +127,7 @@ private:
 
 	UFUNCTION()
 		void OnLeftButtonEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	UFUNCTION()
+		void OnClearOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };
