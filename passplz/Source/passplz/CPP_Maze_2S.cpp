@@ -55,7 +55,7 @@ ACPP_Maze_2S::ACPP_Maze_2S()
 	plan->SetRelativeLocation(FVector(-10.f, 0.f, -100.f));
 	plan->SetRelativeScale3D(FVector(10.f, 10.f, 1.0f));
 
-	Target->SetRelativeLocation(FVector(-470.f, 0.0f, 0.0f));
+	Target->SetRelativeLocation(FVector(-410.f, 0.0f, 0.0f));
 	Target->SetRelativeScale3D(FVector(0.6f, 0.6f, 1.0f));
 
 	forward_target_collision->SetRelativeLocation(FVector(50.f, 0.0f, 0.0f));
@@ -83,7 +83,8 @@ ACPP_Maze_2S::ACPP_Maze_2S()
 	left_button->SetRelativeScale3D(FVector(0.5f, 0.5f, 1.0f));
 	left_button_collision->SetRelativeLocation(FVector(0.f, 0.f, 30.f));
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_MAZE(TEXT("/Game/model/STAGE_2/mazepipe.mazepipe"));
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_MAZE(TEXT("/Game/model/STAGE_2/mazepipe2.mazepipe2"));
 	if (SM_MAZE.Succeeded()) {
 		Maze->SetStaticMesh(SM_MAZE.Object);
 	}

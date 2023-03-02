@@ -18,7 +18,7 @@ ACPP_Cobot::ACPP_Cobot()
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -40.0f), FRotator(0.0f, -90.0f, 0.0f));
 	SpringArm->TargetArmLength = 400.0f;
-	SpringArm->SetRelativeRotation(FRotator(-15.0f, 0.0f, 0.0f));
+	SpringArm->SetRelativeRotation(FRotator(-25.0f, 0.0f, 0.0f));
 	GetCapsuleComponent()->SetCapsuleSize(30.f, 40.f);
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_COBOT(TEXT("/Game/model/PLAYER/cobot.cobot"));
