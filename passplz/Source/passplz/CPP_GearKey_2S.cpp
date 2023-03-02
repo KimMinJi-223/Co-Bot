@@ -135,26 +135,25 @@ void ACPP_GearKey_2S::Tick(float DeltaTime)
 	move_forward = 0;
 	turn_right = 0;
 
+
 	//앞으로 가는 버튼을 눌렀나?
 	if (Is_forward) {
 		//앞으로 못간다.
-		//if (forward_Key_collision->IsOverlappingComponent(center_gear)) {
-			//move_forward = 0;
-			//UE_LOG(LogTemp, Warning, TEXT("fNO"));
+		if (forward_Key_collision->IsOverlappingComponent(center_gear)) {
+			move_forward = 0;
+			UE_LOG(LogTemp, Warning, TEXT("fNO"));
 
-		//}
-		//else {
-			//UE_LOG(LogTemp, Warning, TEXT("fGo"));
-
-		move_forward = 1;
-		//}
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("fGo"));
+			move_forward = 1;
+		}
 		//버튼은 한 순간에 하나만 누르기 가능 
 		//여기에 왔다는 것은 forward버튼을 누른 것
 		//바로 리턴 가능
 		//하지만 바로 리턴하면 타겟이 안 움직인다. 
 		//추가코드 필요
 		Key->AddWorldOffset(FVector(move_forward, 0.0f, 0.0f));
-
 
 		return;
 	}
@@ -179,6 +178,7 @@ void ACPP_GearKey_2S::Tick(float DeltaTime)
 
 	//기어 돌리기
 	else if (Is_right) {
+		Key->AddRelativeLocation(FVector(0.f, -0.001f, 0.0));
 		//오른쪽으로 못간다.
 		if (center_gear->IsOverlappingComponent(left_Key_collision)) {
 			//UE_LOG(LogTemp, Warning, TEXT("rNo"));
@@ -195,12 +195,14 @@ void ACPP_GearKey_2S::Tick(float DeltaTime)
 		child_gear1->AddWorldRotation(FRotator(0.0f, 0.0f, -turn_right * 0.5));
 		child_gear2->AddWorldRotation(FRotator(0.0f, 0.0f, turn_right * 0.5));
 		child_gear3->AddWorldRotation(FRotator(0.0f, 0.0f, -turn_right * 0.5));
+		Key->AddRelativeLocation(FVector(0.f, 0.001f, 0.0));
 
 
 		return;
 	}
 
 	else if (Is_left) {
+		Key->AddRelativeLocation(FVector(0.f, 0.001f, 0.0));
 		//왼쪽로 못 간다..
 		if (center_gear->IsOverlappingComponent(right_Key_collision)) {
 			//UE_LOG(LogTemp, Warning, TEXT("lNo"));
@@ -216,6 +218,8 @@ void ACPP_GearKey_2S::Tick(float DeltaTime)
 		child_gear1->AddWorldRotation(FRotator(0.0f, 0.0f, -turn_right * 0.5));
 		child_gear2->AddWorldRotation(FRotator(0.0f, 0.0f, turn_right * 0.5));
 		child_gear3->AddWorldRotation(FRotator(0.0f, 0.0f, -turn_right * 0.5));
+		Key->AddRelativeLocation(FVector(0.f, -0.001f, 0.0));
+
 		return;
 	}
 

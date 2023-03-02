@@ -3,18 +3,19 @@
 #pragma once
 
 #include "passplz.h"
+#include "Containers/Array.h"
 #include "GameFramework/Actor.h"
 #include "Components/ArrowComponent.h"
-#include "CPP_Sky_2S.generated.h"
+#include "CPP_Checker_5S.generated.h"
 
 UCLASS()
-class PASSPLZ_API ACPP_Sky_2S : public AActor
+class PASSPLZ_API ACPP_Checker_5S : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ACPP_Sky_2S();
+	ACPP_Checker_5S();
 
 protected:
 	// Called when the game starts or when spawned
@@ -23,29 +24,17 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	virtual void PostInitializeComponents() override;	
+	virtual void PostInitializeComponents() override;
 
 private:
-	/*UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* CenterSky;
+	//class ACPP_Cobot_On_rail* Cobot;
+	TArray<class ACPP_Cobot_On_rail*> Cobot;
 
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* FrontSky;
+	USkeletalMeshComponent* CheckerMesh;
 
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* BackSky;*/
-
-	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* Button;
-
-	UPROPERTY(VisibleAnywhere)
-		UBoxComponent* Trigger_Button;
-
-	UPROPERTY(VisibleAnywhere)
-		int32 move_value;
-	
-private:
-	TArray<class ACPP_ChildSky_2S*> ChildSky;
+	UBoxComponent* Move;
 
 	UPROPERTY(VisibleAnywhere)
 		UArrowComponent* Factory_start;
@@ -54,7 +43,10 @@ private:
 		UBoxComponent* Kill_Zone;
 
 	UFUNCTION()
-		void OnButtonOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+		void OnMoveOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+		void OnMoveEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UFUNCTION()
 		void OnKillZoneOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

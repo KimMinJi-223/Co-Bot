@@ -21,7 +21,7 @@ public:
 	};*/
 protected:
 	UFUNCTION(BlueprintCallable)
-	bool Is_Set_IDPW_Controller();
+		bool Is_Set_IDPW_Controller();
 
 protected:
 	UPROPERTY(BlueprintReadWrite)
