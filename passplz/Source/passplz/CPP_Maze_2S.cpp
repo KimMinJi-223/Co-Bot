@@ -84,7 +84,7 @@ ACPP_Maze_2S::ACPP_Maze_2S()
 	left_button_collision->SetRelativeLocation(FVector(0.f, 0.f, 30.f));
 
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_MAZE(TEXT("/Game/model/STAGE_2/mazepipe2.mazepipe2"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_MAZE(TEXT("/Game/model/STAGE_2/mazepipe3.mazepipe3"));
 	if (SM_MAZE.Succeeded()) {
 		Maze->SetStaticMesh(SM_MAZE.Object);
 	}

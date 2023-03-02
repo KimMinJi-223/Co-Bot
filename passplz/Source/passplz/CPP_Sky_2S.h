@@ -4,6 +4,7 @@
 
 #include "passplz.h"
 #include "GameFramework/Actor.h"
+#include "Components/ArrowComponent.h"
 #include "CPP_Sky_2S.generated.h"
 
 UCLASS()
@@ -25,14 +26,14 @@ public:
 	virtual void PostInitializeComponents() override;	
 
 private:
-	UPROPERTY(VisibleAnywhere)
+	/*UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* CenterSky;
 
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* FrontSky;
 
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* BackSky;
+		UStaticMeshComponent* BackSky;*/
 
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* Button;
@@ -42,7 +43,19 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 		int32 move_value;
+	
+private:
+	TArray<class ACPP_ChildSky_2S*> ChildSky;
+
+	UPROPERTY(VisibleAnywhere)
+		UArrowComponent* Factory_start;
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* Kill_Zone;
 
 	UFUNCTION()
 		void OnButtonOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+		void OnKillZoneOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };
