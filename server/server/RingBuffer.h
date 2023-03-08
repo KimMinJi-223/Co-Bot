@@ -5,19 +5,24 @@
 
 // #include <array>
 
-#include <string.h>
+//#include <string.h>
 
-constexpr int BUFFER_SIZE = 50000;
+#include <mutex>
+
+//constexpr int BUFFER_SIZE = 50000;
+constexpr int BUFFER_SIZE = 20;
 
 class RingBuffer
 {
 private:
-	int write_point;
-	int read_point;
+	int			write_point;
+	int			read_point;
 	// std::array<char, BUFFER_SIZE> buffer;
-	char buffer[BUFFER_SIZE];
+	char		buffer[BUFFER_SIZE];
 
 public:
+	std::mutex	lock;
+
 	int enqueue(char* data, int data_size); // 데이터 넣기
 	int dequeue(char* dest, int data_size); // 데이터 꺼내기
 
@@ -45,3 +50,7 @@ public:
 
 // 링버퍼
 // 링버퍼의 연산은 모두 O(1)의 시간 복잡도를 가진다.
+
+// 23.3.7 오늘의 문제점
+// 버퍼보다 큰 값이 들어와도 그냥 받고 있다.
+// 읽지 않아도 그냥 뒤집어 쓰고 있다.

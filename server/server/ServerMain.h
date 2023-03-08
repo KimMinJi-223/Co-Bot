@@ -1,5 +1,6 @@
 #pragma once
 #include "pch.h"
+// #include <sqlext.h>
 
 class ServerMain
 {
@@ -7,6 +8,11 @@ private:
 	HANDLE	iocp_handle;
 	SOCKET	server_sock, client_sock;
 	OVER_EX overlapped;
+
+	//SQLHENV		sqlenv;
+	//SQLHDBC		sqldbc;
+	//SQLHSTMT	sqlstmt = 0;
+	//SQLRETURN	sqlret;
 
 public:
 	bool init();

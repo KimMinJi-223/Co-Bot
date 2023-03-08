@@ -1,66 +1,29 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-#include "../../../server/server/protocol.h"
-
-//#include <wchar.t>
-
 #include "CPP_Cobot_Controller.h"
 #include "CPP_Cobot.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
 
+#include "../../../server/server/protocol.h"
+
 ACPP_Cobot_Controller::ACPP_Cobot_Controller()
     : x(0.f), y(0.f), z(0.f), yaw(0.f)
     , tm_x(0.f), tm_y(0.f), tm_z(0.f), tm_yaw(0.f)
+    , prev_remain(0)
 {
-    UE_LOG(LogTemp, Warning, TEXT("Start connect server!"));
-    //int retval;
-
-    // PrimaryActorTick.bCanEverTick = false;
-
-    // 윈속 초기화
-
-    WSADATA wsaData;
-    int nRet = WSAStartup(MAKEWORD(2, 2), &wsaData);   // Winsock 초기화
-    //if (nRet != 0) return false;
-
-    //// 소켓 생성
-    sock = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-    //if (Socket == INVALID_SOCKET) return false;
-
-    // IP, Port 정보 입력
-    SOCKADDR_IN stServerAddr;
-    stServerAddr.sin_family = AF_INET;
-    stServerAddr.sin_port = htons(7000);
-    stServerAddr.sin_addr.s_addr = inet_addr("127.0.0.1");
-
-    // 접속
-    nRet = connect(sock, (sockaddr*)&stServerAddr, sizeof(sockaddr));
-    //if (nRet == SOCKET_ERROR) return false;
-
-    u_long nonBlockingMode = 1;
-    ioctlsocket(sock, FIONBIO, &nonBlockingMode); // sock을 논블로킹 모드로 설정
-
-    cs_login_packet login_pack;
-    login_pack.size = sizeof(login_pack);
-    login_pack.type = static_cast<char>(type::cs_login);
-
-    int ret = send(sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
-
-    UE_LOG(LogTemp, Warning, TEXT("Success server connect"));
-
 }
 
 ACPP_Cobot_Controller::~ACPP_Cobot_Controller()
 {
-    cs_logout_packet pack;
-    pack.size = sizeof(pack);
-    pack.type = static_cast<int>(type::cs_logout);
+    //cs_logout_packet pack;
+    //pack.size = sizeof(pack);
+    //pack.type = static_cast<int>(type::cs_logout);
 
-    send(sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+    //send(sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 
-    closesocket(sock);
-    WSACleanup();
+    //closesocket(sock);
+    //WSACleanup();
 }
 
 void ACPP_Cobot_Controller::BeginPlay()
@@ -68,7 +31,38 @@ void ACPP_Cobot_Controller::BeginPlay()
     Super::BeginPlay();
     UE_LOG(LogTemp, Warning, TEXT("코봇생성"));
 
-    Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(tm_x, tm_y, tm_z), FRotator(0.0f, 0.f, 0.0f));
+    // 현재 game instance 받아온다
+    instance = Cast<UCPP_CobotGameInstance>(GetWorld()->GetGameInstance());
+
+    sock = instance->socket_mgr.socket;
+
+    //++instance->level;
+
+    //if (1 == instance->level)
+    //{
+    //    cs_login_packet login_pack;
+    //    login_pack.size = sizeof(login_pack);
+    //    login_pack.type = static_cast<char>(type::cs_login);
+
+    //    int ret = send(sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
+    //}
+    //else if (2 == instance->level)
+    //{
+    //    cs_level2_packet level_pack;
+    //    level_pack.size = sizeof(level_pack);
+    //    level_pack.type = static_cast<char>(type::cs_level2);
+    //    level_pack.client_id = id;
+
+    //    int ret = send(sock, reinterpret_cast<char*>(&level_pack), sizeof(level_pack), 0);
+    //}
+
+    cs_login_packet login_pack;
+    login_pack.size = sizeof(login_pack);
+    login_pack.type = static_cast<char>(type::cs_login);
+
+    int ret = send(sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
+
+    Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(tm_x, tm_y, tm_z), FRotator(0.0f, tm_yaw, 0.0f));
 }
 
 void ACPP_Cobot_Controller::Tick(float DeltaTime)
@@ -91,15 +85,45 @@ void ACPP_Cobot_Controller::RecvPacket()
         return;
     }
 
-    ring_buff.enqueue(buff, ret);
-
-    int read_point = 0;
-    while (buff[read_point] <= ring_buff.diff() && !ring_buff.empty())
+    if (prev_remain > 0) // 만약 전에 남아있는 데이터가 있다면
     {
-        ProcessPacket(buff);
-        ring_buff.move_read_pos(buff[0]);
-        read_point = buff[read_point];
+        strcat(prev_packet_buff, buff);
     }
+    else
+    {
+        memcpy(prev_packet_buff, buff, ret);
+    }
+
+    int remain_data = ret + prev_remain;
+    char* p = prev_packet_buff;    
+    
+    while (remain_data > 0)
+    {
+        int packet_size = p[0];
+        if (packet_size <= remain_data)
+        {
+            ProcessPacket(p);
+            p = p + packet_size;
+            remain_data -= packet_size;
+        } else break;
+    }
+
+    prev_remain = remain_data;
+
+    if (remain_data > 0)
+    {
+        memcpy(prev_packet_buff, p, remain_data);
+    }
+
+    //ring_buff.enqueue(buff, ret);
+
+    //int read_point = 0;
+    //while (buff[read_point] <= ring_buff.diff() && !ring_buff.empty())
+    //{
+    //    ProcessPacket(buff);
+    //    ring_buff.move_read_pos(buff[0]);
+    //    read_point = buff[read_point];
+    //}
 }
 
 void ACPP_Cobot_Controller::ProcessPacket(char* packet)
@@ -119,8 +143,6 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
         tm_z = pack->tm_z;
         tm_yaw = pack->tm_yaw;
 
-       
-
         UE_LOG(LogTemp, Warning, TEXT("recv login packet"));
     } break;
     case static_cast<int>(type::sc_move):
@@ -134,7 +156,9 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
 
             Player_2->SetActorLocation(FVector(tm_x, tm_y, tm_z));
             Player_2->SetActorRotation(FRotator(0.f, tm_yaw, 0.f));
-
+            double zz;
+            zz = Player_2->GetActorLocation().Z;
+            UE_LOG(LogTemp, Warning, TEXT("%d, %lf"), pack->client_id, zz);
             //UE_LOG(LogTemp, Warning, TEXT("recv p2 move packet"));
         } else {
             x = pack->x;

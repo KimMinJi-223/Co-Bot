@@ -3,16 +3,16 @@
 constexpr int PORT_NUM = 7000;
 constexpr int BUF_SIZE = 2048;
 
-constexpr int MAX_USER = 2;
+constexpr int MAX_USER = 10;
 constexpr int MAX_LOGIN_LEN = 15;
 
-enum class type { cs_login, sc_login, sc_add_player, cs_move, sc_move, cs_logout };
+enum class type { cs_login, sc_login, sc_add_player, cs_move, sc_move, cs_level2, cs_logout };
 
 struct cs_login_packet {
 	char size;
 	char type;
-	//wchar_t id[MAX_LOGIN_LEN];
-	//wchar_t passward[MAX_LOGIN_LEN];
+	wchar_t id[MAX_LOGIN_LEN];
+	wchar_t passward[MAX_LOGIN_LEN];
 };
 
 struct sc_login_packet {
@@ -46,6 +46,12 @@ struct sc_move_packet {
 	double y;
 	double z;
 	double yaw;
+};
+
+struct cs_level2_packet {
+	char size;
+	char type;
+	int client_id;
 };
 
 struct cs_logout_packet {

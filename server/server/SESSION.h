@@ -14,17 +14,24 @@ public:
 	state		state;
 	SOCKET		sock;
 	int			id;				// 고유 id
-	char		name[BUF_SIZE];
+	wchar_t		name[MAX_LOGIN_LEN];
 	double		x, y, z;
 	double		yaw;
-	std::mutex	lock;
 	RingBuffer	ring_buff;
+	
+	std::mutex	state_lock;
+	std::mutex	match_lock;
 
 	OVER_EX		recv_over;
 
 	int			tm_id;	// 팀원 id
 	double		tm_x, tm_y, tm_z;
 	double		tm_yaw;
+
+	// 패킷 재조립을 위한 부분 이거 나중에 꼭 수정해야 함
+	int			prev_remain;
+	int			prev_packet_size;
+	char		prev_packet_buff[BUF_SIZE];
 
 public:
 	void recv_packet();

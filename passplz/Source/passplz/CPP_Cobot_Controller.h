@@ -4,6 +4,8 @@
 
 #include "../../../server/server/RingBuffer.h"
 
+#include "CPP_CobotGameInstance.h"
+
 #include "Windows/AllowWindowsPlatformTypes.h"
 #include "Windows/prewindowsapi.h"
 
@@ -46,6 +48,13 @@ private:
 	virtual void Tick(float DeltaTime) override;
 	void RecvPacket();
 	void ProcessPacket(char* packet);
+
+	UCPP_CobotGameInstance* instance;
+	
+	// 패킷 재조립을 위한 부분 나중에 무조건 수정
+	int		prev_remain;
+	int		prev_packet_size;
+	char	prev_packet_buff[BUF_SIZE];
 
 public:
 	virtual void PostInitializeComponents() override;

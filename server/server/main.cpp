@@ -12,37 +12,43 @@ int main()
 
 //#include <iostream>
 //#include "RingBuffer.h"
+//#include <thread>
+//#include <vector>
+//#include <mutex>
+//
+//RingBuffer ring_buff;
+//std::mutex lock;
+//
+//void work(int i)
+//{
+//	int num = i;
+//	char word[9] = "working!";
+//
+//	while (true)
+//	{
+//		ring_buff.lock.lock();
+//		int ret = ring_buff.enqueue(reinterpret_cast<char*>(&word), sizeof(word));
+//		ring_buff.lock.unlock();
+//		printf("%d\n", ret);
+//
+//		char dest[BUFFER_SIZE];
+//		ring_buff.lock.lock();
+//		ret = ring_buff.dequeue(dest, 9);
+//		ring_buff.lock.unlock();
+//		printf("%s\n", dest);
+//	}
+//}
 //
 //int main()
 //{
-//	RingBuffer ring_buffer;
-//
-//	char arr[] = "hello, world!";
-//
-//	//std::cout << sizeof(arr) << std::endl;
-//
-//	ring_buffer.enqueue(arr, sizeof(arr));
-//
-//	char dest[14];
-//	ring_buffer.dequeue(dest, 14);
-//
-//	for (int i{}; i < 14; ++i)
+//	std::vector<std::thread> workers;
+//	for (int i{}; i < 5; ++i)
 //	{
-//		std::cout << dest[i];
+//		workers.push_back(std::thread(work, i));
 //	}
 //
-//	std::cout << "\n";
-//
-//	char arr2[] = "kimchaemin";
-//
-//	ring_buffer.enqueue(arr2, sizeof(arr2));
-//	
-//	char dest2[11];
-//
-//	ring_buffer.dequeue(dest2, 11);
-//
-//	for (int i{}; i < 11; ++i)
+//	for (int i{}; i < 5; ++i)
 //	{
-//		std::cout << dest2[i];
+//		workers[i].join();
 //	}
 //}

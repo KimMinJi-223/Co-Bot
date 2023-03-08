@@ -4,6 +4,15 @@
 
 SESSION::SESSION()
 	: state(state::free)
+	, sock(0)
+	, id(-1)
+	, x(-1.f), y(-1.f), z(-1.f)
+	, yaw(0.f)
+	, tm_id(-1)
+	, tm_x(-1.f), tm_y(-1.f), tm_z(-1.f)
+	, tm_yaw(0.f)
+	, prev_remain(0)
+
 {
 	//ZeroMemory(&recv_over.over, sizeof(recv_over.over));
 	//recv_over.wsabuf.buf = recv_over.buffer;
@@ -67,6 +76,8 @@ void SESSION::send_login_packet()
 	pack.tm_yaw = tm_yaw;
 	
 	send_packet(reinterpret_cast<char*>(&pack));
+
+	printf("%d에게 login packet을 보냈습니다.\n", id);
 }
 
 void SESSION::send_move_packet(int client_id)
@@ -91,5 +102,7 @@ void SESSION::send_move_packet(int client_id)
 	}
 
 	send_packet(reinterpret_cast<char*>(&pack));
+
+	//printf("%d -> %d, x: %lf, y: %lf, z: %lf\n", id, client_id, pack.x, pack.y, pack.z);
 }
 

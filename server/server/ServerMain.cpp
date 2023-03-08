@@ -29,6 +29,24 @@ ServerMain::~ServerMain()
 
 bool ServerMain::init()
 {
+    setlocale(LC_ALL, "KOREAN");
+
+    //// DB 연동
+    //sqlret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &sqlenv); // 환경 핸들 할당
+    //if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
+    //    sqlret = SQLSetEnvAttr(sqlenv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER*)SQL_OV_ODBC3, 0); // ODBC 버전 환경 속성 설정
+    //    if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
+    //        sqlret = SQLAllocHandle(SQL_HANDLE_DBC, sqlenv, &sqldbc); // 연결 핸들 할당
+    //        if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
+    //            SQLSetConnectAttr(sqldbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER)5, 0); // login timeout 5초로 설정
+    //            sqlret = SQLConnect(sqldbc, (SQLWCHAR*)L"COBOT_2023", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0); // 연결할 데이터 소스
+    //            if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
+    //                sqlret = SQLAllocHandle(SQL_HANDLE_STMT, sqldbc, &sqlstmt); // 상태 핸들 할당
+    //            }
+    //        }
+    //    }
+    //}
+
     WSADATA wsadata;
     if (WSAStartup(MAKEWORD(2, 2), &wsadata) != 0)
     {
@@ -140,7 +158,7 @@ void ServerMain::worker_thread()
             if (client_id != -1)
             {
                 {
-                    std::lock_guard<std::mutex> lock(clients[client_id].lock);
+                    std::lock_guard<std::mutex> lock(clients[client_id].state_lock);
                     clients[client_id].state = state::alloc;
                 }
 				/*
@@ -149,7 +167,7 @@ void ServerMain::worker_thread()
                 */
                 clients[client_id].id = client_id;
                 clients[client_id].sock = client_sock;
-                clients[client_id].tm_id = 1 - client_id; /* 여기도 매칭 시스템 이후 바꿔야 함 */
+                clients[client_id].tm_id = -1;
                 clients[client_id].x = -7700.f + static_cast<double>(client_id * 300);
                 clients[client_id].y = 2180.f + static_cast<double>(client_id * 300);
                 clients[client_id].z = 64.741069f; // +static_cast<double>(client_id * 300);
@@ -179,24 +197,55 @@ void ServerMain::worker_thread()
         } break;
         case IO_RECV:
         {
-            RingBuffer* ring_buff = &clients[key].ring_buff;
+            int remain_data = num_bytes + clients[key].prev_remain;
             char* p = over_ex->buffer;
 
-            ring_buff->enqueue(p, num_bytes);
-
-			while (p[0] <= ring_buff->diff() && !ring_buff->empty())
-			{
-				process_packet(p, static_cast<int>(key));
-				ring_buff->move_read_pos(p[0]);
-				p += p[0];
-			} 
-
-            if (0 < ring_buff->diff())
+            while (remain_data > 0)
             {
-                memcpy(over_ex->buffer, p, num_bytes);
+                int packet_size = p[0];
+                if (packet_size <= remain_data)
+                {
+                    process_packet(p, static_cast<int>(key));
+                    p = p + packet_size;
+                    remain_data = remain_data - packet_size;
+                } else break;
+            }
+
+            clients[key].prev_remain = remain_data;
+
+            if (remain_data > 0)
+            {
+                memcpy(over_ex->buffer, p, remain_data);
             }
 
             clients[key].recv_packet();
+
+   //         RingBuffer* ring_buff = &clients[key].ring_buff;
+   //         char* p = over_ex->buffer;
+
+   //         ring_buff->lock.lock();
+   //         ring_buff->enqueue(p, num_bytes);
+   //         ring_buff->lock.unlock();
+
+			//while (p[0] <= ring_buff->diff() && !ring_buff->empty())
+			//{
+   //             char ring_pack[BUF_SIZE];
+
+   //             ring_buff->lock.lock();
+   //             ring_buff->dequeue(reinterpret_cast<char*>(&ring_pack), p[0]);
+   //             ring_buff->lock.unlock();
+
+			//	process_packet(ring_pack, static_cast<int>(key));
+			//	//ring_buff->move_read_pos(p[0]);
+			//	p += p[0];
+			//} 
+
+   //         if (0 < ring_buff->diff())
+   //         {
+   //             memcpy(over_ex->buffer, p, num_bytes);
+   //         }
+
+   //         clients[key].recv_packet();
         } break;
         case IO_SEND:
         {
@@ -216,16 +265,9 @@ void ServerMain::worker_thread()
 
 int ServerMain::get_client_id() // 고유한 client id 제공
 {
-    /*
-        여기 임시로 구현한 것이다.
-        원래는 lock 걸어주고 해야한다.
-        테스트를 위한 임시 방편
-        추후에 고쳐야 한다. 
-    */
-
     for (int i{}; i < MAX_USER; ++i)
     {
-        std::lock_guard<std::mutex> lock{ clients[i].lock };
+        std::lock_guard<std::mutex> lock{ clients[i].state_lock };
         if (clients[i].state == state::free)
             return i;
     }
@@ -240,25 +282,49 @@ void ServerMain::process_packet(char* packet, int client_id)
     case static_cast<int>(type::cs_login):
     {
         cs_login_packet* pack = reinterpret_cast<cs_login_packet*>(packet);
+
         printf("%d client로부터 login packet을 받았습니다.\n", client_id);
-       /* wchar_t player_id[MAX_LOGIN_LEN], player_pw[MAX_LOGIN_LEN];
-        wcscpy_s(player_id, MAX_LOGIN_LEN, pack->id);
-        wcscpy_s(player_pw, MAX_LOGIN_LEN, pack->passward);*/
-        //printf("%d client의 ID: %s, PW: %s\n", client_id, player_id, player_pw);
+
+        //wchar_t query_str[256];
+        //wsprintf(query_str, L"SELECT * FROM user_table WHERE ")
+
+        wcscpy_s(clients[client_id].name, MAX_LOGIN_LEN, pack->id);
+        wprintf(L"%d client의 name: %s,\n", client_id, clients[client_id].name);
         {
-            std::lock_guard<std::mutex> lock{ clients[client_id].lock };
+            std::lock_guard<std::mutex> lock{ clients[client_id].state_lock };
             clients[client_id].state = state::ingame;
         }
 
-        // MMORPG가 아닌 2인 협동 게임이기 때문에 팀원을 기다린다.
-        // 이건 어디까지나 매칭 시스템을 만들기 전 떼우는 코드
-        while (true)
-        {
-            //std::lock_guard<std::mutex> lock(clients[client_id].lock);
-            //std::lock_guard<std::mutex> llock(clients[clients[client_id].tm_id].lock);
-            if (state::ingame == clients[client_id].state && state::ingame == clients[clients[client_id].tm_id].state)
+        // matching
+        // 팀원을 찾을 때까지 무한 대기
+		for (int i{}; ; ++i)
+		{
+			if (MAX_USER == i) i = 0;
+			if (state::ingame != clients[i].state || clients[i].id == client_id) continue;
+
+            clients[client_id].match_lock.lock();
+            if (-1 == clients[client_id].tm_id)
+            {
+                clients[i].match_lock.lock();
+                if (-1 == clients[i].tm_id)
+                {
+                    clients[client_id].tm_id = clients[i].id;
+                    clients[i].tm_id = client_id;
+                    clients[i].match_lock.unlock();
+                    clients[client_id].match_lock.unlock();
+                    break;
+                }
+                else
+                {
+                    clients[i].match_lock.unlock();
+                }
+            } 
+            else
+            {
+                clients[client_id].match_lock.unlock();
                 break;
-        }
+            }
+		}
 
         // 상대방 좌표 기억하게 하기
         clients[client_id].tm_x = clients[clients[client_id].tm_id].x;
@@ -272,7 +338,7 @@ void ServerMain::process_packet(char* packet, int client_id)
     case static_cast<int>(type::cs_move):
     {
         cs_move_packet* pack = reinterpret_cast<cs_move_packet*>(packet);
-        printf("%d ID를 가진 클라이언트가 %f, %f, %f 로 이동하였습니다.\n", client_id, pack->x, pack->y, pack->z);
+        //printf("%d ID를 가진 클라이언트가 %f, %f, %f 로 이동하였습니다.\n", client_id, pack->x, pack->y, pack->z);
         clients[client_id].x = pack->x;
         clients[client_id].y = pack->y;
         clients[client_id].z = pack->z;
@@ -294,14 +360,24 @@ void ServerMain::process_packet(char* packet, int client_id)
         clients[client_id].send_move_packet(client_id); // 움직인 클라한테 보내기
         clients[clients[client_id].tm_id].send_move_packet(client_id); // 상대 클라한테 보내기
     } break;
+    //case static_cast<int>(type::cs_level2):
+    //{
+    //    cs_level2_packet* pack = reinterpret_cast<cs_level2_packet*>(packet);
+    //    printf("%d 클라이언트가 level 2로 넘어갔습니다\n", client_id);
+    //    // clients[client_id].x = 
+    //} break;
     case static_cast<int>(type::cs_logout):
     {
-        std::cout << client_id << "client가 logout 하였습니다.\n";
+        {
+            std::lock_guard<std::mutex> lock(clients[client_id].state_lock);
+            clients[client_id].state = state::free;
+        }
+        {
+            std::lock_guard<std::mutex> llock{ clients[client_id].match_lock };
+            clients[client_id].tm_id = -1;
+        }
         closesocket(clients[client_id].sock);
-        std::lock_guard<std::mutex> lock(clients[client_id].lock);
-        clients[client_id].state = state::free;
-        if (clients[client_id].state == state::free)
-            std::cout << client_id << "client state is free\n";
+        std::cout << client_id << "client가 logout 하였습니다.\n";
     } break;
     }
 }
