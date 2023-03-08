@@ -28,5 +28,6 @@ public:
 	SOCKET socket;
 
 public:
+	// char* ConvertWCtoC(wchar_t* str);
 	bool ConnectServer();
 };

@@ -21,7 +21,7 @@ public:
 
 public:
 	SocketManager	socket_mgr;
-	int32			level;
+	bool			is_connect;
 	//ClientInfo		cl_info;
 
 	//void SetInfo();

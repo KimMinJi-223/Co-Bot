@@ -34,27 +34,10 @@ void ACPP_Cobot_Controller::BeginPlay()
     // 현재 game instance 받아온다
     instance = Cast<UCPP_CobotGameInstance>(GetWorld()->GetGameInstance());
 
+    //// 서버에 연결이 안되어 있으면 그냥 return
+    //if (!instance->is_connect) return;
+
     sock = instance->socket_mgr.socket;
-
-    //++instance->level;
-
-    //if (1 == instance->level)
-    //{
-    //    cs_login_packet login_pack;
-    //    login_pack.size = sizeof(login_pack);
-    //    login_pack.type = static_cast<char>(type::cs_login);
-
-    //    int ret = send(sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
-    //}
-    //else if (2 == instance->level)
-    //{
-    //    cs_level2_packet level_pack;
-    //    level_pack.size = sizeof(level_pack);
-    //    level_pack.type = static_cast<char>(type::cs_level2);
-    //    level_pack.client_id = id;
-
-    //    int ret = send(sock, reinterpret_cast<char*>(&level_pack), sizeof(level_pack), 0);
-    //}
 
     cs_login_packet login_pack;
     login_pack.size = sizeof(login_pack);
@@ -252,12 +235,19 @@ void ACPP_Cobot_Controller::Rotate(float NewAxisValue)
 
 bool ACPP_Cobot_Controller::Is_Set_IDPW(FString I, FString p)
 {
-    /*서버! 여기에 서버에 send해줘야함 false라면 바로 리턴 true면 아래 작업 후 리턴*/
-    //ID = I;
-    //Passward = p;
+    ///*서버! 여기에 서버에 send해줘야함 false라면 바로 리턴 true면 아래 작업 후 리턴*/
+    ////ID = I;
+    ////Passward = p;
 
-    //const wchar_t* input_id = TCHAR_TO_WCHAR(*I);
-    //const wchar_t* input_pw = TCHAR_TO_WCHAR(*p);
+    //wchar_t* input_id = TCHAR_TO_WCHAR(*I);
+    //wchar_t* input_pw = TCHAR_TO_WCHAR(*p);
+
+    //if (!instance->is_connect)
+    //{
+    //    instance->socket_mgr.ConnectServer(input_id);
+    //    sock = instance->socket_mgr.socket;
+    //    instance->is_connect = true;
+    //}
 
     //// 서버한테 들어왔다고 알려주는 거
     //cs_login_packet login_pack;
