@@ -40,7 +40,7 @@ void ACPP_Cobot_Controller::BeginPlay()
 
     cs_login_packet login_pack;
     login_pack.size = sizeof(login_pack);
-    login_pack.type = static_cast<char>(type::cs_login);
+    login_pack.type = static_cast<char>(packet_type::cs_login);
 
     int ret = send(*sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
 
@@ -112,7 +112,7 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
 {
     switch (packet[1])
     {
-    case static_cast<int>(type::sc_login):
+    case static_cast<int>(packet_type::sc_login):
     {
         sc_login_packet* pack = reinterpret_cast<sc_login_packet*>(packet);
         id = pack->id;
@@ -127,7 +127,7 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
 
         UE_LOG(LogTemp, Warning, TEXT("recv login packet"));
     } break;
-    case static_cast<int>(type::sc_move):
+    case static_cast<int>(packet_type::sc_move):
     {
         sc_move_packet* pack = reinterpret_cast<sc_move_packet*>(packet);
         if (pack->client_id != id) {
@@ -231,7 +231,7 @@ void ACPP_Cobot_Controller::Move_Forward(float NewAxisValue)
         last_move_time = std::chrono::high_resolution_clock::now();
         cs_move_packet pack;
         pack.size = sizeof(pack);
-        pack.type = static_cast<char>(type::cs_move);
+        pack.type = static_cast<char>(packet_type::cs_move);
         pack.x = player->GetActorLocation().X;
         pack.y = player->GetActorLocation().Y;
         pack.z = player->GetActorLocation().Z;
