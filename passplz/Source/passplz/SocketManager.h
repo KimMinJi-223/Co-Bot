@@ -24,8 +24,14 @@ public:
 	SocketManager();
 	~SocketManager();
 
-public:
+private:
 	SOCKET socket;
+
+public:
+	SOCKET* GetSocket()
+	{
+		return &socket;
+	}
 
 public:
 	// char* ConvertWCtoC(wchar_t* str);

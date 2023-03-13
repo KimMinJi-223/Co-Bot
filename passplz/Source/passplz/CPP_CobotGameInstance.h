@@ -19,9 +19,15 @@ class PASSPLZ_API UCPP_CobotGameInstance : public UGameInstance
 public:
 	UCPP_CobotGameInstance();
 
-public:
+private:
 	SocketManager	socket_mgr;
-	bool			is_connect;
+
+public:
+	SocketManager* GetSocketMgr()
+	{
+		return &socket_mgr;
+	}
+	//bool			is_connect;
 	//ClientInfo		cl_info;
 
 	//void SetInfo();

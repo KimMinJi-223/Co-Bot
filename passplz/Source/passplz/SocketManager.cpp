@@ -36,7 +36,6 @@ bool SocketManager::ConnectServer()
     {
         while (!ip_file.eof())    //파일 끝까지 읽었는지 확인
         {
-            
             ip_file.getline(ip, 30);    //한줄씩 읽어오기
         }
     }

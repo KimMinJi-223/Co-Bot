@@ -31,7 +31,7 @@ class PASSPLZ_API ACPP_Cobot_Controller : public APlayerController
 		~ACPP_Cobot_Controller();
 
 private:
-	SOCKET sock;
+	SOCKET* sock;
 	double x, y, z;
 	double yaw;
 	int	id;
@@ -56,6 +56,8 @@ private:
 	int		prev_packet_size;
 	char	prev_packet_buff[BUF_SIZE];
 
+	std::chrono::high_resolution_clock::time_point last_move_time;
+
 public:
 	virtual void PostInitializeComponents() override;
 	virtual void OnPossess(APawn* aPawn) override;
@@ -66,7 +68,12 @@ private:
 	void Move_Forward(float NewAxisValue);
 	void Rotate(float NewAxisValue);
 
+	APawn* player;
+	FVector player_pos;
+	float new_axis_value;
+
 	class ACPP_Cobot* Player_2; //상대 플레이어 정보
+
 
 public:
 	bool Is_Set_IDPW(FString I, FString p);

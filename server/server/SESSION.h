@@ -24,9 +24,14 @@ public:
 
 	OVER_EX		recv_over;
 
+	// 레이턴시를 알기 위한 변수
+	int			last_move_time;
+
 	int			tm_id;	// 팀원 id
 	double		tm_x, tm_y, tm_z;
 	double		tm_yaw;
+
+	int			tm_last_mvoe_time;
 
 	// 패킷 재조립을 위한 부분 이거 나중에 꼭 수정해야 함
 	int			prev_remain;

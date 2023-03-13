@@ -279,7 +279,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 {
     switch (packet[1]) 
     {
-    case static_cast<int>(type::cs_login):
+    case static_cast<int>(packet_type::cs_login):
     {
         cs_login_packet* pack = reinterpret_cast<cs_login_packet*>(packet);
 
@@ -335,10 +335,11 @@ void ServerMain::process_packet(char* packet, int client_id)
         // 두 명 입장이 되어야 로그인이 됨
         clients[client_id].send_login_packet();
     } break;
-    case static_cast<int>(type::cs_move):
+    case static_cast<int>(packet_type::cs_move):
     {
         cs_move_packet* pack = reinterpret_cast<cs_move_packet*>(packet);
-        //printf("%d ID를 가진 클라이언트가 %f, %f, %f 로 이동하였습니다.\n", client_id, pack->x, pack->y, pack->z);
+        clients[client_id].last_move_time = pack->move_time;
+        printf("%d ID를 가진 클라이언트가 %f, %f, %f 로 이동하였습니다.\n", client_id, pack->x, pack->y, pack->z);
         clients[client_id].x = pack->x;
         clients[client_id].y = pack->y;
         clients[client_id].z = pack->z;
@@ -366,7 +367,7 @@ void ServerMain::process_packet(char* packet, int client_id)
     //    printf("%d 클라이언트가 level 2로 넘어갔습니다\n", client_id);
     //    // clients[client_id].x = 
     //} break;
-    case static_cast<int>(type::cs_logout):
+    case static_cast<int>(packet_type::cs_logout):
     {
         {
             std::lock_guard<std::mutex> lock(clients[client_id].state_lock);

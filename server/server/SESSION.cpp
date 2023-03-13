@@ -64,7 +64,7 @@ void SESSION::send_login_packet()
 {
 	sc_login_packet pack;
 	pack.size = sizeof(pack);
-	pack.type = static_cast<char>(type::sc_login);
+	pack.type = static_cast<char>(packet_type::sc_login);
 	pack.id = id;
 	pack.x = x;
 	pack.y = y;
@@ -84,7 +84,7 @@ void SESSION::send_move_packet(int client_id)
 {
 	sc_move_packet pack;
 	pack.size = sizeof(pack);
-	pack.type = static_cast<int>(type::sc_move);
+	pack.type = static_cast<int>(packet_type::sc_move);
 	pack.client_id = client_id;
 	if (client_id == id)
 	{
@@ -92,6 +92,7 @@ void SESSION::send_move_packet(int client_id)
 		pack.y = y;
 		pack.z = z;
 		pack.yaw = yaw;
+		pack.move_time = last_move_time;
 	}
 	else
 	{
@@ -99,6 +100,7 @@ void SESSION::send_move_packet(int client_id)
 		pack.y = tm_y;
 		pack.z = tm_z;
 		pack.yaw = tm_yaw;
+		pack.move_time = tm_last_mvoe_time;
 	}
 
 	send_packet(reinterpret_cast<char*>(&pack));
