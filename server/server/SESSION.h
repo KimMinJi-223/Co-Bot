@@ -41,7 +41,7 @@ public:
 public:
 	void recv_packet();
 	void send_packet(char* packet);
-	void send_login_packet();
+	void send_enter_packet();
 	void send_move_packet(int client_id);
 	void send_rotate_packet(int client_id);
 

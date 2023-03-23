@@ -60,7 +60,7 @@ void SESSION::send_packet(char* packet)
 	}
 }
 
-void SESSION::send_login_packet()
+void SESSION::send_enter_packet()
 {
 	sc_login_packet pack;
 	pack.size = sizeof(pack);
@@ -77,7 +77,7 @@ void SESSION::send_login_packet()
 	
 	send_packet(reinterpret_cast<char*>(&pack));
 
-	printf("%d에게 login packet을 보냈습니다.\n", id);
+	printf("%d에게 enter packet을 보냈습니다.\n", id);
 }
 
 void SESSION::send_move_packet(int client_id)

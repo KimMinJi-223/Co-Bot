@@ -24,6 +24,8 @@ private:
 	void worker_thread();
 	int get_client_id();
 	void process_packet(char* packet, int client_id);
+	bool matching(int client_id);
+	void set_team_position(int client_id);
 
 public:
 	ServerMain();
