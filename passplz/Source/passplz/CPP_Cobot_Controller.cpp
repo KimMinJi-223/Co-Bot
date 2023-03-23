@@ -33,16 +33,11 @@ void ACPP_Cobot_Controller::BeginPlay()
     Super::BeginPlay();
     UE_LOG(LogTemp, Warning, TEXT("코봇생성"));
 
-    // 현재 game instance 받아온다
     instance = Cast<UCPP_CobotGameInstance>(GetWorld()->GetGameInstance());
 
     sock = instance->GetSocketMgr()->GetSocket();
 
-    cs_login_packet login_pack;
-    login_pack.size = sizeof(login_pack);
-    login_pack.type = static_cast<char>(packet_type::cs_login);
-
-    int ret = send(*sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
+    SendEnterPacket();
 
     Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(tm_x, tm_y, tm_z), FRotator(0.0f, tm_yaw, 0.0f));
 }
@@ -51,8 +46,7 @@ void ACPP_Cobot_Controller::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    //RecvPacket();
-    //UE_LOG(LogTemp, Warning, TEXT("Tick"));
+    RecvPacket();
 }
 
 void ACPP_Cobot_Controller::RecvPacket()
@@ -140,23 +134,26 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
             Player_2->SetActorRotation(FRotator(0.f, tm_yaw, 0.f));
 
             UE_LOG(LogTemp, Warning, TEXT("Recv Player2 move packet!"));
-            //double zz;
-            //zz = Player_2->GetActorLocation().Z;
-            //UE_LOG(LogTemp, Warning, TEXT("%d, %lf"), pack->client_id, zz);
-            //UE_LOG(LogTemp, Warning, TEXT("recv p2 move packet"));
         } else {
             auto delay = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() - pack->move_time;
-            x = pack->x;
-            y = pack->y;
-            z = pack->z;
-            yaw = pack->yaw;
-
-            player->AddMovementInput(player_pos, new_axis_value);
-            //UE_LOG(LogTemp, Warning, TEXT("recv my move packet"));
             UE_LOG(LogTemp, Warning, TEXT("Delay: %d"), delay);
         }        
     } break;
     }
+}
+
+void ACPP_Cobot_Controller::SendEnterPacket()
+{
+    //cs_enter_packet enter_pack;
+    //enter_pack.size = sizeof(enter_pack);
+    //enter_pack.type = static_cast<char>(packet_type::cs_enter);
+
+    /* 로그인을 하기 전 임시로 구현해놓음. 이거 안하면 MATCHING이 안됨 */
+    cs_login_packet enter_pack;
+    enter_pack.size = sizeof(enter_pack);
+    enter_pack.type = static_cast<char>(packet_type::cs_login);
+
+    int ret = send(*sock, reinterpret_cast<char*>(&enter_pack), sizeof(enter_pack), 0);
 }
 
 void ACPP_Cobot_Controller::PostInitializeComponents()
@@ -189,94 +186,31 @@ void ACPP_Cobot_Controller::Move_Forward(float NewAxisValue)
     if (!player)
         return;
 
-    RecvPacket();
-
     FRotator rotator_controller = GetControlRotation();
     FRotator rotator_forward = UKismetMathLibrary::MakeRotator(0.0f, 0.0f, rotator_controller.Yaw);
     FVector forward_vector = UKismetMathLibrary::GetForwardVector(rotator_forward);
 
-    // player_pos = forward_vector;
-    if (forward_vector.X != 0.f) {
-        player_pos.X = forward_vector.X / 0.1f;
-    } else {
-        player_pos.X = 0.f;
-    }
+    player->AddMovementInput(forward_vector, NewAxisValue);
 
-    if (forward_vector.Y != 0.f) {
-        player_pos.Y = forward_vector.Y / 0.1f;
-    } else {
-        player_pos.Y = 0.f;
-    }
-
-    if (forward_vector.Z != 0.f) {
-        player_pos.Z = forward_vector.Z / 0.1f;
-    } else {
-        player_pos.Z = 0.f;
-    }
-
-    double player_yaw;
-    if (rotator_controller.Yaw != 0.f) {
-        player_yaw = rotator_controller.Yaw / 0.1f;
-    } else {
-        player_yaw = 0.f;
-    }
-
-    if (x != player_pos.X || y != player_pos.Y || z != player_pos.Z || yaw != player_yaw)
+    if (x != player->GetActorLocation().X || y != player->GetActorLocation().Y || z != player->GetActorLocation().Z || yaw != player->GetActorRotation().Yaw)
     {
-        x = player_pos.X;
-        y = player_pos.Y;
-        z = player_pos.Z;
-        yaw = player_yaw;
+        x = player->GetActorLocation().X;
+        y = player->GetActorLocation().Y;
+        z = player->GetActorLocation().Z;
+        yaw = player->GetActorRotation().Yaw;
 
         last_move_time = std::chrono::high_resolution_clock::now();
         cs_move_packet pack;
         pack.size = sizeof(pack);
         pack.type = static_cast<char>(packet_type::cs_move);
-        pack.x = player->GetActorLocation().X;
-        pack.y = player->GetActorLocation().Y;
-        pack.z = player->GetActorLocation().Z;
-        pack.yaw = player->GetActorRotation().Yaw;
+        pack.x = x;
+        pack.y = y;
+        pack.z = z;
+        pack.yaw = yaw;
         pack.move_time = static_cast<unsigned>(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count());
 
         int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
     }
-
-    // 서버로 움직임 보냄
- // 매프레임 여기를 지나감
- // 따라서 움직임이 바뀌었을 때만 보내도록 함
- /*
-    여기는 일단 내가 움직이는 거 위치 받아오려고 해둔 곳
-    추후에 어디가 움직이는 곳인지 보고 고쳐야 함
- */
-
-    //double yaw1 = player->GetActorRotation().Yaw;
-
-    //UE_LOG(LogTemp, Warning, TEXT("Yaw: %lf"), yaw1);
-
-    //if (x != player->GetActorLocation().X || y != player->GetActorLocation().Y || z != player->GetActorLocation().Z || yaw != player->GetActorRotation().Yaw)
-    //{
-    //    x = player->GetActorLocation().X;
-    //    y = player->GetActorLocation().Y;
-    //    z = player->GetActorLocation().Z;
-    //    yaw = player->GetActorRotation().Yaw;
-
-    //    cs_move_packet pack;
-    //    pack.size = sizeof(pack);
-    //    pack.type = static_cast<char>(type::cs_move);
-    //    pack.x = x;
-    //    pack.y = y;
-    //    pack.z = z;
-    //    pack.yaw = yaw;
-
-    //    int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
-
-    //    // 이게 패킷 받는거
-    //    // 패킷 받을 곳에 복붙해서 놓으면 됨
-    //    //RecvPacket();
-    //}
-
-
-    //RecvPacket();
 }
 
 void ACPP_Cobot_Controller::Rotate(float NewAxisValue)
@@ -314,8 +248,3 @@ bool ACPP_Cobot_Controller::Is_Set_IDPW(FString I, FString p)
     //UE_LOG(LogTemp, Warning, TEXT("ID: %s, PW: %s"), input_id, input_pw);
     return true; 
 }
-
-/*
-    클라 보아라
-    싱크를 맞춰야 하니 움직임도 바꾸고 동시에 동작되어야 하는건 바꿔야 할 듯 하다.
-*/

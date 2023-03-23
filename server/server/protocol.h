@@ -6,7 +6,7 @@ constexpr int BUF_SIZE = 2048;
 constexpr int MAX_USER = 10;
 constexpr int MAX_LOGIN_LEN = 15;
 
-enum class packet_type { cs_login, sc_login, sc_add_player, cs_move, sc_move, sc_next_light, cs_logout };
+enum class packet_type { cs_login, sc_login, cs_enter, sc_add_player, cs_move, sc_move, sc_next_light, cs_logout };
 enum class synch_type { button1, button2, button3 };
 
 struct cs_login_packet {
@@ -28,6 +28,11 @@ struct sc_login_packet {
 	double	tm_y;
 	double	tm_z;
 	double	tm_yaw;
+};
+
+struct cs_enter_packet {
+	char size;
+	char type;
 };
 
 struct cs_move_packet {

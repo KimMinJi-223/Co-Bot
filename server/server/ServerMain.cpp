@@ -31,22 +31,6 @@ bool ServerMain::init()
 {
     setlocale(LC_ALL, "KOREAN");
 
-    //// DB 연동
-    //sqlret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &sqlenv); // 환경 핸들 할당
-    //if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
-    //    sqlret = SQLSetEnvAttr(sqlenv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER*)SQL_OV_ODBC3, 0); // ODBC 버전 환경 속성 설정
-    //    if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
-    //        sqlret = SQLAllocHandle(SQL_HANDLE_DBC, sqlenv, &sqldbc); // 연결 핸들 할당
-    //        if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
-    //            SQLSetConnectAttr(sqldbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER)5, 0); // login timeout 5초로 설정
-    //            sqlret = SQLConnect(sqldbc, (SQLWCHAR*)L"COBOT_2023", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0); // 연결할 데이터 소스
-    //            if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
-    //                sqlret = SQLAllocHandle(SQL_HANDLE_STMT, sqldbc, &sqlstmt); // 상태 핸들 할당
-    //            }
-    //        }
-    //    }
-    //}
-
     WSADATA wsadata;
     if (WSAStartup(MAKEWORD(2, 2), &wsadata) != 0)
     {
@@ -249,14 +233,6 @@ void ServerMain::worker_thread()
         } break;
         case IO_SEND:
         {
-            /*
-                delete 해줘야 하는게 맞는데 왜 이거만 키면 오류가 나는지 모르겠다.
-
-                <해결>
-                할당하지도 않은 메모리 영역을 해제하려고 해서 생긴 오류였다.
-                send_packet() 함수에서 new OVER_EX로 하여 오류를 해결하였다.
-                근데 꼭 new/delete로 안해도 될것 같긴 하다.
-            */
             delete over_ex;
         } break;
         }
@@ -282,58 +258,32 @@ void ServerMain::process_packet(char* packet, int client_id)
     case static_cast<int>(packet_type::cs_login):
     {
         cs_login_packet* pack = reinterpret_cast<cs_login_packet*>(packet);
-
         printf("%d client로부터 login packet을 받았습니다.\n", client_id);
-
-        //wchar_t query_str[256];
-        //wsprintf(query_str, L"SELECT * FROM user_table WHERE ")
 
         wcscpy_s(clients[client_id].name, MAX_LOGIN_LEN, pack->id);
         wprintf(L"%d client의 name: %s,\n", client_id, clients[client_id].name);
+
         {
             std::lock_guard<std::mutex> lock{ clients[client_id].state_lock };
             clients[client_id].state = state::ingame;
         }
 
-        // matching
-        // 팀원을 찾을 때까지 무한 대기
-		for (int i{}; ; ++i)
-		{
-			if (MAX_USER == i) i = 0;
-			if (state::ingame != clients[i].state || clients[i].id == client_id) continue;
+        bool is_matching = matching(client_id);
+        if (!is_matching)
+            std::cout << "이미 다른 팀원이 있습니다." << std::endl;
 
-            clients[client_id].match_lock.lock();
-            if (-1 == clients[client_id].tm_id)
-            {
-                clients[i].match_lock.lock();
-                if (-1 == clients[i].tm_id)
-                {
-                    clients[client_id].tm_id = clients[i].id;
-                    clients[i].tm_id = client_id;
-                    clients[i].match_lock.unlock();
-                    clients[client_id].match_lock.unlock();
-                    break;
-                }
-                else
-                {
-                    clients[i].match_lock.unlock();
-                }
-            } 
-            else
-            {
-                clients[client_id].match_lock.unlock();
-                break;
-            }
-		}
+        set_team_position(client_id);
 
-        // 상대방 좌표 기억하게 하기
-        clients[client_id].tm_x = clients[clients[client_id].tm_id].x;
-        clients[client_id].tm_y = clients[clients[client_id].tm_id].y;
-        clients[client_id].tm_z = clients[clients[client_id].tm_id].z;
-        clients[client_id].tm_yaw = clients[clients[client_id].tm_id].yaw;
+        clients[client_id].send_enter_packet();
+    } break;
+    case static_cast<int>(packet_type::cs_enter):
+    {
+        cs_enter_packet* pack = reinterpret_cast<cs_enter_packet*>(packet);
+        printf("%d client로부터 enter packet을 받았습니다.\n", client_id);
 
-        // 두 명 입장이 되어야 로그인이 됨
-        clients[client_id].send_login_packet();
+        set_team_position(client_id);
+
+        clients[client_id].send_enter_packet();
     } break;
     case static_cast<int>(packet_type::cs_move):
     {
@@ -348,25 +298,10 @@ void ServerMain::process_packet(char* packet, int client_id)
         clients[clients[client_id].tm_id].tm_y = pack->y;
         clients[clients[client_id].tm_id].tm_z = pack->z;
         clients[clients[client_id].tm_id].tm_yaw = pack->yaw;
-        // 움직인 것을 다른 클라들한테 보내주기
-        // 23.2.11
-        // 현재는 클라에서 움직임을 다 한 후 서버로 위치를 보내준다.
-        // 혼자 하는 것이라면 상관이 없지만 멀티게임에서는 동시에 보여지는 것이 중요하다.
-        // 이렇게 하면 다른 쪽에서는 느리게 보일 수 밖에 없다.
-        // 누르는 순간 서버로 보내고 서버에서 동시에 보내주도록 해야 한다.
-        // <현재 오류>
-        // 클라 CPP에서 실행하면 클라 한명 당 2개의 접속이 되고 있다.
-        // 따라서 접속도 안되어 있는 클라가 INGAME으로 표시되는 오류가 있다.
-        // 이건 클라쪽에서 수정해야 할 듯 하다.
+
         clients[client_id].send_move_packet(client_id); // 움직인 클라한테 보내기
         clients[clients[client_id].tm_id].send_move_packet(client_id); // 상대 클라한테 보내기
     } break;
-    //case static_cast<int>(type::cs_level2):
-    //{
-    //    cs_level2_packet* pack = reinterpret_cast<cs_level2_packet*>(packet);
-    //    printf("%d 클라이언트가 level 2로 넘어갔습니다\n", client_id);
-    //    // clients[client_id].x = 
-    //} break;
     case static_cast<int>(packet_type::cs_logout):
     {
         {
@@ -381,5 +316,41 @@ void ServerMain::process_packet(char* packet, int client_id)
         std::cout << client_id << "client가 logout 하였습니다.\n";
     } break;
     }
+}
+
+bool ServerMain::matching(int client_id)
+{
+    for (int i{}; ; ++i)
+    {
+        if (MAX_USER == i) i = 0;
+        if (state::ingame != clients[i].state || clients[i].id == client_id) continue;
+
+        clients[client_id].match_lock.lock();
+        if (-1 == clients[client_id].tm_id) {
+            clients[i].match_lock.lock();
+            if (-1 == clients[i].tm_id) {
+                clients[client_id].tm_id = clients[i].id;
+                clients[i].tm_id = client_id;
+                clients[i].match_lock.unlock();
+                clients[client_id].match_lock.unlock();
+
+                return true;
+            } else {
+                clients[i].match_lock.unlock();
+            }
+        } else { // 이미 팀원이 있다는 소리
+            clients[client_id].match_lock.unlock();
+
+            return false;
+        }
+    }
+}
+
+void ServerMain::set_team_position(int client_id)
+{
+    clients[client_id].tm_x = clients[clients[client_id].tm_id].x;
+    clients[client_id].tm_y = clients[clients[client_id].tm_id].y;
+    clients[client_id].tm_z = clients[clients[client_id].tm_id].z;
+    clients[client_id].tm_yaw = clients[clients[client_id].tm_id].yaw;
 }
 

@@ -48,6 +48,7 @@ private:
 	virtual void Tick(float DeltaTime) override;
 	void RecvPacket();
 	void ProcessPacket(char* packet);
+	void SendEnterPacket();
 
 	UCPP_CobotGameInstance* instance;
 	
