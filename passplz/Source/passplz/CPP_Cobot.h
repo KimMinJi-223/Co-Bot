@@ -19,7 +19,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -35,4 +35,24 @@ private:
 
 	UPROPERTY(VisibleAnywhere, Category = Cameara)
 		UCameraComponent* Camera;
+
+	TSubclassOf<class UAnimInstance> AnimInstanceClass;
+
+public:
+	UPROPERTY(BlueprintReadWrite)
+		float Time_left;
+	UPROPERTY(BlueprintReadWrite)
+		float Time_right;
+	UPROPERTY(BlueprintReadWrite)
+		FVector Target_left;
+	UPROPERTY(BlueprintReadWrite)
+		FVector Target_right;
+	UPROPERTY(BlueprintReadWrite)
+		FVector Current_left;
+	UPROPERTY(BlueprintReadWrite)
+		FVector Current_right;
+	UPROPERTY(BlueprintReadWrite)
+		FVector Start_left;
+	UPROPERTY(BlueprintReadWrite)
+		FVector Start_right;
 };
