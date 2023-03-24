@@ -68,8 +68,9 @@ protected:
 private:
 	void Move_Forward(float NewAxisValue);
 	void Rotate(float NewAxisValue);
+	void Left_Right(float NewAxisValue);
 
-	APawn* player;
+	class ACPP_Cobot* player;
 	FVector player_pos;
 	float new_axis_value;
 
@@ -84,4 +85,10 @@ protected:
 		FString ID; //아이디
 	UPROPERTY(BlueprintReadWrite)
 		FString Passward; //비밀번호
+
+
+protected:
+	UCurveFloat* Cobot_Curve;
+
+
 };

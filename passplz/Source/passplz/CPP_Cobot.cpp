@@ -20,11 +20,26 @@ ACPP_Cobot::ACPP_Cobot()
 	SpringArm->TargetArmLength = 400.0f;
 	SpringArm->SetRelativeRotation(FRotator(-25.0f, 0.0f, 0.0f));
 	GetCapsuleComponent()->SetCapsuleSize(30.f, 40.f);
-
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_COBOT(TEXT("/Game/model/PLAYER/cobot.cobot"));
+	
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_COBOT(TEXT("/Game/model/PLAYER/cobot_test02.cobot_test02"));
 	if (SK_COBOT.Succeeded()) {
+		UE_LOG(LogTemp, Warning, TEXT("mesh ok"));
+
 		GetMesh()->SetSkeletalMesh(SK_COBOT.Object);
 	}
+	
+	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	static ConstructorHelpers::FClassFinder<UAnimInstance> COBOT_ANIM(TEXT("/Game/Global_BP/Cobot_anim.Cobot_anim_C"));
+	if (COBOT_ANIM.Succeeded()) {
+		UE_LOG(LogTemp, Warning, TEXT("Animation OK"));
+		AnimInstanceClass = COBOT_ANIM.Class;
+		//GetMesh()->SetAnimInstanceClass(COBOT_ANIM.Class);
+	}
+	else{
+		UE_LOG(LogTemp, Warning, TEXT("Animation NO"));
+	}
+
+	GetCharacterMovement()->MaxWalkSpeed = 100.f;
 
 }
 
@@ -32,7 +47,13 @@ ACPP_Cobot::ACPP_Cobot()
 void ACPP_Cobot::BeginPlay()
 {
 	Super::BeginPlay();
-	
+	Current_left = GetMesh()->GetSocketLocation("left");
+	Start_left = GetMesh()->GetSocketLocation("left");
+	Target_left = GetMesh()->GetSocketLocation("left");
+	Current_right = GetMesh()->GetSocketLocation("right");
+	Start_right = GetMesh()->GetSocketLocation("right");
+	Target_right = GetMesh()->GetSocketLocation("right");
+	GetMesh()->SetAnimInstanceClass(AnimInstanceClass);
 }
 
 // Called every frame
