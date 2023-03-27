@@ -40,6 +40,14 @@ ACPP_Cobot::ACPP_Cobot()
 	}
 
 	GetCharacterMovement()->MaxWalkSpeed = 100.f;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bUseControllerDesiredRotation = false;
+
+	bUseControllerRotationYaw = false;
+	SpringArm->bUsePawnControlRotation = true;
+	SpringArm->bInheritPitch = true;
+	SpringArm->bInheritYaw = true;
+	SpringArm->bInheritRoll = true;
 
 }
 
