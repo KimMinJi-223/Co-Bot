@@ -10,8 +10,10 @@
 #include <chrono>
 
 ACPP_Cobot_Controller::ACPP_Cobot_Controller()
-    : x(-1.f), y(-1.f), z(-1.f), yaw(-1.f)
-    , tm_x(-1.f), tm_y(-1.f), tm_z(-1.f), tm_yaw(-1.f)
+    : location(0.f, 0.f, 0.f)
+    , tm_location(0.f, 0.f, 0.f)
+    , tm_time_left(0.f)
+    , tm_time_right(0.f)
     , prev_remain(0)
 {
 }
@@ -31,7 +33,7 @@ ACPP_Cobot_Controller::~ACPP_Cobot_Controller()
 void ACPP_Cobot_Controller::BeginPlay()
 {
     Super::BeginPlay();
-    UE_LOG(LogTemp, Warning, TEXT("코봇생성"));
+    UE_LOG(LogTemp, Warning, TEXT("BeginPlay()"));
 
     instance = Cast<UCPP_CobotGameInstance>(GetWorld()->GetGameInstance());
 
@@ -39,7 +41,7 @@ void ACPP_Cobot_Controller::BeginPlay()
 
     SendEnterPacket();
 
-    Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(tm_x, tm_y, tm_z), FRotator(0.0f, tm_yaw, 0.0f));
+    Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(-8100.f, 2180.f, 59.149971f), FRotator(0.0f, 0.0f, 0.0f));
 
     Cobot_Curve = LoadObject<UCurveFloat>(nullptr, TEXT("/Game/curve/Cobot_Curve.Cobot_Curve"));
 }
@@ -111,33 +113,44 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
     {
         sc_login_packet* pack = reinterpret_cast<sc_login_packet*>(packet);
         id = pack->id;
-        x = pack->x;
-        y = pack->y;
-        z = pack->z;
-        yaw = pack->yaw;
-        tm_x = pack->tm_x;
-        tm_y = pack->tm_y;
-        tm_z = pack->tm_z;
-        tm_yaw = pack->tm_yaw;
+        //x = pack->x;
+        //y = pack->y;
+        //z = pack->z;
+        //yaw = pack->yaw;
+        //tm_x = pack->tm_x;
+        //tm_y = pack->tm_y;
+        //tm_z = pack->tm_z;
+        //tm_yaw = pack->tm_yaw;
 
         UE_LOG(LogTemp, Warning, TEXT("recv login packet"));
     } break;
     case static_cast<int>(packet_type::sc_move):
     {
         sc_move_packet* pack = reinterpret_cast<sc_move_packet*>(packet);
-        if (pack->client_id != id) {
-            tm_x = pack->x;
-            tm_y = pack->y;
-            tm_z = pack->z;
-            tm_yaw = pack->yaw;
+        if (pack->client_id != id) { // 상대방이 움직였다
+            tm_location = pack->location;
 
-            Player_2->SetActorLocation(FVector(tm_x, tm_y, tm_z));
-            Player_2->SetActorRotation(FRotator(0.f, tm_yaw, 0.f));
+            if (direction::left == pack->direction) {
+                Player_2->Current_left.X = pack->current.x;
+                Player_2->Current_left.Y = pack->current.y;
+                Player_2->Current_left.Z = pack->current.z;
 
-            UE_LOG(LogTemp, Warning, TEXT("Recv Player2 move packet!"));
-        } else {
-            auto delay = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() - pack->move_time;
-            UE_LOG(LogTemp, Warning, TEXT("Delay: %d"), delay);
+                Player_2->Time_left = pack->time;
+            } else if (direction::right == pack->direction) {
+                Player_2->Current_right.X = pack->current.x;
+                Player_2->Current_right.Y = pack->current.y;
+                Player_2->Current_right.Z = pack->current.z;
+
+                Player_2->Time_right = pack->time;
+            }
+
+            Player_2->SetActorLocation(FVector(tm_location.x, tm_location.y, tm_location.z));
+
+            //UE_LOG(LogTemp, Warning, TEXT("Recv Player2 move packet!"));
+        } else { // 내가 움직였다
+
+            //auto delay = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() - pack->move_time;
+            //UE_LOG(LogTemp, Warning, TEXT("Delay: %d"), delay);
         }
     } break;
     }
@@ -153,6 +166,8 @@ void ACPP_Cobot_Controller::SendEnterPacket()
     cs_login_packet enter_pack;
     enter_pack.size = sizeof(enter_pack);
     enter_pack.type = static_cast<char>(packet_type::cs_login);
+    wcscpy_s(enter_pack.id, MAX_LOGIN_LEN, L"ex_id");
+    wcscpy_s(enter_pack.passward, MAX_LOGIN_LEN, L"ex_pw");
 
     int ret = send(*sock, reinterpret_cast<char*>(&enter_pack), sizeof(enter_pack), 0);
 }
@@ -196,9 +211,6 @@ void ACPP_Cobot_Controller::Move_Forward(float NewAxisValue)
     FVector forward_vector = UKismetMathLibrary::GetForwardVector(rotator_forward);
 
     player->AddMovementInput(forward_vector, NewAxisValue);
-
-
-
 }
 
 void ACPP_Cobot_Controller::Rotate(float NewAxisValue)
@@ -209,7 +221,6 @@ void ACPP_Cobot_Controller::Rotate(float NewAxisValue)
 
 void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 {
-
     player = Cast<ACPP_Cobot>(GetPawn());
 
     if (!player)
@@ -221,7 +232,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 
     float distance_two_feet = 50.f;
 
-    if (((int)NewAxisValue) == 1) {
+    if (((int)NewAxisValue) == 1) { // A key
         player->Time_left += GetWorld()->GetDeltaSeconds();
         if (player->Time_left < 1.0f) {
             //캐릭터를 움직인다.
@@ -253,12 +264,27 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
             //if(HitResult.IsValidBlockingHit())
             player->Current_left = HitResult.Location;
             UE_LOG(LogTemp, Warning, TEXT("%f"), HitResult.Location.Z);
+
+            // server
+            cs_move_packet pack;
+            pack.size = sizeof(pack);
+            pack.type = static_cast<char>(packet_type::cs_move);
+            pack.direction = direction::left;
+            pack.location.x = player->GetActorLocation().X;
+            pack.location.y = player->GetActorLocation().Y;
+            pack.location.z = player->GetActorLocation().Z;
+            pack.current.x = player->Current_left.X;
+            pack.current.y = player->Current_left.Y;
+            pack.current.z = player->Current_left.Z;
+            pack.time = player->Time_left;
+
+            send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
         }
-    } else {
+    } else { 
         player->Start_left = player->Current_left;
         player->Time_left = 0.f;
 
-        if (((int)NewAxisValue) == 2) {
+        if (((int)NewAxisValue) == 2) { // D key
             player->Time_right += GetWorld()->GetDeltaSeconds();
             if (player->Time_right < 1.0f) {
                 //캐릭터를 움직인다.
@@ -286,17 +312,25 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
                     ECollisionChannel::ECC_Visibility
                 );
                 player->Current_right = HitResult.Location;
+
+                cs_move_packet pack;
+                pack.size = sizeof(pack);
+                pack.type = static_cast<char>(packet_type::cs_move);
+                pack.direction = direction::right;
+                pack.location.x = player->GetActorLocation().X;
+                pack.location.y = player->GetActorLocation().Y;
+                pack.location.z = player->GetActorLocation().Z;
+                pack.current.x = player->Current_right.X;
+                pack.current.y = player->Current_right.Y;
+                pack.current.z = player->Current_right.Z;
+                pack.time = player->Time_right;
+
+                send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
             }
         } else {
             player->Start_right = player->Current_right;
             player->Time_right = 0.f;
         }
-
-
-
-
-
-
     }
 }
 

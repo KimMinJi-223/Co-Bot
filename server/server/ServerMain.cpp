@@ -32,15 +32,13 @@ bool ServerMain::init()
     setlocale(LC_ALL, "KOREAN");
 
     WSADATA wsadata;
-    if (WSAStartup(MAKEWORD(2, 2), &wsadata) != 0)
-    {
+    if (WSAStartup(MAKEWORD(2, 2), &wsadata) != 0) {
         GetLastError();
         return false;
     }
 
     iocp_handle = CreateIOCPHandle();
-    if (nullptr == iocp_handle)
-    {
+    if (nullptr == iocp_handle) {
         GetLastError();
         return false;
     }
@@ -52,20 +50,17 @@ bool ServerMain::init()
     server_addr.sin_addr.s_addr = htonl(INADDR_ANY);
     server_addr.sin_port = htons(PORT_NUM);
 
-    if (SOCKET_ERROR == bind(server_sock, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr)))
-    {
+    if (SOCKET_ERROR == bind(server_sock, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr))) {
         GetLastError();
         return false;
     }
 
-    if (SOCKET_ERROR == listen(server_sock, SOMAXCONN))
-    {
+    if (SOCKET_ERROR == listen(server_sock, SOMAXCONN)) {
         GetLastError();
         return false;
     }
 
-    if (!AssociateSocketWithIOCP(server_sock, 7777))
-    {
+    if (!AssociateSocketWithIOCP(server_sock, 7777)) {
         GetLastError();
         return false;
     }
@@ -87,9 +82,7 @@ void ServerMain::server_main() // 본격적인 서버 루프 들어가는 곳
     std::vector<std::thread> worker_threads;
     int thread_num = std::thread::hardware_concurrency();
     for (int i{}; i < thread_num; ++i)
-    {
        worker_threads.emplace_back(std::thread(&ServerMain::worker_thread, this));
-    }
 
     for (auto& th : worker_threads)
         th.join();
@@ -117,16 +110,13 @@ void ServerMain::worker_thread()
         GetQueuedCompletionStatus(iocp_handle, &num_bytes, &key, &over, INFINITE);
         OVER_EX* over_ex = reinterpret_cast<OVER_EX*>(over);
 
-        if ((0 == num_bytes) && ((IO_RECV == over_ex->mode) || (IO_SEND == over_ex->mode)))
-        {
+        if ((0 == num_bytes) && ((IO_RECV == over_ex->mode) || (IO_SEND == over_ex->mode))) {
             /*
                 연결 끊기 코드 추가해야 함
             */
 
             if (IO_SEND == over_ex->mode)
-            {
                 delete over_ex;
-            }
 
             continue;
         }
@@ -139,8 +129,7 @@ void ServerMain::worker_thread()
 
             std::cout << client_id << "번째 ID를 가진 클라가 입장하였습니다." << std::endl;
 
-            if (client_id != -1)
-            {
+            if (client_id != -1) {
                 {
                     std::lock_guard<std::mutex> lock(clients[client_id].state_lock);
                     clients[client_id].state = state::alloc;
@@ -152,14 +141,9 @@ void ServerMain::worker_thread()
                 clients[client_id].id = client_id;
                 clients[client_id].sock = client_sock;
                 clients[client_id].tm_id = -1;
-                clients[client_id].x = -7700.f + static_cast<double>(client_id * 300);
-                clients[client_id].y = 2180.f + static_cast<double>(client_id * 300);
-                clients[client_id].z = 64.741069f; // +static_cast<double>(client_id * 300);
-                clients[client_id].yaw = 0.f;
 
                 // 접속을 다시 받기 위해서
-                if (!AssociateSocketWithIOCP(client_sock, client_id))
-                {
+                if (!AssociateSocketWithIOCP(client_sock, client_id)) {
                     GetLastError();
                     continue;
                 }
@@ -167,10 +151,7 @@ void ServerMain::worker_thread()
                 clients[client_id].recv_packet();
 
                 client_sock = WSASocket(AF_INET, SOCK_STREAM, IPPROTO_TCP, NULL, NULL, WSA_FLAG_OVERLAPPED);
-
-            }
-            else
-            {
+            } else {
                 std::cout << "Max user!\n";
             }
 
@@ -187,8 +168,7 @@ void ServerMain::worker_thread()
             while (remain_data > 0)
             {
                 int packet_size = p[0];
-                if (packet_size <= remain_data)
-                {
+                if (packet_size <= remain_data) {
                     process_packet(p, static_cast<int>(key));
                     p = p + packet_size;
                     remain_data = remain_data - packet_size;
@@ -198,9 +178,7 @@ void ServerMain::worker_thread()
             clients[key].prev_remain = remain_data;
 
             if (remain_data > 0)
-            {
                 memcpy(over_ex->buffer, p, remain_data);
-            }
 
             clients[key].recv_packet();
 
@@ -288,19 +266,30 @@ void ServerMain::process_packet(char* packet, int client_id)
     case static_cast<int>(packet_type::cs_move):
     {
         cs_move_packet* pack = reinterpret_cast<cs_move_packet*>(packet);
-        clients[client_id].last_move_time = pack->move_time;
-        printf("%d ID를 가진 클라이언트가 %f, %f, %f 로 이동하였습니다.\n", client_id, pack->x, pack->y, pack->z);
-        clients[client_id].x = pack->x;
-        clients[client_id].y = pack->y;
-        clients[client_id].z = pack->z;
-        clients[client_id].yaw = pack->yaw;
-        clients[clients[client_id].tm_id].tm_x = pack->x;
-        clients[clients[client_id].tm_id].tm_y = pack->y;
-        clients[clients[client_id].tm_id].tm_z = pack->z;
-        clients[clients[client_id].tm_id].tm_yaw = pack->yaw;
+        //clients[client_id].last_move_time = pack->move_time;
+        printf("%d ID를 가진 클라이언트가 %f, %f, %f 로 이동하였습니다.\n", client_id, pack->location.x, pack->location.y, pack->location.z);
+        clients[client_id].location = pack->location;
+        clients[clients[client_id].tm_id].tm_location = pack->location;
 
-        clients[client_id].send_move_packet(client_id); // 움직인 클라한테 보내기
-        clients[clients[client_id].tm_id].send_move_packet(client_id); // 상대 클라한테 보내기
+        if (direction::left == pack->direction) {
+            clients[client_id].current_left = pack->current;
+            clients[client_id].time_left = pack->time;
+
+            clients[clients[client_id].tm_id].tm_current_left = pack->current;
+            clients[clients[client_id].tm_id].tm_time_left = pack->time;
+
+            clients[client_id].send_left_move_packet(client_id); // 움직인 클라한테 보내기
+            clients[clients[client_id].tm_id].send_left_move_packet(client_id); // 상대 클라한테 보내기
+        } else if (direction::right == pack->direction) {
+            clients[client_id].current_right = pack->current;
+            clients[client_id].time_right;
+
+            clients[clients[client_id].tm_id].tm_current_right = pack->current;
+            clients[clients[client_id].tm_id].tm_time_right = pack->time;
+
+            clients[client_id].send_right_move_packet(client_id); // 움직인 클라한테 보내기
+            clients[clients[client_id].tm_id].send_right_move_packet(client_id); // 상대 클라한테 보내기
+        }
     } break;
     case static_cast<int>(packet_type::cs_logout):
     {
@@ -334,6 +323,8 @@ bool ServerMain::matching(int client_id)
                 clients[i].match_lock.unlock();
                 clients[client_id].match_lock.unlock();
 
+                std::cout << i << ", " << client_id << "matching!" << std::endl;
+
                 return true;
             } else {
                 clients[i].match_lock.unlock();
@@ -348,9 +339,5 @@ bool ServerMain::matching(int client_id)
 
 void ServerMain::set_team_position(int client_id)
 {
-    clients[client_id].tm_x = clients[clients[client_id].tm_id].x;
-    clients[client_id].tm_y = clients[clients[client_id].tm_id].y;
-    clients[client_id].tm_z = clients[clients[client_id].tm_id].z;
-    clients[client_id].tm_yaw = clients[clients[client_id].tm_id].yaw;
+    clients[client_id].tm_location = clients[clients[client_id].tm_id].location;
 }
-

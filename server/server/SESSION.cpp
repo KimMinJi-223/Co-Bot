@@ -6,10 +6,10 @@ SESSION::SESSION()
 	: state(state::free)
 	, sock(0)
 	, id(-1)
-	, x(-1.f), y(-1.f), z(-1.f)
+	, location(-1.f, -1.f, -1.f)
 	, yaw(0.f)
 	, tm_id(-1)
-	, tm_x(-1.f), tm_y(-1.f), tm_z(-1.f)
+	, tm_location(-1.f, -1.f, -1.f)
 	, tm_yaw(0.f)
 	, prev_remain(0)
 
@@ -26,16 +26,6 @@ SESSION::~SESSION()
 
 void SESSION::recv_packet()
 {
-	/*
-		솔직히 여기 ring_buff() 더해주고 빼는 곳 이해가 안간다.
-		왜 저렇게 해줘야 하지??
-		전에 남아있던 곳에서
-		
-		=> 깨달았다.
-		- 이건 받은게 아니라 다음에 그렇게 받겠다는 것이다.
-		- 이미 받은 것에서 추가로 받겠다는 것이다.
-		- 그래서 내가 지금 받은 것 플러스한 자리에 다음에 받겠다는 것이다.
-	*/
 	DWORD recv_flag = 0;
 	ZeroMemory(&recv_over.over, sizeof(recv_over.over));
 	recv_over.wsabuf.buf = recv_over.buffer + ring_buff.diff();
@@ -66,45 +56,57 @@ void SESSION::send_enter_packet()
 	pack.size = sizeof(pack);
 	pack.type = static_cast<char>(packet_type::sc_login);
 	pack.id = id;
-	pack.x = x;
-	pack.y = y;
-	pack.z = z;
-	pack.yaw = yaw;
-	pack.tm_x = tm_x;
-	pack.tm_y = tm_y;
-	pack.tm_z = tm_z;
-	pack.tm_yaw = tm_yaw;
+	//pack.x = x;
+	//pack.y = y;
+	//pack.z = z;
+	//pack.yaw = yaw;
+	//pack.tm_x = tm_x;
+	//pack.tm_y = tm_y;
+	//pack.tm_z = tm_z;
+	//pack.tm_yaw = tm_yaw;
 	
 	send_packet(reinterpret_cast<char*>(&pack));
 
 	printf("%d에게 enter packet을 보냈습니다.\n", id);
 }
 
-void SESSION::send_move_packet(int client_id)
+void SESSION::send_left_move_packet(int client_id)
 {
 	sc_move_packet pack;
 	pack.size = sizeof(pack);
 	pack.type = static_cast<int>(packet_type::sc_move);
 	pack.client_id = client_id;
-	if (client_id == id)
-	{
-		pack.x = x;
-		pack.y = y;
-		pack.z = z;
-		pack.yaw = yaw;
-		pack.move_time = last_move_time;
-	}
-	else
-	{
-		pack.x = tm_x;
-		pack.y = tm_y;
-		pack.z = tm_z;
-		pack.yaw = tm_yaw;
-		pack.move_time = tm_last_mvoe_time;
+	pack.direction = direction::left;
+	if (client_id == id) {
+		pack.location = location;
+		pack.current = current_left;
+		pack.time = time_left;
+	} else if (client_id == tm_id) {
+		pack.location = tm_location;
+		pack.current = tm_current_left;
+		pack.time = tm_time_left;
 	}
 
 	send_packet(reinterpret_cast<char*>(&pack));
+}
 
-	//printf("%d -> %d, x: %lf, y: %lf, z: %lf\n", id, client_id, pack.x, pack.y, pack.z);
+void SESSION::send_right_move_packet(int client_id)
+{
+	sc_move_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<int>(packet_type::sc_move);
+	pack.client_id = client_id;
+	pack.direction = direction::right;
+	if (client_id == id) {
+		pack.location = location;
+		pack.current = current_right;
+		pack.time = time_right;
+	} else if (client_id == tm_id) {
+		pack.location = tm_location;
+		pack.current = tm_current_right;
+		pack.time = tm_time_right;
+	}
+
+	send_packet(reinterpret_cast<char*>(&pack));
 }
 

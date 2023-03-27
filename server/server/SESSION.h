@@ -15,7 +15,12 @@ public:
 	SOCKET		sock;
 	int			id;				// °íÀ¯ id
 	wchar_t		name[MAX_LOGIN_LEN];
-	double		x, y, z;
+	vector_d3	location;
+	vector_d3	current_left;
+	vector_d3	current_right;
+	float		time_left;
+	float		time_right;
+
 	double		yaw;
 	RingBuffer	ring_buff;
 	
@@ -28,7 +33,12 @@ public:
 	int			last_move_time;
 
 	int			tm_id;	// ÆÀ¿ø id
-	double		tm_x, tm_y, tm_z;
+	vector_d3	tm_location;
+	vector_d3	tm_current_left;
+	vector_d3	tm_current_right;
+	float		tm_time_left;
+	float		tm_time_right;
+
 	double		tm_yaw;
 
 	int			tm_last_mvoe_time;
@@ -42,8 +52,10 @@ public:
 	void recv_packet();
 	void send_packet(char* packet);
 	void send_enter_packet();
-	void send_move_packet(int client_id);
-	void send_rotate_packet(int client_id);
+	void send_left_move_packet(int client_id);
+	void send_right_move_packet(int client_id);
+	//void send_move_packet(int client_id);
+	//void send_rotate_packet(int client_id);
 
 public:
 	SESSION();

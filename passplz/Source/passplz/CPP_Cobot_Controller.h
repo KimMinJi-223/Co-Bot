@@ -32,14 +32,15 @@ class PASSPLZ_API ACPP_Cobot_Controller : public APlayerController
 
 private:
 	SOCKET* sock;
-	double x, y, z;
-	double yaw;
+	vector_d3 location;
 	int	id;
 	RingBuffer ring_buff;
 	// TMap<int, AActor*> actorList;
 
-	double tm_x, tm_y, tm_z;
-	double tm_yaw;
+	vector_d3 tm_location;
+	vector_d3 tm_current;
+	float tm_time_left;
+	float tm_time_right;
 
 protected:
 	virtual void BeginPlay() override;
