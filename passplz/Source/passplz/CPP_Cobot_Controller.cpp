@@ -44,11 +44,23 @@ void ACPP_Cobot_Controller::BeginPlay()
     Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(-8100.f, 2180.f, 59.149971f), FRotator(0.0f, 0.0f, 0.0f));
 
     Cobot_Curve = LoadObject<UCurveFloat>(nullptr, TEXT("/Game/curve/Cobot_Curve.Cobot_Curve"));
+
+    IsUnion = false;
 }
 
 void ACPP_Cobot_Controller::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
+
+    if (IsUnion) {
+        UE_LOG(LogTemp, Warning, TEXT("Union"));
+        //합체 요청을 하는 곳, 스페이스 바를 계속 누르고 있으면 여기에 계속 들어온다.
+        //여기서 서버에 상대 플레이어에게 합체 요청을 보내고 서버는 상대방에게 합체 요청을 보내줘야함
+    }
+    else {
+        UE_LOG(LogTemp, Warning, TEXT("No Union"));
+        //스페이스바를 누르지 않으면 여기에 계속 들어온다.
+    }
 
     RecvPacket();
 }
@@ -196,6 +208,10 @@ void ACPP_Cobot_Controller::SetupInputComponent()
     //A, D키
     InputComponent->BindAxis(TEXT("LEFT_RIGHT"), this, &ACPP_Cobot_Controller::Left_Right);
 
+    //합체
+    InputComponent->BindAction(TEXT("COBOT_UNION"), IE_Pressed, this, &ACPP_Cobot_Controller::Union_Pressed);
+    InputComponent->BindAction(TEXT("COBOT_UNION"), IE_Released, this, &ACPP_Cobot_Controller::Union_Released);
+
 }
 
 void ACPP_Cobot_Controller::Move_Forward(float NewAxisValue)
@@ -226,8 +242,22 @@ void ACPP_Cobot_Controller::LookUp(float NewAxisValue)
     AddPitchInput(delta_time * NewAxisValue * 20.0f);
 }
 
+void ACPP_Cobot_Controller::Union_Pressed()
+{
+    IsUnion = true;
+}
+
+void ACPP_Cobot_Controller::Union_Released()
+{
+    IsUnion = false;
+}
+
 void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 {
+    player->Foot_left_Zone->SetWorldLocation(player->GetMesh()->GetSocketLocation("left"));
+    player->Foot_right_Zone->SetWorldLocation(player->GetMesh()->GetSocketLocation("right"));
+
+
     player = Cast<ACPP_Cobot>(GetPawn());
     if (!player)
         return;
@@ -249,6 +279,8 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 
 
     if (((int)NewAxisValue) == 1) { // A key
+        player->Start_right = player->Current_right;
+        player->Time_right = 0.f;
         player->Time_left += GetWorld()->GetDeltaSeconds();
         if (player->Time_left < 1.0f) {
             //캐릭터를 움직인다.
@@ -265,7 +297,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
             player->Current_left = (player->GetActorRightVector() * -curvevalue * distance_two_feet) + (UKismetMathLibrary::VLerp(player->Start_left, player->Target_left, player->Time_left));
 
             FHitResult HitResult;
-            FVector StartTraceLocation = player->Current_left + FVector(0.f, 0.f, 50.f);
+            FVector StartTraceLocation = player->Current_left + FVector(0.f, 0.f, 30.f);
             FVector EndTraceLocation = player->Current_left + FVector(0.f, 0.f, -500.f);
           
             //트레이스로 다음 발의 위치를 찾는다.
@@ -277,6 +309,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
             );
             //그 값을 현재 발 위치로 넣어준다.
             player->Current_left = HitResult.Location;
+          
             UE_LOG(LogTemp, Warning, TEXT("%f"), HitResult.Location.Z);
 
             // server
@@ -314,7 +347,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
                 player->Current_right = (player->GetActorRightVector() * curvevalue * distance_two_feet) + (UKismetMathLibrary::VLerp(player->Start_right, player->Target_right, player->Time_right));
 
                 FHitResult HitResult;
-                FVector StartTraceLocation = player->Current_right + FVector(0.f, 0.f, 50.f);
+                FVector StartTraceLocation = player->Current_right + FVector(0.f, 0.f, 30.f);
                 FVector EndTraceLocation = player->Current_right + FVector(0.f, 0.f, -500.f);
 
                 GetWorld()->LineTraceSingleByChannel(

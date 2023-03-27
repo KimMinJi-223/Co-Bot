@@ -71,6 +71,8 @@ private:
 	void Left_Right(float NewAxisValue);
 	void Turn(float NewAxisValue);
 	void LookUp(float NewAxisValue);
+	void Union_Pressed();
+	void Union_Released();
 
 	class ACPP_Cobot* player;
 	FVector player_pos;
@@ -91,6 +93,6 @@ protected:
 
 protected:
 	UCurveFloat* Cobot_Curve;
-
+	bool IsUnion;
 
 };

@@ -6,28 +6,35 @@
 // Sets default values
 ACPP_Cobot::ACPP_Cobot()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	UE_LOG(LogTemp, Warning, TEXT("ACPP_Cobot"));
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
+	Foot_left_Zone = CreateDefaultSubobject<UBoxComponent>(TEXT("Foot_left_Zone"));
+	Foot_right_Zone = CreateDefaultSubobject<UBoxComponent>(TEXT("Foot_right_Zone"));
 
 	SpringArm->SetupAttachment(GetCapsuleComponent());
 	Camera->SetupAttachment(SpringArm);
+	Foot_left_Zone->SetupAttachment(RootComponent);
+	Foot_right_Zone->SetupAttachment(RootComponent);
+
+	Foot_left_Zone->SetBoxExtent(FVector(8.f, 8.f, 4.f));
+	Foot_right_Zone->SetBoxExtent(FVector(8.f, 8.f, 4.f));
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -40.0f), FRotator(0.0f, -90.0f, 0.0f));
 	SpringArm->TargetArmLength = 400.0f;
 	SpringArm->SetRelativeRotation(FRotator(-25.0f, 0.0f, 0.0f));
 	GetCapsuleComponent()->SetCapsuleSize(30.f, 40.f);
-	
+
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_COBOT(TEXT("/Game/model/PLAYER/cobot_test02.cobot_test02"));
 	if (SK_COBOT.Succeeded()) {
 		UE_LOG(LogTemp, Warning, TEXT("mesh ok"));
 
 		GetMesh()->SetSkeletalMesh(SK_COBOT.Object);
 	}
-	
+
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
 	static ConstructorHelpers::FClassFinder<UAnimInstance> COBOT_ANIM(TEXT("/Game/Global_BP/Cobot_anim.Cobot_anim_C"));
 	if (COBOT_ANIM.Succeeded()) {
@@ -35,7 +42,7 @@ ACPP_Cobot::ACPP_Cobot()
 		AnimInstanceClass = COBOT_ANIM.Class;
 		//GetMesh()->SetAnimInstanceClass(COBOT_ANIM.Class);
 	}
-	else{
+	else {
 		UE_LOG(LogTemp, Warning, TEXT("Animation NO"));
 	}
 
@@ -48,6 +55,7 @@ ACPP_Cobot::ACPP_Cobot()
 	SpringArm->bInheritPitch = true;
 	SpringArm->bInheritYaw = true;
 	SpringArm->bInheritRoll = true;
+
 
 }
 

@@ -36,9 +36,14 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = Cameara)
 		UCameraComponent* Camera;
 
+
 	TSubclassOf<class UAnimInstance> AnimInstanceClass;
 
 public:
+	UPROPERTY(BlueprintReadWrite)
+		UBoxComponent* Foot_left_Zone;
+	UPROPERTY(BlueprintReadWrite)
+		UBoxComponent* Foot_right_Zone;
 	UPROPERTY(BlueprintReadWrite)
 		float Time_left;
 	UPROPERTY(BlueprintReadWrite)
