@@ -190,7 +190,8 @@ void ACPP_Cobot_Controller::SetupInputComponent()
 
     // W, S 키 눌리면 Move_Forward() 함수를 실행
     InputComponent->BindAxis(TEXT("MOVE_FORWARD"), this, &ACPP_Cobot_Controller::Move_Forward);
-    InputComponent->BindAxis(TEXT("ROTATE"), this, &ACPP_Cobot_Controller::Rotate);
+    InputComponent->BindAxis(TEXT("ROTATE"), this, &ACPP_Cobot_Controller::Turn);
+    InputComponent->BindAxis(TEXT("LookUp"), this, &ACPP_Cobot_Controller::LookUp);
 
     //A, D키
     InputComponent->BindAxis(TEXT("LEFT_RIGHT"), this, &ACPP_Cobot_Controller::Left_Right);
@@ -213,24 +214,39 @@ void ACPP_Cobot_Controller::Move_Forward(float NewAxisValue)
     player->AddMovementInput(forward_vector, NewAxisValue);
 }
 
-void ACPP_Cobot_Controller::Rotate(float NewAxisValue)
+void ACPP_Cobot_Controller::Turn(float NewAxisValue)
 {
     float delta_time = GetWorld()->GetDeltaSeconds();
     AddYawInput(delta_time * NewAxisValue * 20.0f);
 }
 
+void ACPP_Cobot_Controller::LookUp(float NewAxisValue)
+{
+    float delta_time = GetWorld()->GetDeltaSeconds();
+    AddPitchInput(delta_time * NewAxisValue * 20.0f);
+}
+
 void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 {
     player = Cast<ACPP_Cobot>(GetPawn());
-
     if (!player)
         return;
+
+    // 이동하기 전에 캐릭터의 상태를 계산해서 보폭과 걸음 속도를 설정한다.
+    float distance_two_feet = 50.f;
+    if (60.0f > (player->Current_left - player->Current_right).Size()) {
+        distance_two_feet = 50.f;
+        player->GetCharacterMovement()->MaxWalkSpeed = 100.f;
+    }
+    else {
+        distance_two_feet = 1.f;
+        player->GetCharacterMovement()->MaxWalkSpeed = 0.f;
+    }
 
     FRotator rotator_controller = GetControlRotation();
     FRotator rotator_forward = UKismetMathLibrary::MakeRotator(0.0f, 0.0f, rotator_controller.Yaw);
     FVector forward_vector = UKismetMathLibrary::GetForwardVector(rotator_forward);
 
-    float distance_two_feet = 50.f;
 
     if (((int)NewAxisValue) == 1) { // A key
         player->Time_left += GetWorld()->GetDeltaSeconds();
@@ -247,21 +263,19 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
             //현재 발의 위치를 업데이트 한다.
             float curvevalue = Cobot_Curve->GetFloatValue(player->Time_left);
             player->Current_left = (player->GetActorRightVector() * -curvevalue * distance_two_feet) + (UKismetMathLibrary::VLerp(player->Start_left, player->Target_left, player->Time_left));
-            UE_LOG(LogTemp, Warning, TEXT("Time %f"), curvevalue);
-            UE_LOG(LogTemp, Warning, TEXT("%f"), player->Current_left.Z);
 
             FHitResult HitResult;
             FVector StartTraceLocation = player->Current_left + FVector(0.f, 0.f, 50.f);
             FVector EndTraceLocation = player->Current_left + FVector(0.f, 0.f, -500.f);
-            //UE_LOG(LogTemp, Warning, TEXT("%f"), player->Current_left.X);
-
+          
+            //트레이스로 다음 발의 위치를 찾는다.
             GetWorld()->LineTraceSingleByChannel(
                 HitResult,
                 StartTraceLocation,
                 EndTraceLocation,
                 ECollisionChannel::ECC_Visibility
             );
-            //if(HitResult.IsValidBlockingHit())
+            //그 값을 현재 발 위치로 넣어준다.
             player->Current_left = HitResult.Location;
             UE_LOG(LogTemp, Warning, TEXT("%f"), HitResult.Location.Z);
 
@@ -294,7 +308,6 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
                 player->Target_right = player->GetActorLocation() +
                     player->GetActorForwardVector() * 50.f;
                 player->Target_right.Z -= -50.f;
-                //UE_LOG(LogTemp, Warning, TEXT("Target_left %f"), player->Target_right.X);
 
                 //현재 발의 위치를 업데이트 한다.
                 float curvevalue = Cobot_Curve->GetFloatValue(player->Time_right);
@@ -303,7 +316,6 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
                 FHitResult HitResult;
                 FVector StartTraceLocation = player->Current_right + FVector(0.f, 0.f, 50.f);
                 FVector EndTraceLocation = player->Current_right + FVector(0.f, 0.f, -500.f);
-                //UE_LOG(LogTemp, Warning, TEXT("%f"), player->Current_right.X);
 
                 GetWorld()->LineTraceSingleByChannel(
                     HitResult,
@@ -327,7 +339,8 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 
                 send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
             }
-        } else {
+        } 
+        else {
             player->Start_right = player->Current_right;
             player->Time_right = 0.f;
         }

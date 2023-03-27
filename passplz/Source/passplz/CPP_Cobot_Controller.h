@@ -68,8 +68,9 @@ protected:
 
 private:
 	void Move_Forward(float NewAxisValue);
-	void Rotate(float NewAxisValue);
 	void Left_Right(float NewAxisValue);
+	void Turn(float NewAxisValue);
+	void LookUp(float NewAxisValue);
 
 	class ACPP_Cobot* player;
 	FVector player_pos;
