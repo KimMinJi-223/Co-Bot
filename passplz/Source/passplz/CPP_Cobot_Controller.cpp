@@ -312,7 +312,6 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
           
             UE_LOG(LogTemp, Warning, TEXT("%f"), HitResult.Location.Z);
 
-            // server
             cs_move_packet pack;
             pack.size = sizeof(pack);
             pack.type = static_cast<char>(packet_type::cs_move);
@@ -327,9 +326,25 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 
             send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
         }
-    } else { 
-        player->Start_left = player->Current_left;
-        player->Time_left = 0.f;
+    } else {
+        if (player->Start_left != player->Current_left) {
+			player->Start_left = player->Current_left;
+			player->Time_left = 0.f;
+
+            cs_move_packet pack;
+            pack.size = sizeof(pack);
+            pack.type = static_cast<char>(packet_type::cs_move);
+            pack.direction = direction::left;
+            pack.location.x = player->GetActorLocation().X;
+            pack.location.y = player->GetActorLocation().Y;
+            pack.location.z = player->GetActorLocation().Z;
+            pack.current.x = player->Current_left.X;
+            pack.current.y = player->Current_left.Y;
+            pack.current.z = player->Current_left.Z;
+            pack.time = player->Time_left;
+
+            send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+        }
 
         if (((int)NewAxisValue) == 2) { // D key
             player->Time_right += GetWorld()->GetDeltaSeconds();
@@ -374,8 +389,24 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
             }
         } 
         else {
-            player->Start_right = player->Current_right;
-            player->Time_right = 0.f;
+            if (player->Start_right != player->Current_right) {
+				player->Start_right = player->Current_right;
+				player->Time_right = 0.f;
+
+                cs_move_packet pack;
+                pack.size = sizeof(pack);
+                pack.type = static_cast<char>(packet_type::cs_move);
+                pack.direction = direction::right;
+                pack.location.x = player->GetActorLocation().X;
+                pack.location.y = player->GetActorLocation().Y;
+                pack.location.z = player->GetActorLocation().Z;
+                pack.current.x = player->Current_right.X;
+                pack.current.y = player->Current_right.Y;
+                pack.current.z = player->Current_right.Z;
+                pack.time = player->Time_right;
+
+                send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+            }
         }
     }
 }
