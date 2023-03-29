@@ -41,6 +41,7 @@ private:
 	vector_d3 tm_current;
 	float tm_time_left;
 	float tm_time_right;
+	double tm_yaw;
 
 protected:
 	virtual void BeginPlay() override;
@@ -50,6 +51,7 @@ private:
 	void RecvPacket();
 	void ProcessPacket(char* packet);
 	void SendEnterPacket();
+	void SendMovePacket(direction move_direction);
 
 	UCPP_CobotGameInstance* instance;
 	

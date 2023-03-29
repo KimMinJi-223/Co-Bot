@@ -81,11 +81,15 @@ void SESSION::send_left_move_packet(int client_id)
 		pack.location = location;
 		pack.current = current_left;
 		pack.time = time_left;
+		pack.yaw = yaw;
 	} else if (client_id == tm_id) {
 		pack.location = tm_location;
 		pack.current = tm_current_left;
 		pack.time = tm_time_left;
+		pack.yaw = tm_yaw;
 	}
+
+	std::cout << client_id << "client yaw: " << pack.yaw << std::endl;
 
 	send_packet(reinterpret_cast<char*>(&pack));
 }
@@ -101,10 +105,12 @@ void SESSION::send_right_move_packet(int client_id)
 		pack.location = location;
 		pack.current = current_right;
 		pack.time = time_right;
+		pack.yaw = yaw;
 	} else if (client_id == tm_id) {
 		pack.location = tm_location;
 		pack.current = tm_current_right;
 		pack.time = tm_time_right;
+		pack.yaw = tm_yaw;
 	}
 
 	send_packet(reinterpret_cast<char*>(&pack));

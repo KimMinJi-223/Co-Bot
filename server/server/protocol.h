@@ -59,20 +59,9 @@ struct cs_move_packet {
 	direction	direction;
 	vector_d3	location;
 	vector_d3	current;
+	double		yaw;
 	float		time;
 };
-
-//struct cs_left_move_packet {
-//	char size;
-//	char type;
-//	double current_left_x;
-//	double current_left_y;
-//	double current_left_z;
-//	double location_x;
-//	double location_y;
-//	double location_z;
-//	float time_left;
-//};
 
 struct sc_move_packet {
 	char size;
@@ -81,19 +70,9 @@ struct sc_move_packet {
 	direction direction;
 	vector_d3 location;
 	vector_d3 current;
+	double	yaw;
 	float time;
 };
-
-//struct sc_move_packet {
-//	char	size;
-//	char	type;
-//	int		client_id;
-//	double	x;
-//	double	y;
-//	double	z;
-//	double	yaw;
-//	unsigned int move_time;
-//};
 
 struct sc_synch_packet {
 	char	size;
