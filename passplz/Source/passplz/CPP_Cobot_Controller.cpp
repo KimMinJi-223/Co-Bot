@@ -15,6 +15,7 @@ ACPP_Cobot_Controller::ACPP_Cobot_Controller()
     , tm_time_left(0.f)
     , tm_time_right(0.f)
     , prev_remain(0)
+    , is_connect(false)
 {
 }
 
@@ -38,7 +39,7 @@ void ACPP_Cobot_Controller::BeginPlay()
     instance = Cast<UCPP_CobotGameInstance>(GetWorld()->GetGameInstance());
 
     sock = instance->GetSocketMgr()->GetSocket();
-
+    
     SendEnterPacket();
 
     Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(-8100.f, 2180.f, 59.149971f), FRotator(0.0f, 0.0f, 0.0f));
@@ -125,14 +126,8 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
     {
         sc_login_packet* pack = reinterpret_cast<sc_login_packet*>(packet);
         id = pack->id;
-        //x = pack->x;
-        //y = pack->y;
-        //z = pack->z;
-        //yaw = pack->yaw;
-        //tm_x = pack->tm_x;
-        //tm_y = pack->tm_y;
-        //tm_z = pack->tm_z;
-        //tm_yaw = pack->tm_yaw;
+        tm_location = pack->tm_location;
+        tm_yaw = pack->tm_yaw;
 
         UE_LOG(LogTemp, Warning, TEXT("recv login packet"));
     } break;
@@ -392,26 +387,17 @@ bool ACPP_Cobot_Controller::Is_Set_IDPW(FString I, FString p)
     ////ID = I;
     ////Passward = p;
 
-    //wchar_t* input_id = TCHAR_TO_WCHAR(*I);
-    //wchar_t* input_pw = TCHAR_TO_WCHAR(*p);
+    wchar_t* input_id = TCHAR_TO_WCHAR(*I);
+    wchar_t* input_pw = TCHAR_TO_WCHAR(*p);
 
-    //if (!instance->is_connect)
-    //{
-    //    instance->socket_mgr.ConnectServer(input_id);
-    //    sock = instance->socket_mgr.socket;
-    //    instance->is_connect = true;
-    //}
+    // 서버한테 들어왔다고 알려주는 거
+    cs_login_packet login_pack;
+    login_pack.size = sizeof(login_pack);
+    login_pack.type = static_cast<char>(packet_type::cs_login);
+    wcscpy_s(login_pack.id, MAX_LOGIN_LEN, input_id);
+    wcscpy_s(login_pack.passward, MAX_LOGIN_LEN, input_pw);
 
-    //// 서버한테 들어왔다고 알려주는 거
-    //cs_login_packet login_pack;
-    //login_pack.size = sizeof(login_pack);
-    //login_pack.type = static_cast<char>(type::cs_login);
-    ////wcscpy_s(login_pack.id, MAX_LOGIN_LEN, input_id);
-    ////wcscpy_s(login_pack.passward, MAX_LOGIN_LEN, input_pw);
+    int ret = send(*sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
 
-    //int ret = send(sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
-
-
-     //UE_LOG(LogTemp, Warning, TEXT("ID: %s, PW: %s"), input_id, input_pw);
     return true;
 }

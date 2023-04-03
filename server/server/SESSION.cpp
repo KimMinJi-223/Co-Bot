@@ -56,14 +56,8 @@ void SESSION::send_enter_packet()
 	pack.size = sizeof(pack);
 	pack.type = static_cast<char>(packet_type::sc_login);
 	pack.id = id;
-	//pack.x = x;
-	//pack.y = y;
-	//pack.z = z;
-	//pack.yaw = yaw;
-	//pack.tm_x = tm_x;
-	//pack.tm_y = tm_y;
-	//pack.tm_z = tm_z;
-	//pack.tm_yaw = tm_yaw;
+	pack.tm_location = tm_location;
+	pack.tm_yaw = tm_yaw;
 	
 	send_packet(reinterpret_cast<char*>(&pack));
 

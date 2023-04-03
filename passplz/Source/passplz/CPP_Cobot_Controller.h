@@ -43,6 +43,7 @@ private:
 	float tm_time_right;
 	double tm_yaw;
 
+	bool is_connect;
 protected:
 	virtual void BeginPlay() override;
 
