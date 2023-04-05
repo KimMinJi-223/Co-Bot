@@ -35,11 +35,17 @@ struct cs_login_packet {
 };
 
 struct sc_login_packet {
-	char		size;
-	char		type;
-	int			id;
-	vector_d3	tm_location;
-	double		tm_yaw;
+	char	size;
+	char	type;
+	int		id;
+	double	x;
+	double	y;
+	double	z;
+	double	yaw;
+	double	tm_x;
+	double	tm_y;
+	double	tm_z;
+	double	tm_yaw;
 };
 
 struct cs_enter_packet {
@@ -50,23 +56,46 @@ struct cs_enter_packet {
 struct cs_move_packet {
 	char		size;
 	char		type;
+	float		time;
 	direction	direction;
+	double		yaw;
 	vector_d3	location;
 	vector_d3	current;
-	double		yaw;
-	float		time;
 };
+
+//struct cs_left_move_packet {
+//	char size;
+//	char type;
+//	double current_left_x;
+//	double current_left_y;
+//	double current_left_z;
+//	double location_x;
+//	double location_y;
+//	double location_z;
+//	float time_left;
+//};
 
 struct sc_move_packet {
 	char		size;
 	char		type;
 	int			client_id;
+	float		time;
 	direction	direction;
+	double		yaw;
 	vector_d3	location;
 	vector_d3	current;
-	double		yaw;
-	float		time;
 };
+
+//struct sc_move_packet {
+//	char	size;
+//	char	type;
+//	int		client_id;
+//	double	x;
+//	double	y;
+//	double	z;
+//	double	yaw;
+//	unsigned int move_time;
+//};
 
 struct sc_synch_packet {
 	char	size;

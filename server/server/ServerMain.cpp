@@ -281,6 +281,7 @@ void ServerMain::process_packet(char* packet, int client_id)
             clients[clients[client_id].tm_id].tm_current_left = pack->current;
             clients[clients[client_id].tm_id].tm_time_left = pack->time;
 
+            clients[client_id].send_left_move_packet(client_id); // 움직인 클라한테 보내기
             clients[clients[client_id].tm_id].send_left_move_packet(client_id); // 상대 클라한테 보내기
         } else if (direction::right == pack->direction) {
             clients[client_id].current_right = pack->current;
@@ -289,6 +290,7 @@ void ServerMain::process_packet(char* packet, int client_id)
             clients[clients[client_id].tm_id].tm_current_right = pack->current;
             clients[clients[client_id].tm_id].tm_time_right = pack->time;
 
+            clients[client_id].send_right_move_packet(client_id); // 움직인 클라한테 보내기
             clients[clients[client_id].tm_id].send_right_move_packet(client_id); // 상대 클라한테 보내기
         }
     } break;

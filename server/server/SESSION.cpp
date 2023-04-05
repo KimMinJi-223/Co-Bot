@@ -56,8 +56,14 @@ void SESSION::send_enter_packet()
 	pack.size = sizeof(pack);
 	pack.type = static_cast<char>(packet_type::sc_login);
 	pack.id = id;
-	pack.tm_location = tm_location;
-	pack.tm_yaw = tm_yaw;
+	//pack.x = x;
+	//pack.y = y;
+	//pack.z = z;
+	//pack.yaw = yaw;
+	//pack.tm_x = tm_x;
+	//pack.tm_y = tm_y;
+	//pack.tm_z = tm_z;
+	//pack.tm_yaw = tm_yaw;
 	
 	send_packet(reinterpret_cast<char*>(&pack));
 
@@ -82,8 +88,6 @@ void SESSION::send_left_move_packet(int client_id)
 		pack.time = tm_time_left;
 		pack.yaw = tm_yaw;
 	}
-
-	std::cout << client_id << "client yaw: " << pack.yaw << std::endl;
 
 	send_packet(reinterpret_cast<char*>(&pack));
 }

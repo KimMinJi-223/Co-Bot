@@ -12,9 +12,13 @@
 
 UCPP_CobotGameInstance::UCPP_CobotGameInstance()
 {
-	if (socket_mgr.ConnectServer()) {
+	socket_mgr.ConnectServer();
+	if (socket_mgr.ConnectServer())
+	{
 		UE_LOG(LogTemp, Warning, TEXT("Success the server connect"));
-	} else {
+	}
+	else
+	{
 		UE_LOG(LogTemp, Warning, TEXT("Fail the server connect"));
 	}
 
