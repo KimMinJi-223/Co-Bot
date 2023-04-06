@@ -52,15 +52,15 @@ void ACPP_Cobot_Controller::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    if (IsUnion) {
-        UE_LOG(LogTemp, Warning, TEXT("Union"));
-        //합체 요청을 하는 곳, 스페이스 바를 계속 누르고 있으면 여기에 계속 들어온다.
-        //여기서 서버에 상대 플레이어에게 합체 요청을 보내고 서버는 상대방에게 합체 요청을 보내줘야함
-    }
-    else {
-        UE_LOG(LogTemp, Warning, TEXT("No Union"));
-        //스페이스바를 누르지 않으면 여기에 계속 들어온다.
-    }
+    //if (IsUnion) {
+    //    UE_LOG(LogTemp, Warning, TEXT("Union"));
+    //    //합체 요청을 하는 곳, 스페이스 바를 계속 누르고 있으면 여기에 계속 들어온다.
+    //    //여기서 서버에 상대 플레이어에게 합체 요청을 보내고 서버는 상대방에게 합체 요청을 보내줘야함
+    //}
+    //else {
+    //    UE_LOG(LogTemp, Warning, TEXT("No Union"));
+    //    //스페이스바를 누르지 않으면 여기에 계속 들어온다.
+    //}
 
     RecvPacket();
 }

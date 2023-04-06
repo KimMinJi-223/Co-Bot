@@ -50,60 +50,60 @@ ACPP_Maze_2S::ACPP_Maze_2S()
 	left_button->SetupAttachment(RootComponent);
 	left_button_collision->SetupAttachment(left_button);
 
-	Maze->SetRelativeRotation(FRotator(0.f, -90.f, -90.f)); // y, z, x
+	//Maze->SetRelativeRotation(FRotator(0.f, -90.f, -90.f)); // y, z, x
 
-	plan->SetRelativeLocation(FVector(-10.f, 0.f, -100.f));
-	plan->SetRelativeScale3D(FVector(10.f, 10.f, 1.0f));
+	//plan->SetRelativeLocation(FVector(-10.f, 0.f, -100.f));
+	//plan->SetRelativeScale3D(FVector(10.f, 10.f, 1.0f));
 
-	Target->SetRelativeLocation(FVector(-410.f, 0.0f, 0.0f));
-	Target->SetRelativeScale3D(FVector(0.6f, 0.6f, 1.0f));
+	//Target->SetRelativeLocation(FVector(-410.f, 0.0f, 0.0f));
+	//Target->SetRelativeScale3D(FVector(0.6f, 0.6f, 1.0f));
 
-	forward_target_collision->SetRelativeLocation(FVector(50.f, 0.0f, 0.0f));
-	back_target_collision->SetRelativeLocation(FVector(-50.f, 0.0f, 0.0f));
-	right_target_collision->SetRelativeLocation(FVector(0.f, 50.0f, 0.0f));
-	left_target_collision->SetRelativeLocation(FVector(0.f, -50.0f, 0.0f));
-	forward_target_collision->SetBoxExtent(FVector(10.f, 50.f, 32.f));
-	back_target_collision->SetBoxExtent(FVector(10.f, 50.f, 32.f));
-	right_target_collision->SetBoxExtent(FVector(50.f, 10.f, 32.f));
-	left_target_collision->SetBoxExtent(FVector(50.f, 10.f, 32.f));
+	//forward_target_collision->SetRelativeLocation(FVector(50.f, 0.0f, 0.0f));
+	//back_target_collision->SetRelativeLocation(FVector(-50.f, 0.0f, 0.0f));
+	//right_target_collision->SetRelativeLocation(FVector(0.f, 50.0f, 0.0f));
+	//left_target_collision->SetRelativeLocation(FVector(0.f, -50.0f, 0.0f));
+	//forward_target_collision->SetBoxExtent(FVector(10.f, 50.f, 32.f));
+	//back_target_collision->SetBoxExtent(FVector(10.f, 50.f, 32.f));
+	//right_target_collision->SetBoxExtent(FVector(50.f, 10.f, 32.f));
+	//left_target_collision->SetBoxExtent(FVector(50.f, 10.f, 32.f));
 
-	forward_button->SetRelativeLocation(FVector(-1030.f, 0.f, -20.f));
-	forward_button->SetRelativeScale3D(FVector(0.5f, 0.5f, 1.0f));
-	forward_button_collision->SetRelativeLocation(FVector(0.f, 0.f, 30.f));
+	//forward_button->SetRelativeLocation(FVector(-1030.f, 0.f, -20.f));
+	//forward_button->SetRelativeScale3D(FVector(0.5f, 0.5f, 1.0f));
+	//forward_button_collision->SetRelativeLocation(FVector(0.f, 0.f, 30.f));
 
-	back_button->SetRelativeLocation(FVector(-1110.f, 0.f, -20.f));
-	back_button->SetRelativeScale3D(FVector(0.5f, 0.5f, 1.0f));
-	back_button_collision->SetRelativeLocation(FVector(0.f, 0.f, 30.f));
+	//back_button->SetRelativeLocation(FVector(-1110.f, 0.f, -20.f));
+	//back_button->SetRelativeScale3D(FVector(0.5f, 0.5f, 1.0f));
+	//back_button_collision->SetRelativeLocation(FVector(0.f, 0.f, 30.f));
 
-	right_button->SetRelativeLocation(FVector(-1030.f, 400.f, -20.f));
-	right_button->SetRelativeScale3D(FVector(0.5f, 0.5f, 1.0f));
-	right_button_collision->SetRelativeLocation(FVector(0.f, 0.f, 30.f));
+	//right_button->SetRelativeLocation(FVector(-1030.f, 400.f, -20.f));
+	//right_button->SetRelativeScale3D(FVector(0.5f, 0.5f, 1.0f));
+	//right_button_collision->SetRelativeLocation(FVector(0.f, 0.f, 30.f));
 
-	left_button->SetRelativeLocation(FVector(-1110.f, 400.f, -20.f));
-	left_button->SetRelativeScale3D(FVector(0.5f, 0.5f, 1.0f));
-	left_button_collision->SetRelativeLocation(FVector(0.f, 0.f, 30.f));
+	//left_button->SetRelativeLocation(FVector(-1110.f, 400.f, -20.f));
+	//left_button->SetRelativeScale3D(FVector(0.5f, 0.5f, 1.0f));
+	//left_button_collision->SetRelativeLocation(FVector(0.f, 0.f, 30.f));
 
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_MAZE(TEXT("/Game/model/STAGE_2/mazepipe3.mazepipe3"));
-	if (SM_MAZE.Succeeded()) {
-		Maze->SetStaticMesh(SM_MAZE.Object);
-	}
+	//static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_MAZE(TEXT("/Game/model/STAGE_2/mazepipe3.mazepipe3"));
+	//if (SM_MAZE.Succeeded()) {
+	//	Maze->SetStaticMesh(SM_MAZE.Object);
+	//}
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CUBE(TEXT("/Engine/BasicShapes/Cube.Cube"));
-	if (SM_CUBE.Succeeded()) {
-		plan->SetStaticMesh(SM_CUBE.Object);
-		Target->SetStaticMesh(SM_CUBE.Object);
-	}
+	//static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CUBE(TEXT("/Engine/BasicShapes/Cube.Cube"));
+	//if (SM_CUBE.Succeeded()) {
+	//	plan->SetStaticMesh(SM_CUBE.Object);
+	//	Target->SetStaticMesh(SM_CUBE.Object);
+	//}
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BUTTON(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
-	if (SM_BUTTON.Succeeded()) {
-		forward_button->SetStaticMesh(SM_BUTTON.Object);
-		back_button->SetStaticMesh(SM_BUTTON.Object);
-		right_button->SetStaticMesh(SM_BUTTON.Object);
-		left_button->SetStaticMesh(SM_BUTTON.Object);
-	}
+	//static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BUTTON(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
+	//if (SM_BUTTON.Succeeded()) {
+	//	forward_button->SetStaticMesh(SM_BUTTON.Object);
+	//	back_button->SetStaticMesh(SM_BUTTON.Object);
+	//	right_button->SetStaticMesh(SM_BUTTON.Object);
+	//	left_button->SetStaticMesh(SM_BUTTON.Object);
+	//}
 
-	center->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//center->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	
 	move_forward = 0;
 	move_right = 0;
@@ -120,6 +120,7 @@ void ACPP_Maze_2S::BeginPlay()
 void ACPP_Maze_2S::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	UE_LOG(LogTemp, Warning, TEXT("Tick"));
 
 	move_forward = 0;
 	move_right = 0;
