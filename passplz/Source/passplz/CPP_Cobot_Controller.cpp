@@ -45,22 +45,15 @@ void ACPP_Cobot_Controller::BeginPlay()
 
     Cobot_Curve = LoadObject<UCurveFloat>(nullptr, TEXT("/Game/curve/Cobot_Curve.Cobot_Curve"));
 
-    IsUnion = false;
+    player = Cast<ACPP_Cobot>(GetPawn());
+    if (!player)
+        return;
+    player->IsUnion_Jump_anim = false;
 }
 
 void ACPP_Cobot_Controller::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
-
-    if (IsUnion) {
-        UE_LOG(LogTemp, Warning, TEXT("Union"));
-        //합체 요청을 하는 곳, 스페이스 바를 계속 누르고 있으면 여기에 계속 들어온다.
-        //여기서 서버에 상대 플레이어에게 합체 요청을 보내고 서버는 상대방에게 합체 요청을 보내줘야함
-    }
-    else {
-        UE_LOG(LogTemp, Warning, TEXT("No Union"));
-        //스페이스바를 누르지 않으면 여기에 계속 들어온다.
-    }
 
     RecvPacket();
 }
@@ -202,7 +195,7 @@ void ACPP_Cobot_Controller::SetupInputComponent()
     Super::SetupInputComponent();
 
     // W, S 키 눌리면 Move_Forward() 함수를 실행
-    InputComponent->BindAxis(TEXT("MOVE_FORWARD"), this, &ACPP_Cobot_Controller::Move_Forward);
+    //InputComponent->BindAxis(TEXT("MOVE_FORWARD"), this, &ACPP_Cobot_Controller::Move_Forward);
     InputComponent->BindAxis(TEXT("ROTATE"), this, &ACPP_Cobot_Controller::Turn);
     InputComponent->BindAxis(TEXT("LookUp"), this, &ACPP_Cobot_Controller::LookUp);
 
@@ -215,21 +208,21 @@ void ACPP_Cobot_Controller::SetupInputComponent()
 
 }
 
-void ACPP_Cobot_Controller::Move_Forward(float NewAxisValue)
-{
-    new_axis_value = NewAxisValue;
-
-    player = Cast<ACPP_Cobot>(GetPawn());
-
-    if (!player)
-        return;
-
-    FRotator rotator_controller = GetControlRotation();
-    FRotator rotator_forward = UKismetMathLibrary::MakeRotator(0.0f, 0.0f, rotator_controller.Yaw);
-    FVector forward_vector = UKismetMathLibrary::GetForwardVector(rotator_forward);
-
-    player->AddMovementInput(forward_vector, NewAxisValue);
-}
+//void ACPP_Cobot_Controller::Move_Forward(float NewAxisValue)
+//{
+//    new_axis_value = NewAxisValue;
+//
+//    player = Cast<ACPP_Cobot>(GetPawn());
+//
+//    if (!player)
+//        return;
+//
+//    FRotator rotator_controller = GetControlRotation();
+//    FRotator rotator_forward = UKismetMathLibrary::MakeRotator(0.0f, 0.0f, rotator_controller.Yaw);
+//    FVector forward_vector = UKismetMathLibrary::GetForwardVector(rotator_forward);
+//
+//    player->AddMovementInput(forward_vector, NewAxisValue);
+//}
 
 void ACPP_Cobot_Controller::Turn(float NewAxisValue)
 {
@@ -245,22 +238,23 @@ void ACPP_Cobot_Controller::LookUp(float NewAxisValue)
 
 void ACPP_Cobot_Controller::Union_Pressed()
 {
-    IsUnion = true;
+    player->IsUnion_Jump_anim = (!(player->IsUnion_Jump_anim));
 }
 
 void ACPP_Cobot_Controller::Union_Released()
 {
-    IsUnion = false;
+   // IsUnion_Jump_anim = false;
 }
 
 void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 {
+
+    //발 충돌 박스 위치 업데이트
     player->Foot_left_Zone->SetWorldLocation(player->GetMesh()->GetSocketLocation("left"));
     player->Foot_right_Zone->SetWorldLocation(player->GetMesh()->GetSocketLocation("right"));
 
 
-    player = Cast<ACPP_Cobot>(GetPawn());
-    if (!player)
+    if (player->IsUnion_Jump_anim)
         return;
 
     // 이동하기 전에 캐릭터의 상태를 계산해서 보폭과 걸음 속도를 설정한다.
