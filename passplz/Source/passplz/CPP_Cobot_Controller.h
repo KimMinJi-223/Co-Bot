@@ -91,8 +91,8 @@ protected:
 		FString Passward; //비밀번호
 
 
+
 protected:
 	UCurveFloat* Cobot_Curve;
-	bool IsUnion;
 
 };

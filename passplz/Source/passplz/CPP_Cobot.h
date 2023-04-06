@@ -60,4 +60,6 @@ public:
 		FVector Start_left;
 	UPROPERTY(BlueprintReadWrite)
 		FVector Start_right;
+	UPROPERTY(BlueprintReadWrite)
+		bool IsUnion_Jump_anim;
 };
