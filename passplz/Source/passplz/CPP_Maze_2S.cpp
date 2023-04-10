@@ -143,7 +143,7 @@ void ACPP_Maze_2S::Tick(float DeltaTime)
 		//바로 리턴 가능
 		//하지만 바로 리턴하면 타겟이 안 움직인다. 
 		//추가코드 필요
-		Target->AddWorldOffset(FVector(move_forward, 0.0f, 0.0f));
+		Target->AddLocalOffset(FVector(move_forward, 0.0f, 0.0f));
 		return;
 	}
 
@@ -157,7 +157,7 @@ void ACPP_Maze_2S::Tick(float DeltaTime)
 		else {
 			move_forward = -1;
 		}
-		Target->AddWorldOffset(FVector(move_forward, 0.0f, 0.0f));
+		Target->AddLocalOffset(FVector(move_forward, 0.0f, 0.0f));
 		return;
 	}
 
@@ -170,7 +170,8 @@ void ACPP_Maze_2S::Tick(float DeltaTime)
 		else {
 			move_right = 1;
 		}
-		Target->AddWorldOffset(FVector(0.0f, move_right, 0.0f));
+		Target->AddLocalOffset(FVector(0.0f, move_right, 0.0f));
+
 		return;
 	}
 
@@ -183,7 +184,7 @@ void ACPP_Maze_2S::Tick(float DeltaTime)
 		else {
 			move_right = -1;
 		}
-		Target->AddWorldOffset(FVector(0.0f, move_right, 0.0f));
+		Target->AddLocalOffset(FVector(0.0f, move_right, 0.0f));
 		return;
 	}
 }
