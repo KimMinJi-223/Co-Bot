@@ -153,7 +153,7 @@ void ACPP_GearKey_2S::Tick(float DeltaTime)
 		//바로 리턴 가능
 		//하지만 바로 리턴하면 타겟이 안 움직인다. 
 		//추가코드 필요
-		Key->AddWorldOffset(FVector(move_forward, 0.0f, 0.0f));
+		Key->AddLocalOffset(FVector(move_forward, 0.0f, 0.0f));
 
 		return;
 	}
@@ -172,13 +172,13 @@ void ACPP_GearKey_2S::Tick(float DeltaTime)
 
 			move_forward = -1;
 		}
-		Key->AddWorldOffset(FVector(move_forward, 0.0f, 0.0f));
+		Key->AddLocalOffset(FVector(move_forward, 0.0f, 0.0f));
 		return;
 	}
 
 	//기어 돌리기
 	else if (Is_right) {
-		Key->AddRelativeLocation(FVector(0.f, -0.001f, 0.0));
+		Key->AddLocalOffset(FVector(0.f, -0.001f, 0.0));
 		//오른쪽으로 못간다.
 		if (center_gear->IsOverlappingComponent(left_Key_collision)) {
 			//UE_LOG(LogTemp, Warning, TEXT("rNo"));
@@ -191,18 +191,18 @@ void ACPP_GearKey_2S::Tick(float DeltaTime)
 
 			turn_right = 1;
 		}
-		center_gear->AddWorldRotation(FRotator(0.0f, 0.0f, turn_right * 0.5));
-		child_gear1->AddWorldRotation(FRotator(0.0f, 0.0f, -turn_right * 0.5));
-		child_gear2->AddWorldRotation(FRotator(0.0f, 0.0f, turn_right * 0.5));
-		child_gear3->AddWorldRotation(FRotator(0.0f, 0.0f, -turn_right * 0.5));
-		Key->AddRelativeLocation(FVector(0.f, 0.001f, 0.0));
+		center_gear->AddLocalRotation(FRotator(0.0f, 0.0f, turn_right * 0.5));
+		child_gear1->AddLocalRotation(FRotator(0.0f, 0.0f, -turn_right * 0.5));
+		child_gear2->AddLocalRotation(FRotator(0.0f, 0.0f, turn_right * 0.5));
+		child_gear3->AddLocalRotation(FRotator(0.0f, 0.0f, -turn_right * 0.5));
+		Key->AddLocalOffset(FVector(0.f, 0.001f, 0.0));
 
 
 		return;
 	}
 
 	else if (Is_left) {
-		Key->AddRelativeLocation(FVector(0.f, 0.001f, 0.0));
+		Key->AddLocalOffset(FVector(0.f, 0.001f, 0.0));
 		//왼쪽로 못 간다..
 		if (center_gear->IsOverlappingComponent(right_Key_collision)) {
 			//UE_LOG(LogTemp, Warning, TEXT("lNo"));
@@ -214,11 +214,11 @@ void ACPP_GearKey_2S::Tick(float DeltaTime)
 
 			turn_right = -1;
 		}
-		center_gear->AddWorldRotation(FRotator(0.0f, 0.0f, turn_right * 0.5));
-		child_gear1->AddWorldRotation(FRotator(0.0f, 0.0f, -turn_right * 0.5));
-		child_gear2->AddWorldRotation(FRotator(0.0f, 0.0f, turn_right * 0.5));
-		child_gear3->AddWorldRotation(FRotator(0.0f, 0.0f, -turn_right * 0.5));
-		Key->AddRelativeLocation(FVector(0.f, -0.001f, 0.0));
+		center_gear->AddLocalRotation(FRotator(0.0f, 0.0f, turn_right * 0.5));
+		child_gear1->AddLocalRotation(FRotator(0.0f, 0.0f, -turn_right * 0.5));
+		child_gear2->AddLocalRotation(FRotator(0.0f, 0.0f, turn_right * 0.5));
+		child_gear3->AddLocalRotation(FRotator(0.0f, 0.0f, -turn_right * 0.5));
+		Key->AddLocalOffset(FVector(0.f, -0.001f, 0.0));
 
 		return;
 	}

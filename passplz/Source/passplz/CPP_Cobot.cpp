@@ -55,7 +55,7 @@ ACPP_Cobot::ACPP_Cobot()
 	SpringArm->bInheritPitch = true;
 	SpringArm->bInheritYaw = true;
 	SpringArm->bInheritRoll = true;
-
+	IsFall_down = false;
 
 }
 

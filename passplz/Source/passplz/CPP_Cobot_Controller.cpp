@@ -49,6 +49,8 @@ void ACPP_Cobot_Controller::BeginPlay()
     if (!player)
         return;
     player->IsUnion_Jump_anim = false;
+    previous_input = 0;
+    current_input = 0;
 }
 
 void ACPP_Cobot_Controller::Tick(float DeltaTime)
@@ -64,6 +66,33 @@ void ACPP_Cobot_Controller::Tick(float DeltaTime)
     //    UE_LOG(LogTemp, Warning, TEXT("No Union"));
     //    //스페이스바를 누르지 않으면 여기에 계속 들어온다.
     //}
+   /* FHitResult HitResult;
+    FVector StartTraceLocation = player->Current_left + FVector(0.f, 0.f, 30.f);
+    FVector EndTraceLocation = player->Current_left + FVector(0.f, 0.f, -500.f);
+    GetWorld()->LineTraceSingleByChannel(
+        HitResult,
+        StartTraceLocation,
+        EndTraceLocation,
+        ECollisionChannel::ECC_Visibility
+    );
+    if (HitResult.IsValidBlockingHit()) {
+        player->Current_left = HitResult.Location;
+    }
+
+
+
+    StartTraceLocation = player->Current_right + FVector(0.f, 0.f, 30.f);
+    EndTraceLocation = player->Current_right + FVector(0.f, 0.f, -500.f);
+    GetWorld()->LineTraceSingleByChannel(
+        HitResult,
+        StartTraceLocation,
+        EndTraceLocation,
+        ECollisionChannel::ECC_Visibility
+    );
+    if (HitResult.IsValidBlockingHit()) {
+        player->Current_right = HitResult.Location;
+    }
+ */
 
     RecvPacket();
 }
@@ -238,6 +267,8 @@ void ACPP_Cobot_Controller::Turn(float NewAxisValue)
 {
     float delta_time = GetWorld()->GetDeltaSeconds();
     AddYawInput(delta_time * NewAxisValue * 20.0f);
+    FRotator control_rotate = GetControlRotation();
+  //  SetControlRotation(FRotator(control_rotate.Pitch, UKismetMathLibrary::ClampAngle(control_rotate.Yaw, rotate_min, rotate_max), control_rotate.Roll));
 }
 
 void ACPP_Cobot_Controller::LookUp(float NewAxisValue)
@@ -271,10 +302,10 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
     float distance_two_feet = 50.f;
     if (60.0f > (player->Current_left - player->Current_right).Size()) {
         distance_two_feet = 50.f;
-        player->GetCharacterMovement()->MaxWalkSpeed = 100.f;
+        player->GetCharacterMovement()->MaxWalkSpeed = 150.f;
     }
     else {
-        distance_two_feet = 1.f;
+        distance_two_feet = 0.f;
         player->GetCharacterMovement()->MaxWalkSpeed = 0.f;
     }
 
@@ -286,7 +317,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
     if (((int)NewAxisValue) == 1) { // A key
         player->Start_right = player->Current_right;
         player->Time_right = 0.f;
-        player->Time_left += GetWorld()->GetDeltaSeconds();
+        player->Time_left += (GetWorld()->GetDeltaSeconds()*2);
         if (player->Time_left < 1.0f) {
             //캐릭터를 움직인다.
             player->AddMovementInput(forward_vector, 1.0f);
@@ -301,21 +332,22 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
             float curvevalue = Cobot_Curve->GetFloatValue(player->Time_left);
             player->Current_left = (player->GetActorRightVector() * -curvevalue * distance_two_feet) + (UKismetMathLibrary::VLerp(player->Start_left, player->Target_left, player->Time_left));
 
-            FHitResult HitResult;
-            FVector StartTraceLocation = player->Current_left + FVector(0.f, 0.f, 30.f);
-            FVector EndTraceLocation = player->Current_left + FVector(0.f, 0.f, -500.f);
+            //FHitResult HitResult;
+            //FVector StartTraceLocation = player->Current_left + FVector(0.f, 0.f, 30.f);
+            //FVector EndTraceLocation = player->Current_left + FVector(0.f, 0.f, -500.f);
           
             //트레이스로 다음 발의 위치를 찾는다.
-            GetWorld()->LineTraceSingleByChannel(
-                HitResult,
-                StartTraceLocation,
-                EndTraceLocation,
-                ECollisionChannel::ECC_Visibility
-            );
-            //그 값을 현재 발 위치로 넣어준다.
-            player->Current_left = HitResult.Location;
+            //GetWorld()->LineTraceSingleByChannel(
+            //    HitResult,
+            //    StartTraceLocation,
+            //    EndTraceLocation,
+            //    ECollisionChannel::ECC_Visibility
+            //);
+            ////그 값을 현재 발 위치로 넣어준다.
+            //if(HitResult.IsValidBlockingHit())
+            //    player->Current_left = HitResult.Location;
           
-            UE_LOG(LogTemp, Warning, TEXT("%f"), HitResult.Location.Z);
+          //  UE_LOG(LogTemp, Warning, TEXT("%f"), HitResult.Location.Z);
 
             cs_move_packet pack;
             pack.size = sizeof(pack);
@@ -335,6 +367,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
     } else {
         if (player->Start_left != player->Current_left) {
 			player->Start_left = player->Current_left;
+            player->Target_left = player->Current_left;
 			player->Time_left = 0.f;
 
             cs_move_packet pack;
@@ -354,7 +387,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
         }
 
         if (((int)NewAxisValue) == 2) { // D key
-            player->Time_right += GetWorld()->GetDeltaSeconds();
+            player->Time_right += (GetWorld()->GetDeltaSeconds() * 2);
             if (player->Time_right < 1.0f) {
                 //캐릭터를 움직인다.
                 player->AddMovementInput(forward_vector, 1.0f);
@@ -372,13 +405,14 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
                 FVector StartTraceLocation = player->Current_right + FVector(0.f, 0.f, 30.f);
                 FVector EndTraceLocation = player->Current_right + FVector(0.f, 0.f, -500.f);
 
-                GetWorld()->LineTraceSingleByChannel(
+    /*            GetWorld()->LineTraceSingleByChannel(
                     HitResult,
                     StartTraceLocation,
                     EndTraceLocation,
                     ECollisionChannel::ECC_Visibility
                 );
-                player->Current_right = HitResult.Location;
+                if (HitResult.IsValidBlockingHit())
+                    player->Current_right = HitResult.Location;*/
 
                 cs_move_packet pack;
                 pack.size = sizeof(pack);
@@ -400,6 +434,8 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
         else {
             if (player->Start_right != player->Current_right) {
 				player->Start_right = player->Current_right;
+                player->Start_right = player->Current_right;
+
 				player->Time_right = 0.f;
 
                 cs_move_packet pack;
@@ -418,6 +454,15 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
                 send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
             }
         }
+    }
+
+    previous_input = current_input;
+    current_input = ((int)NewAxisValue);
+    if (current_input != previous_input) {
+        rotate_min = GetControlRotation().Yaw - 90.f;
+        rotate_max = GetControlRotation().Yaw + 90.f;
+        UE_LOG(LogTemp, Warning, TEXT("current_input"));
+
     }
 }
 

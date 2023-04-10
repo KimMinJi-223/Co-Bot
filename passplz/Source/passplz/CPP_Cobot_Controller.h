@@ -95,4 +95,10 @@ protected:
 protected:
 	UCurveFloat* Cobot_Curve;
 
+private:
+	int previous_input;
+	int current_input;
+	float rotate_min;
+	float rotate_max;
+
 };
