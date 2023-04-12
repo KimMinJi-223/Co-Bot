@@ -7,7 +7,7 @@
 // Sets default values
 ACPP_Stage2_MissionButton::ACPP_Stage2_MissionButton()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	Center = CreateDefaultSubobject<UArrowComponent>(TEXT("Center"));
 	Maze_target_forward = CreateDefaultSubobject<UBoxComponent>(TEXT("Maze_target_forward"));
@@ -29,7 +29,7 @@ ACPP_Stage2_MissionButton::ACPP_Stage2_MissionButton()
 void ACPP_Stage2_MissionButton::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -108,6 +108,7 @@ void ACPP_Stage2_MissionButton::OnMazeLeftOverlap(UPrimitiveComponent* Overlappe
 
 	UE_LOG(LogTemp, Warning, TEXT("OnMazeLeftOverlap"));
 }
+//버튼 충돌이 끝났음을 알린다.
 void ACPP_Stage2_MissionButton::OnMazeforwardEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
@@ -157,4 +158,4 @@ void ACPP_Stage2_MissionButton::OnMazeLeftEndOverlap(UPrimitiveComponent* Overla
 	UE_LOG(LogTemp, Warning, TEXT("OnMazeLeftEndOverlap"));
 }
 //===================================================================================================================
-//충돌이 끝날을때 서버로 코봇이 이제 안 밟고 있다를 알려야 함
+
