@@ -461,7 +461,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
     if (current_input != previous_input) {
         rotate_min = GetControlRotation().Yaw - 90.f;
         rotate_max = GetControlRotation().Yaw + 90.f;
-        UE_LOG(LogTemp, Warning, TEXT("current_input"));
+       // UE_LOG(LogTemp, Warning, TEXT("current_input"));
 
     }
 }

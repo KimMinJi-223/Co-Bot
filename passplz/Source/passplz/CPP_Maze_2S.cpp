@@ -120,7 +120,7 @@ void ACPP_Maze_2S::BeginPlay()
 void ACPP_Maze_2S::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	UE_LOG(LogTemp, Warning, TEXT("Tick"));
+	//UE_LOG(LogTemp, Warning, TEXT("Tick"));
 
 	move_forward = 0;
 	move_right = 0;

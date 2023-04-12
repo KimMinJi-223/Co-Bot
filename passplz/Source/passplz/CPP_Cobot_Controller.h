@@ -74,6 +74,10 @@ private:
 	void Union_Pressed();
 	void Union_Released();
 
+public: //장애물과 서버 데이터 통신을 위해 필요한 API
+	SOCKET* GetSocket() { return sock; };
+
+private:
 	class ACPP_Cobot* player;
 	FVector player_pos;
 	float new_axis_value;

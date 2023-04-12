@@ -9,6 +9,9 @@ constexpr int MAX_LOGIN_LEN = 15;
 enum class packet_type { cs_login, sc_login, cs_enter, sc_add_player, cs_move, sc_move, sc_next_light, cs_logout };
 enum class direction { up, down, left, right };
 enum class synch_type { button1, button2, button3 };
+enum class button_type { s2_maze_forward, s2_maze_back, s2_maze_right, s2_maze_left };
+enum class endbutton_type { s2_maze_forward, s2_maze_back, s2_maze_right, s2_maze_left };
+
 
 struct vector_d3 {
 	double x;
@@ -104,6 +107,11 @@ struct sc_synch_packet {
 };
 
 struct cs_logout_packet {
+	char size;
+	char type;
+};
+
+struct cs_button_packet {
 	char size;
 	char type;
 };
