@@ -29,6 +29,8 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void AnimatiomChange(int mode);
+
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		USpringArmComponent* SpringArm;
@@ -63,5 +65,5 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		bool IsUnion_Jump_anim;
 	UPROPERTY(BlueprintReadWrite)
-		bool IsFall_down;
+		bool IsFast_run;
 };
