@@ -24,6 +24,12 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void PostInitializeComponents() override;
 
+	// 서버에서 받은 패킷 타입에 따라 불리는 함수 target의 위치를 옮긴다.
+	void target_forward();
+	void target_back();
+	void target_right();
+	void target_left();
+
 private:
 	UPROPERTY(VisibleAnywhere)
 		UBoxComponent* center;
@@ -48,70 +54,4 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* plan;
-
-	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* forward_button;
-
-	UPROPERTY(VisibleAnywhere)
-		UBoxComponent* forward_button_collision;
-
-	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* back_button;
-
-	UPROPERTY(VisibleAnywhere)
-		UBoxComponent* back_button_collision;
-
-	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* right_button;
-
-	UPROPERTY(VisibleAnywhere)
-		UBoxComponent* right_button_collision;
-
-	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* left_button;
-
-	UPROPERTY(VisibleAnywhere)
-		UBoxComponent* left_button_collision;
-
-	UPROPERTY(VisibleAnywhere)
-		bool Is_forward;
-
-	UPROPERTY(VisibleAnywhere)
-		bool Is_back;
-
-	UPROPERTY(VisibleAnywhere)
-		bool Is_right;
-
-	UPROPERTY(VisibleAnywhere)
-		bool Is_left;
-
-	UPROPERTY(VisibleAnywhere)
-		int32 move_forward;
-
-	UPROPERTY(VisibleAnywhere)
-		int32 move_right;
-
-	UFUNCTION()
-		void OnForwardButtonOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	UFUNCTION()
-	void OnForwardButtonEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-	UFUNCTION()
-		void OnBackButtonOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	UFUNCTION()
-		void OnBackButtonEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-	UFUNCTION()
-		void OnRightButtonOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	UFUNCTION()
-		void OnRightButtonEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-	UFUNCTION()
-		void OnLeftButtonOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	UFUNCTION()
-		void OnLeftButtonEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 }; 
