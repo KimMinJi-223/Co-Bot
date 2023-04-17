@@ -233,7 +233,8 @@ void ACPP_Cobot_Controller::SetupInputComponent()
 {
     Super::SetupInputComponent();
 
-    //회전
+    // W, S 키 눌리면 Move_Forward() 함수를 실행
+    //InputComponent->BindAxis(TEXT("MOVE_FORWARD"), this, &ACPP_Cobot_Controller::Move_Forward);
     InputComponent->BindAxis(TEXT("ROTATE"), this, &ACPP_Cobot_Controller::Turn);
     InputComponent->BindAxis(TEXT("LookUp"), this, &ACPP_Cobot_Controller::LookUp);
 
@@ -244,10 +245,23 @@ void ACPP_Cobot_Controller::SetupInputComponent()
     InputComponent->BindAction(TEXT("COBOT_UNION"), IE_Pressed, this, &ACPP_Cobot_Controller::Union_Pressed);
     InputComponent->BindAction(TEXT("COBOT_UNION"), IE_Released, this, &ACPP_Cobot_Controller::Union_Released);
 
-    //달리기
-    InputComponent->BindAction(TEXT("RUN"), IE_Pressed, this, &ACPP_Cobot_Controller::Run_Pressed);
-    InputComponent->BindAction(TEXT("RUN"), IE_Released, this, &ACPP_Cobot_Controller::Run_Released);
 }
+
+//void ACPP_Cobot_Controller::Move_Forward(float NewAxisValue)
+//{
+//    new_axis_value = NewAxisValue;
+//
+//    player = Cast<ACPP_Cobot>(GetPawn());
+//
+//    if (!player)
+//        return;
+//
+//    FRotator rotator_controller = GetControlRotation();
+//    FRotator rotator_forward = UKismetMathLibrary::MakeRotator(0.0f, 0.0f, rotator_controller.Yaw);
+//    FVector forward_vector = UKismetMathLibrary::GetForwardVector(rotator_forward);
+//
+//    player->AddMovementInput(forward_vector, NewAxisValue);
+//}
 
 void ACPP_Cobot_Controller::Turn(float NewAxisValue)
 {
@@ -266,25 +280,11 @@ void ACPP_Cobot_Controller::LookUp(float NewAxisValue)
 void ACPP_Cobot_Controller::Union_Pressed()
 {
     player->IsUnion_Jump_anim = (!(player->IsUnion_Jump_anim));
-
-   
 }
 
 void ACPP_Cobot_Controller::Union_Released()
 {
    // IsUnion_Jump_anim = false;
-}
-
-void ACPP_Cobot_Controller::Run_Pressed()
-{
-    player->IsFast_run = true;
-    player->AnimatiomChange(1);
-}
-
-void ACPP_Cobot_Controller::Run_Released()
-{
-    player->IsFast_run = false;
-    player->AnimatiomChange(0);
 }
 
 void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
@@ -300,9 +300,9 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 
     // 이동하기 전에 캐릭터의 상태를 계산해서 보폭과 걸음 속도를 설정한다.
     float distance_two_feet = 50.f;
-    if (60.f > (player->Current_left - player->Current_right).Size()) {
+    if (60.0f > (player->Current_left - player->Current_right).Size()) {
         distance_two_feet = 50.f;
-        player->GetCharacterMovement()->MaxWalkSpeed =200.f;
+        player->GetCharacterMovement()->MaxWalkSpeed = 150.f;
     }
     else {
         distance_two_feet = 0.f;
@@ -324,16 +324,14 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 
             //목표 왼발 위치를 정한다.
             player->Target_left = player->GetActorLocation() +
-                forward_vector * 60.f;
-
+                player->GetActorForwardVector() * 50.f;
+            player->Target_left.Z -= -50.f;
+            //UE_LOG(LogTemp, Warning, TEXT("Target_left %f"), player->Target_left.X);
 
             //현재 발의 위치를 업데이트 한다.
             float curvevalue = Cobot_Curve->GetFloatValue(player->Time_left);
             player->Current_left = (player->GetActorRightVector() * -curvevalue * distance_two_feet) + (UKismetMathLibrary::VLerp(player->Start_left, player->Target_left, player->Time_left));
 
-            UE_LOG(LogTemp, Warning, TEXT("Target_left %f"), player->Target_left.Z);
-            UE_LOG(LogTemp, Warning, TEXT("Current_left %f"), player->Current_left.Z);
-            
             //FHitResult HitResult;
             //FVector StartTraceLocation = player->Current_left + FVector(0.f, 0.f, 30.f);
             //FVector EndTraceLocation = player->Current_left + FVector(0.f, 0.f, -500.f);
@@ -396,8 +394,8 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 
                 //목표 왼발 위치를 정한다.
                 player->Target_right = player->GetActorLocation() +
-                    forward_vector * 60.f;
-          
+                    player->GetActorForwardVector() * 50.f;
+                player->Target_right.Z -= -50.f;
 
                 //현재 발의 위치를 업데이트 한다.
                 float curvevalue = Cobot_Curve->GetFloatValue(player->Time_right);
@@ -463,7 +461,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
     if (current_input != previous_input) {
         rotate_min = GetControlRotation().Yaw - 90.f;
         rotate_max = GetControlRotation().Yaw + 90.f;
-       // UE_LOG(LogTemp, Warning, TEXT("current_input"));
+        UE_LOG(LogTemp, Warning, TEXT("current_input"));
 
     }
 }

@@ -67,18 +67,13 @@ protected:
 	virtual void SetupInputComponent() override;
 
 private:
+	void Move_Forward(float NewAxisValue);
 	void Left_Right(float NewAxisValue);
 	void Turn(float NewAxisValue);
 	void LookUp(float NewAxisValue);
 	void Union_Pressed();
 	void Union_Released();
-	void Run_Pressed();
-	void Run_Released();
 
-public: //장애물과 서버 데이터 통신을 위해 필요한 API
-	SOCKET* GetSocket() { return sock; };
-
-private:
 	class ACPP_Cobot* player;
 	FVector player_pos;
 	float new_axis_value;

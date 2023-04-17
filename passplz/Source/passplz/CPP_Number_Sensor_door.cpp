@@ -55,7 +55,7 @@ void ACPP_Number_Sensor_door::BeginPlay()
 void ACPP_Number_Sensor_door::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	//UE_LOG(LogTemp, Warning, TEXT("ACPP_Number_Sensor_door::Tick"));
+	UE_LOG(LogTemp, Warning, TEXT("ACPP_Number_Sensor_door::Tick"));
 }
 
 void ACPP_Number_Sensor_door::PostInitializeComponents()

@@ -55,7 +55,7 @@ ACPP_Cobot::ACPP_Cobot()
 	SpringArm->bInheritPitch = true;
 	SpringArm->bInheritYaw = true;
 	SpringArm->bInheritRoll = true;
-	IsFast_run = false;
+	IsFall_down = false;
 
 }
 
@@ -95,39 +95,5 @@ void ACPP_Cobot::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-}
-
-void ACPP_Cobot::AnimatiomChange(int mode)
-{
-	if (mode == 0) {
-		GetCharacterMovement()->bOrientRotationToMovement = true;
-		GetCharacterMovement()->bUseControllerDesiredRotation = false;
-
-		bUseControllerRotationYaw = false;
-		SpringArm->bUsePawnControlRotation = true;
-		SpringArm->bInheritPitch = true;
-		SpringArm->bInheritYaw = true;
-		SpringArm->bInheritRoll = true;
-
-		Current_left = GetMesh()->GetSocketLocation("left");
-		Start_left = Current_left;
-		Target_left = Current_left;
-
-		Current_right = GetMesh()->GetSocketLocation("right");
-		Start_right = Current_right;
-		Target_right = Current_right;
-
-
-	}
-	else if (mode == 1) {
-		//GetCharacterMovement()->bOrientRotationToMovement = true;
-		GetCharacterMovement()->bUseControllerDesiredRotation = false;
-		
-		bUseControllerRotationYaw = true;
-		//SpringArm->bUsePawnControlRotation = true;
-		//SpringArm->bInheritPitch = true;
-		//SpringArm->bInheritYaw = true;
-		//SpringArm->bInheritRoll = true;
-	}
 }
 
