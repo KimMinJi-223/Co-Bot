@@ -6,11 +6,14 @@
 #include <iostream>
 #include <array>
 #include <mutex>
+#include <memory>
+
 
 #pragma comment(lib, "mswsock.lib")
 
 #include "RingBuffer.h"
 #include "SESSION.h"
+
 
 std::array<SESSION, MAX_USER> clients;
 
@@ -108,12 +111,17 @@ void ServerMain::worker_thread()
     while (true)
     {
         GetQueuedCompletionStatus(iocp_handle, &num_bytes, &key, &over, INFINITE);
+        
         OVER_EX* over_ex = reinterpret_cast<OVER_EX*>(over);
-
+        //OVER_EX* over1 = reinterpret_cast<OVER_EX*>(over);
+        //std::shared_ptr<OVER_EX> over_ex = std::make_shared<OVER_EX>(over1);
+        
         if ((0 == num_bytes) && ((IO_RECV == over_ex->mode) || (IO_SEND == over_ex->mode))) {
             /*
                 연결 끊기 코드 추가해야 함
             */
+
+            std::cout << "num bytes: " << num_bytes << "over_ex mode: IO_RECV" << "over_ex mode: IO_SEND" << std::endl;
 
             if (IO_SEND == over_ex->mode)
                 delete over_ex;
@@ -182,6 +190,7 @@ void ServerMain::worker_thread()
 
             clients[key].recv_packet();
 
+            // ring buffer
    //         RingBuffer* ring_buff = &clients[key].ring_buff;
    //         char* p = over_ex->buffer;
 
@@ -198,7 +207,7 @@ void ServerMain::worker_thread()
    //             ring_buff->lock.unlock();
 
 			//	process_packet(ring_pack, static_cast<int>(key));
-			//	//ring_buff->move_read_pos(p[0]);
+			//	ring_buff->move_read_pos(p[0]);
 			//	p += p[0];
 			//} 
 
@@ -306,6 +315,46 @@ void ServerMain::process_packet(char* packet, int client_id)
         }
         closesocket(clients[client_id].sock);
         std::cout << client_id << "client가 logout 하였습니다.\n";
+    } break;
+    case static_cast<int>(packet_type::cs_push_button_maze_forward):
+    {
+        clients[client_id].send_push_button_packet(direction::forward);
+        clients[clients[client_id].tm_id].send_push_button_packet(direction::forward);
+    } break;
+    case static_cast<int>(packet_type::cs_push_button_maze_back):
+    {
+        clients[client_id].send_push_button_packet(direction::back);
+        clients[clients[client_id].tm_id].send_push_button_packet(direction::back);
+    } break;
+    case static_cast<int>(packet_type::cs_push_button_maze_left):
+    {
+        clients[client_id].send_push_button_packet(direction::left);
+        clients[clients[client_id].tm_id].send_push_button_packet(direction::left);
+    } break;
+    case static_cast<int>(packet_type::cs_push_button_maze_right):
+    {
+        clients[client_id].send_push_button_packet(direction::right);
+        clients[clients[client_id].tm_id].send_push_button_packet(direction::right);
+    } break;
+    case static_cast<int>(packet_type::cs_end_button_maze_forward):
+    {
+        clients[client_id].send_end_button_packet(direction::forward);
+        clients[clients[client_id].tm_id].send_end_button_packet(direction::forward);
+    } break;
+    case static_cast<int>(packet_type::cs_end_button_maze_back):
+    {
+        clients[client_id].send_end_button_packet(direction::back);
+        clients[clients[client_id].tm_id].send_end_button_packet(direction::back);
+    } break;
+    case static_cast<int>(packet_type::cs_end_button_maze_left):
+    {
+        clients[client_id].send_end_button_packet(direction::left);
+        clients[clients[client_id].tm_id].send_end_button_packet(direction::left);
+    } break;
+    case static_cast<int>(packet_type::cs_end_button_maze_right):
+    {
+        clients[client_id].send_end_button_packet(direction::forward);
+        clients[clients[client_id].tm_id].send_end_button_packet(direction::right);
     } break;
     }
 }

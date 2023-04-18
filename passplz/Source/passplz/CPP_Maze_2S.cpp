@@ -51,7 +51,7 @@ void ACPP_Maze_2S::PostInitializeComponents()
 //서버에서 앞으로 가라는 패킷을 받았을때 실행
 void ACPP_Maze_2S::target_forward()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("target_forward"));
+	UE_LOG(LogTemp, Warning, TEXT("target_forward"));
 	if (!forward_target_collision->IsOverlappingComponent(Maze))
 		Target->AddLocalOffset(FVector(1.f, 0.0f, 0.0f));
 	return;
@@ -60,7 +60,7 @@ void ACPP_Maze_2S::target_forward()
 //서버에서 뒤으로 가라는 패킷을 받았을때 실행
 void ACPP_Maze_2S::target_back()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("target_back"));
+	UE_LOG(LogTemp, Warning, TEXT("target_back"));
 	if (!back_target_collision->IsOverlappingComponent(Maze))
 		Target->AddLocalOffset(FVector(-1.f, 0.0f, 0.0f));
 	return;
@@ -69,7 +69,7 @@ void ACPP_Maze_2S::target_back()
 //서버에서 오른쪽으로 가라는 패킷을 받았을때 실행
 void ACPP_Maze_2S::target_right()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("target_right"));
+	UE_LOG(LogTemp, Warning, TEXT("target_right"));
 	if (!right_target_collision->IsOverlappingComponent(Maze))
 		Target->AddLocalOffset(FVector(0.0f, 1.f, 0.0f));
 	return;
@@ -78,7 +78,7 @@ void ACPP_Maze_2S::target_right()
 //서버에서 왼쪽으로 가라는 패킷을 받았을때 실행
 void ACPP_Maze_2S::target_left()
 {
-	//UE_LOG(LogTemp, Warning, TEXT("target_left"));
+	UE_LOG(LogTemp, Warning, TEXT("target_left"));
 	if (!left_target_collision->IsOverlappingComponent(Maze))
 		Target->AddLocalOffset(FVector(0.0f, -1.f, 0.0f));
 	return;

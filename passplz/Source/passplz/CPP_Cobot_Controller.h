@@ -42,6 +42,13 @@ private:
 	float tm_time_left;
 	float tm_time_right;
 
+	TArray<AActor*> arrOutActors;
+
+	bool is_maze_button_push_forward;
+	bool is_maze_button_push_back;
+	bool is_maze_button_push_left;
+	bool is_maze_button_push_right;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -50,6 +57,7 @@ private:
 	void RecvPacket();
 	void ProcessPacket(char* packet);
 	void SendEnterPacket();
+	void SendMovePacket(direction direction);
 
 	UCPP_CobotGameInstance* instance;
 	

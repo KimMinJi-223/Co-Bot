@@ -6,8 +6,38 @@ constexpr int BUF_SIZE = 2048;
 constexpr int MAX_USER = 10;
 constexpr int MAX_LOGIN_LEN = 15;
 
-enum class packet_type { cs_login, sc_login, cs_enter, sc_add_player, cs_move, sc_move, sc_next_light, cs_logout };
-enum class direction { up, down, left, right };
+enum class packet_type { 
+	cs_login, 
+	cs_enter, 
+	cs_move,
+	cs_logout,
+
+	cs_push_button_maze_forward,
+	cs_push_button_maze_back,
+	cs_push_button_maze_left,
+	cs_push_button_maze_right,
+
+	cs_end_button_maze_forward,
+	cs_end_button_maze_back,
+	cs_end_button_maze_left,
+	cs_end_button_maze_right,
+
+	sc_login, 
+	sc_add_player,
+	sc_move,
+	sc_next_light,
+
+	sc_push_button_maze_forward,
+	sc_push_button_maze_back,
+	sc_push_button_maze_left,
+	sc_push_button_maze_right,
+
+	sc_end_button_maze_forward,
+	sc_end_button_maze_back,
+	sc_end_button_maze_left,
+	sc_end_button_maze_right,
+};
+enum class direction { forward, back, left, right };
 enum class synch_type { button1, button2, button3 };
 enum class button_type { s2_maze_forward, s2_maze_back, s2_maze_right, s2_maze_left };
 enum class endbutton_type { s2_maze_forward, s2_maze_back, s2_maze_right, s2_maze_left };
@@ -112,6 +142,11 @@ struct cs_logout_packet {
 };
 
 struct cs_button_packet {
+	char size;
+	char type;
+};
+
+struct sc_button_packet {
 	char size;
 	char type;
 };

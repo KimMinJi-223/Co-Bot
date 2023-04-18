@@ -4,6 +4,7 @@
 #include "CPP_Cobot.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
+#include "CPP_Maze_2S.h"
 
 #include "../../../server/server/protocol.h"
 
@@ -15,6 +16,10 @@ ACPP_Cobot_Controller::ACPP_Cobot_Controller()
     , tm_time_left(0.f)
     , tm_time_right(0.f)
     , prev_remain(0)
+    , is_maze_button_push_forward(false)
+    , is_maze_button_push_back(false)
+    , is_maze_button_push_left(false)
+    , is_maze_button_push_right(false)
 {
 }
 
@@ -51,12 +56,26 @@ void ACPP_Cobot_Controller::BeginPlay()
     player->IsUnion_Jump_anim = false;
     previous_input = 0;
     current_input = 0;
+
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Maze_2S::StaticClass(), arrOutActors);
 }
 
 void ACPP_Cobot_Controller::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
+    if (is_maze_button_push_forward) {
+        Cast<ACPP_Maze_2S>(arrOutActors[0])->target_forward();
+    }
+    if (is_maze_button_push_back) {
+        Cast<ACPP_Maze_2S>(arrOutActors[0])->target_back();
+    }
+    if (is_maze_button_push_left) {
+        Cast<ACPP_Maze_2S>(arrOutActors[0])->target_left();
+    }
+    if (is_maze_button_push_right) {
+        Cast<ACPP_Maze_2S>(arrOutActors[0])->target_right();
+    }
     //if (IsUnion) {
     //    UE_LOG(LogTemp, Warning, TEXT("Union"));
     //    //합체 요청을 하는 곳, 스페이스 바를 계속 누르고 있으면 여기에 계속 들어온다.
@@ -198,6 +217,47 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
             //UE_LOG(LogTemp, Warning, TEXT("Delay: %d"), delay);
         }
     } break;
+    case static_cast<int>(packet_type::sc_push_button_maze_forward):
+    {
+        UE_LOG(LogTemp, Warning, TEXT("push_forward"));
+        is_maze_button_push_forward = true;
+        //TArray<AActor*> arrOutActors;
+        //UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Maze_2S::StaticClass(), arrOutActors);
+
+        //Cast<ACPP_Maze_2S>(arrOutActors[0])->target_forward();
+    } break;
+    case static_cast<int>(packet_type::sc_push_button_maze_back):
+    {
+        UE_LOG(LogTemp, Warning, TEXT("push_back"));
+        is_maze_button_push_back = true;
+    } break;
+    case static_cast<int>(packet_type::sc_push_button_maze_left):
+    {
+        UE_LOG(LogTemp, Warning, TEXT("push_left"));
+        is_maze_button_push_left = true;
+    } break;
+    case static_cast<int>(packet_type::sc_push_button_maze_right):
+    {
+        UE_LOG(LogTemp, Warning, TEXT("push_right"));
+        is_maze_button_push_right = true;
+    } break;
+    case static_cast<int>(packet_type::sc_end_button_maze_forward):
+    {
+        UE_LOG(LogTemp, Error, TEXT("end forward"));
+        is_maze_button_push_forward = false;
+    } break;
+    case static_cast<int>(packet_type::sc_end_button_maze_back):
+    {
+        is_maze_button_push_back = false;
+    } break;
+    case static_cast<int>(packet_type::sc_end_button_maze_left):
+    {
+        is_maze_button_push_left = false;
+    } break;
+    case static_cast<int>(packet_type::sc_end_button_maze_right):
+    {
+        is_maze_button_push_right = false;
+    } break;
     }
 }
 
@@ -215,6 +275,32 @@ void ACPP_Cobot_Controller::SendEnterPacket()
     wcscpy_s(enter_pack.passward, MAX_LOGIN_LEN, L"ex_pw");
 
     int ret = send(*sock, reinterpret_cast<char*>(&enter_pack), sizeof(enter_pack), 0);
+}
+
+void ACPP_Cobot_Controller::SendMovePacket(direction direction)
+{
+    cs_move_packet pack;
+    pack.size = sizeof(pack);
+    pack.type = static_cast<char>(packet_type::cs_move);
+    pack.direction = direction;
+    pack.yaw = player->GetActorRotation().Yaw;
+    pack.location.x = player->GetActorLocation().X;
+    pack.location.y = player->GetActorLocation().Y;
+    pack.location.z = player->GetActorLocation().Z;
+
+    if (direction::left == direction) {
+        pack.time = player->Time_left;
+        pack.current.x = player->Current_left.X;
+        pack.current.y = player->Current_left.Y;
+        pack.current.z = player->Current_left.Z;
+    } else if (direction::right == direction) {
+        pack.time = player->Time_right;
+        pack.current.x = player->Current_right.X;
+        pack.current.y = player->Current_right.Y;
+        pack.current.z = player->Current_right.Z;
+    }
+    
+    send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 }
 
 void ACPP_Cobot_Controller::PostInitializeComponents()
@@ -266,8 +352,6 @@ void ACPP_Cobot_Controller::LookUp(float NewAxisValue)
 void ACPP_Cobot_Controller::Union_Pressed()
 {
     player->IsUnion_Jump_anim = (!(player->IsUnion_Jump_anim));
-
-   
 }
 
 void ACPP_Cobot_Controller::Union_Released()
@@ -351,20 +435,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
           
           //  UE_LOG(LogTemp, Warning, TEXT("%f"), HitResult.Location.Z);
 
-            cs_move_packet pack;
-            pack.size = sizeof(pack);
-            pack.type = static_cast<char>(packet_type::cs_move);
-            pack.time = player->Time_left;
-            pack.direction = direction::left;
-            pack.yaw = player->GetActorRotation().Yaw;
-            pack.location.x = player->GetActorLocation().X;
-            pack.location.y = player->GetActorLocation().Y;
-            pack.location.z = player->GetActorLocation().Z;
-            pack.current.x = player->Current_left.X;
-            pack.current.y = player->Current_left.Y;
-            pack.current.z = player->Current_left.Z;
-            
-            send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+            SendMovePacket(direction::left);
         }
     } else {
         if (player->Start_left != player->Current_left) {
@@ -372,20 +443,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
             player->Target_left = player->Current_left;
 			player->Time_left = 0.f;
 
-            cs_move_packet pack;
-            pack.size = sizeof(pack);
-            pack.type = static_cast<char>(packet_type::cs_move);
-            pack.time = player->Time_left;
-            pack.direction = direction::left;
-            pack.yaw = player->GetActorRotation().Yaw;
-            pack.location.x = player->GetActorLocation().X;
-            pack.location.y = player->GetActorLocation().Y;
-            pack.location.z = player->GetActorLocation().Z;
-            pack.current.x = player->Current_left.X;
-            pack.current.y = player->Current_left.Y;
-            pack.current.z = player->Current_left.Z;
-
-            send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+            SendMovePacket(direction::left);
         }
 
         if (((int)NewAxisValue) == 2) { // D key
@@ -416,21 +474,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
                 if (HitResult.IsValidBlockingHit())
                     player->Current_right = HitResult.Location;*/
 
-                cs_move_packet pack;
-                pack.size = sizeof(pack);
-                pack.type = static_cast<char>(packet_type::cs_move);
-                pack.time = player->Time_right;
-                pack.direction = direction::right;
-                pack.yaw = player->GetActorRotation().Yaw;
-                pack.location.x = player->GetActorLocation().X;
-                pack.location.y = player->GetActorLocation().Y;
-                pack.location.z = player->GetActorLocation().Z;
-                pack.current.x = player->Current_right.X;
-                pack.current.y = player->Current_right.Y;
-                pack.current.z = player->Current_right.Z;
-                
-
-                send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+                SendMovePacket(direction::right);
             }
         } 
         else {
@@ -440,20 +484,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 
 				player->Time_right = 0.f;
 
-                cs_move_packet pack;
-                pack.size = sizeof(pack);
-                pack.type = static_cast<char>(packet_type::cs_move);
-                pack.time = player->Time_right;
-                pack.direction = direction::right;
-                pack.yaw = player->GetActorRotation().Yaw;
-                pack.location.x = player->GetActorLocation().X;
-                pack.location.y = player->GetActorLocation().Y;
-                pack.location.z = player->GetActorLocation().Z;
-                pack.current.x = player->Current_right.X;
-                pack.current.y = player->Current_right.Y;
-                pack.current.z = player->Current_right.Z;
-
-                send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+                SendMovePacket(direction::right);
             }
         }
     }

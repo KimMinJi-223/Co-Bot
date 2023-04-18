@@ -1,6 +1,7 @@
 #pragma once
 
 #include <WinSock2.h>
+#include <memory>
 #include "protocol.h"
 
 #pragma comment(lib, "ws2_32.lib")
@@ -18,5 +19,11 @@ public:
 	{
 		ZeroMemory(&over, sizeof(over));
 		wsabuf.buf = buffer;
+	}
+
+	OVER_EX(OVER_EX& over_ex)
+	{
+		ZeroMemory(&over, sizeof(over));
+		over_ex.wsabuf.buf = buffer;
 	}
 };

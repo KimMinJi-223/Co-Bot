@@ -1,6 +1,7 @@
 #include "SESSION.h"
 
 #include <iostream>
+#include <memory>
 
 SESSION::SESSION()
 	: state(state::free)
@@ -37,10 +38,15 @@ void SESSION::recv_packet()
 void SESSION::send_packet(char* packet)
 {
 	OVER_EX* over = new OVER_EX;
-	over->wsabuf.buf = reinterpret_cast<char*>(packet);
+	// std::atomic<std::shared_ptr<OVER_EX>> over;
+	// std::shared_ptr<OVER_EX> over(new OVER_EX());
+	// OVER_EX* over = new OVER_EX;
+	// over->wsabuf.buf = reinterpret_cast<char*>(packet);
+
+	over->wsabuf.buf = over->buffer;
 	over->wsabuf.len = packet[0];
-	ZeroMemory(&over->over, sizeof(over->over));
 	over->mode = IO_SEND;
+	ZeroMemory(&over->over, sizeof(over->over));
 	memcpy(over->buffer, packet, packet[0]);
 	int ret = WSASend(sock, &over->wsabuf, 1, 0, 0, &over->over, 0);
 	if (ret == SOCKET_ERROR)
@@ -114,3 +120,50 @@ void SESSION::send_right_move_packet(int client_id)
 	send_packet(reinterpret_cast<char*>(&pack));
 }
 
+void SESSION::send_push_button_packet(direction direction)
+{
+	sc_button_packet pack;
+	pack.size = sizeof(pack);
+	if (direction::forward == direction) {
+		pack.type = static_cast<char>(packet_type::sc_push_button_maze_forward);
+	} else if (direction::back == direction) {
+		pack.type = static_cast<char>(packet_type::sc_push_button_maze_back);
+	} else if (direction::left == direction) {
+		pack.type = static_cast<char>(packet_type::sc_push_button_maze_left);
+	} else if (direction::right == direction) {
+		pack.type = static_cast<char>(packet_type::sc_push_button_maze_right);
+	}
+	
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_end_button_packet(direction direction)
+{
+	sc_button_packet pack;
+	pack.size = sizeof(pack);
+
+	if (direction::forward == direction) {
+		pack.type = static_cast<char>(packet_type::sc_end_button_maze_forward);
+	} else if (direction::back == direction) {
+		pack.type = static_cast<char>(packet_type::sc_end_button_maze_back);
+	} else if (direction::left == direction) {
+		pack.type = static_cast<char>(packet_type::sc_end_button_maze_left);
+	} else if (direction::right == direction) {
+		pack.type = static_cast<char>(packet_type::sc_end_button_maze_right);
+	}
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+// 23.4.14
+// 1. OVER_EX 동적 할당해주는 부분에서 메모리 릭이 있는 듯하다.
+// 2. std::atomic<std::shared_ptr>에 대해서 더 조사해보기
+//		- C++20에서 나오기로 했던 atomic_shared_ptr인지 확인해보기
+//		- 다르면 어떤 부분이 다른지 알아보기(성능, 비용, 안정성, ...)
+//		- 안전하다고 확인되면 적용시키기(이것또한 폭풍 조사,,,)
+// 3. 매칭관련 부분도 다시 살펴봐야 한다.
+//		- lock을 사용하고 있는데 더 좋은 방법이 없나 찾아보기
+//		- 알고리즘에도 이상이 없는지 확인해보기
+// 4. 링버퍼 사용한 패킷 재조립 구현하기
+//		- 문제가 있는듯해서 사용하지 않았음
+//		- 정확한 문제를 파악하고 고치기                                    

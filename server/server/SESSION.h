@@ -54,6 +54,8 @@ public:
 	void send_enter_packet();
 	void send_left_move_packet(int client_id);
 	void send_right_move_packet(int client_id);
+	void send_push_button_packet(direction direction);
+	void send_end_button_packet(direction direction);
 	//void send_move_packet(int client_id);
 	//void send_rotate_packet(int client_id);
 

@@ -20,9 +20,6 @@ ACPP_Stage2_MissionButton::ACPP_Stage2_MissionButton()
 	Maze_target_back->SetupAttachment(RootComponent);
 	Maze_target_right->SetupAttachment(RootComponent);
 	Maze_target_left->SetupAttachment(RootComponent);
-
-
-
 }
 
 // Called when the game starts or when spawned
@@ -63,7 +60,7 @@ void ACPP_Stage2_MissionButton::OnMazeforwardOverlap(UPrimitiveComponent* Overla
 
 	cs_button_packet button_pack;
 	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(button_type::s2_maze_forward);
+	button_pack.type = static_cast<char>(packet_type::cs_push_button_maze_forward);
 
 	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
 
@@ -76,7 +73,7 @@ void ACPP_Stage2_MissionButton::OnMazeBackOverlap(UPrimitiveComponent* Overlappe
 
 	cs_button_packet button_pack;
 	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(button_type::s2_maze_back);
+	button_pack.type = static_cast<char>(packet_type::cs_push_button_maze_back);
 
 	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
 
@@ -89,7 +86,7 @@ void ACPP_Stage2_MissionButton::OnMazeRightOverlap(UPrimitiveComponent* Overlapp
 
 	cs_button_packet button_pack;
 	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(button_type::s2_maze_right);
+	button_pack.type = static_cast<char>(packet_type::cs_push_button_maze_right);
 
 	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
 
@@ -102,7 +99,7 @@ void ACPP_Stage2_MissionButton::OnMazeLeftOverlap(UPrimitiveComponent* Overlappe
 
 	cs_button_packet button_pack;
 	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(button_type::s2_maze_left);
+	button_pack.type = static_cast<char>(packet_type::cs_push_button_maze_left);
 
 	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
 
@@ -115,7 +112,7 @@ void ACPP_Stage2_MissionButton::OnMazeforwardEndOverlap(UPrimitiveComponent* Ove
 
 	cs_button_packet button_pack;
 	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(endbutton_type::s2_maze_forward);
+	button_pack.type = static_cast<char>(packet_type::cs_end_button_maze_forward);
 
 	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
 
@@ -127,7 +124,7 @@ void ACPP_Stage2_MissionButton::OnMazeBackEndOverlap(UPrimitiveComponent* Overla
 
 	cs_button_packet button_pack;
 	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(endbutton_type::s2_maze_back);
+	button_pack.type = static_cast<char>(packet_type::cs_end_button_maze_back);
 
 	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
 
@@ -139,7 +136,7 @@ void ACPP_Stage2_MissionButton::OnMazeRightEndOverlap(UPrimitiveComponent* Overl
 
 	cs_button_packet button_pack;
 	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(endbutton_type::s2_maze_right);
+	button_pack.type = static_cast<char>(packet_type::cs_end_button_maze_right);
 
 	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
 
@@ -151,7 +148,7 @@ void ACPP_Stage2_MissionButton::OnMazeLeftEndOverlap(UPrimitiveComponent* Overla
 
 	cs_button_packet button_pack;
 	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(endbutton_type::s2_maze_left);
+	button_pack.type = static_cast<char>(packet_type::cs_end_button_maze_left);
 
 	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
 
