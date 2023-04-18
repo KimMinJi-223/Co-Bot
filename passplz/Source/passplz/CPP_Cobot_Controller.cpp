@@ -408,7 +408,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 
             //목표 왼발 위치를 정한다.
             player->Target_left = player->GetActorLocation() +
-                forward_vector * 60.f;
+                forward_vector * 50.f;
 
 
             //현재 발의 위치를 업데이트 한다.
@@ -454,7 +454,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 
                 //목표 왼발 위치를 정한다.
                 player->Target_right = player->GetActorLocation() +
-                    forward_vector * 60.f;
+                    forward_vector * 50.f;
           
 
                 //현재 발의 위치를 업데이트 한다.

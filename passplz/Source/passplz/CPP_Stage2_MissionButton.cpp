@@ -10,16 +10,29 @@ ACPP_Stage2_MissionButton::ACPP_Stage2_MissionButton()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 	Center = CreateDefaultSubobject<UArrowComponent>(TEXT("Center"));
+
+	//미로
 	Maze_target_forward = CreateDefaultSubobject<UBoxComponent>(TEXT("Maze_target_forward"));
 	Maze_target_back = CreateDefaultSubobject<UBoxComponent>(TEXT("Maze_target_back"));
 	Maze_target_right = CreateDefaultSubobject<UBoxComponent>(TEXT("Maze_target_right"));
 	Maze_target_left = CreateDefaultSubobject<UBoxComponent>(TEXT("Maze_target_left"));
+
+	//기어
+	Gear_target_forward = CreateDefaultSubobject<UBoxComponent>(TEXT("Gear_target_forward"));
+	Gear_target_back = CreateDefaultSubobject<UBoxComponent>(TEXT("Gear_target_back"));
+	Gear_target_right = CreateDefaultSubobject<UBoxComponent>(TEXT("Gear_target_right"));
+	Gear_target_left = CreateDefaultSubobject<UBoxComponent>(TEXT("Gear_target_left"));
 
 	RootComponent = Center;
 	Maze_target_forward->SetupAttachment(RootComponent);
 	Maze_target_back->SetupAttachment(RootComponent);
 	Maze_target_right->SetupAttachment(RootComponent);
 	Maze_target_left->SetupAttachment(RootComponent);
+
+	Gear_target_forward->SetupAttachment(RootComponent);
+	Gear_target_back->SetupAttachment(RootComponent);
+	Gear_target_right->SetupAttachment(RootComponent);
+	Gear_target_left->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
@@ -53,7 +66,7 @@ void ACPP_Stage2_MissionButton::PostInitializeComponents()
 	Maze_target_left->OnComponentEndOverlap.AddDynamic(this, &ACPP_Stage2_MissionButton::OnMazeLeftEndOverlap);
 }
 
-//코봇이 버튼을 밟았을때 어떤 버튼을 밟았는지 서버로 보낸다======================================================
+//미로버튼을 밟았을때 어떤 버튼을 밟았는지 서버로 보낸다======================================================
 void ACPP_Stage2_MissionButton::OnMazeforwardOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
@@ -105,7 +118,7 @@ void ACPP_Stage2_MissionButton::OnMazeLeftOverlap(UPrimitiveComponent* Overlappe
 
 	UE_LOG(LogTemp, Warning, TEXT("OnMazeLeftOverlap"));
 }
-//버튼 충돌이 끝났음을 알린다.
+//미로버튼 충돌이 끝났음을 알린다.
 void ACPP_Stage2_MissionButton::OnMazeforwardEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
@@ -153,6 +166,105 @@ void ACPP_Stage2_MissionButton::OnMazeLeftEndOverlap(UPrimitiveComponent* Overla
 	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
 
 	UE_LOG(LogTemp, Warning, TEXT("OnMazeLeftEndOverlap"));
+}
+//===================================================================================================================
+//기어 버튼 충돌 시작
+void ACPP_Stage2_MissionButton::OnGearforwardOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+	cs_button_packet button_pack;
+	button_pack.size = sizeof(button_pack);
+	button_pack.type = static_cast<char>(packet_type::cs_push_button_gear_forward);
+
+	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+
+	UE_LOG(LogTemp, Warning, TEXT("OnGearforwardOverlap"));
+}
+void ACPP_Stage2_MissionButton::OnGearBackOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+	cs_button_packet button_pack;
+	button_pack.size = sizeof(button_pack);
+	button_pack.type = static_cast<char>(packet_type::cs_push_button_gear_back);
+
+	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+
+	UE_LOG(LogTemp, Warning, TEXT("OnGearBackOverlap"));
+}
+void ACPP_Stage2_MissionButton::OnGearRightOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+	cs_button_packet button_pack;
+	button_pack.size = sizeof(button_pack);
+	button_pack.type = static_cast<char>(packet_type::cs_push_button_gear_right);
+
+	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+
+	UE_LOG(LogTemp, Warning, TEXT("OnGearRightOverlap"));
+}
+void ACPP_Stage2_MissionButton::OnGearLeftOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+	cs_button_packet button_pack;
+	button_pack.size = sizeof(button_pack);
+	button_pack.type = static_cast<char>(packet_type::cs_push_button_gear_left);
+
+	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+
+	UE_LOG(LogTemp, Warning, TEXT("OnGearLeftOverlap"));
+}
+//기어버튼 충돌 끝
+void ACPP_Stage2_MissionButton::OnGearforwardEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+	cs_button_packet button_pack;
+	button_pack.size = sizeof(button_pack);
+	button_pack.type = static_cast<char>(packet_type::cs_end_button_gear_forward);
+
+	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+
+	UE_LOG(LogTemp, Warning, TEXT("OnGearforwardEndOverlap"));
+}
+void ACPP_Stage2_MissionButton::OnGearBackEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+	cs_button_packet button_pack;
+	button_pack.size = sizeof(button_pack);
+	button_pack.type = static_cast<char>(packet_type::cs_end_button_gear_back);
+
+	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+
+	UE_LOG(LogTemp, Warning, TEXT("OnGearBackEndOverlap"));
+}
+void ACPP_Stage2_MissionButton::OnGearRightEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+	cs_button_packet button_pack;
+	button_pack.size = sizeof(button_pack);
+	button_pack.type = static_cast<char>(packet_type::cs_end_button_gear_right);
+
+	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+
+	UE_LOG(LogTemp, Warning, TEXT("OnGearRightEndOverlap"));
+}
+void ACPP_Stage2_MissionButton::OnGearLeftEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+	cs_button_packet button_pack;
+	button_pack.size = sizeof(button_pack);
+	button_pack.type = static_cast<char>(packet_type::cs_end_button_gear_left);
+
+	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+
+	UE_LOG(LogTemp, Warning, TEXT("OnGearLeftEndOverlap"));
 }
 //===================================================================================================================
 

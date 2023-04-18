@@ -22,6 +22,16 @@ enum class packet_type {
 	cs_end_button_maze_left,
 	cs_end_button_maze_right,
 
+	cs_push_button_gear_forward,
+	cs_push_button_gear_back,
+	cs_push_button_gear_left,
+	cs_push_button_gear_right,
+
+	cs_end_button_gear_forward,
+	cs_end_button_gear_back,
+	cs_end_button_gear_left,
+	cs_end_button_gear_right,
+
 	sc_login, 
 	sc_add_player,
 	sc_move,

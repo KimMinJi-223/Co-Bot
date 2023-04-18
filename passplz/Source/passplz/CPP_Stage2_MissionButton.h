@@ -29,6 +29,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		UArrowComponent* Center;
 
+	//미로 충돌
 	UPROPERTY(VisibleAnywhere)
 		UBoxComponent* Maze_target_forward;
 	UPROPERTY(VisibleAnywhere)
@@ -38,8 +39,18 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		UBoxComponent* Maze_target_left;
 
+	//기어 충돌
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* Gear_target_forward;
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* Gear_target_back;
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* Gear_target_right;
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* Gear_target_left;
+
 private:
-	//충돌 시작 이벤트
+	//미로 충돌 시작 이벤트==========================================================================
 	UFUNCTION()
 		void OnMazeforwardOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
@@ -48,7 +59,7 @@ private:
 		void OnMazeRightOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
 		void OnMazeLeftOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	//충돌 끝 이벤트
+	//미로 충돌 끝 이벤트
 	UFUNCTION()
 		void OnMazeforwardEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	UFUNCTION()
@@ -57,5 +68,26 @@ private:
 		void OnMazeRightEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	UFUNCTION()
 		void OnMazeLeftEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+
+	//=============================================================================================
+	//기어 충돌 시작 이벤트
+	UFUNCTION()
+		void OnGearforwardOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+		void OnGearBackOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+		void OnGearRightOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+		void OnGearLeftOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	//기어 충돌 끝 이벤트
+	UFUNCTION()
+		void OnGearforwardEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	UFUNCTION()
+		void OnGearBackEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	UFUNCTION()
+		void OnGearRightEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	UFUNCTION()
+		void OnGearLeftEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	//=============================================================================================
 
 };

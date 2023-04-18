@@ -29,6 +29,8 @@ ACPP_Maze_2S::ACPP_Maze_2S()
 	back_target_collision->SetupAttachment(Target);
 	right_target_collision->SetupAttachment(Target);
 	left_target_collision->SetupAttachment(Target);
+
+	center->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 // Called when the game starts or when spawned
