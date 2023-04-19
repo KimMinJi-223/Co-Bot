@@ -1,1 +1,2 @@
-!!!
+변수 : camel 표기법 ex) cobotIsGood
+함수 : pascal 표기법 ex) CobotIsGood
