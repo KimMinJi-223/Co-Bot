@@ -54,4 +54,11 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* plan;
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* clear;
+
+public:
+	UFUNCTION()
+		void OnComponentBeginOverlap_clear(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 }; 
