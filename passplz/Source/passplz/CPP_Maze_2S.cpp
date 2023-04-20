@@ -3,6 +3,7 @@
 
 #include "CPP_Maze_2S.h"
 
+
 // Sets default values
 ACPP_Maze_2S::ACPP_Maze_2S()
 {
@@ -17,6 +18,7 @@ ACPP_Maze_2S::ACPP_Maze_2S()
 	back_target_collision = CreateDefaultSubobject<UBoxComponent>(TEXT("back_target_collision"));
 	right_target_collision = CreateDefaultSubobject<UBoxComponent>(TEXT("right_target_collision"));
 	left_target_collision = CreateDefaultSubobject<UBoxComponent>(TEXT("left_target_collision"));
+	clear = CreateDefaultSubobject<UBoxComponent>(TEXT("clear"));
 
 	RootComponent = center;
 
@@ -25,6 +27,7 @@ ACPP_Maze_2S::ACPP_Maze_2S()
 	plan->SetupAttachment(RootComponent);
 
 	Target->SetupAttachment(RootComponent);
+	clear->SetupAttachment(RootComponent);
 	forward_target_collision->SetupAttachment(Target);
 	back_target_collision->SetupAttachment(Target);
 	right_target_collision->SetupAttachment(Target);
@@ -48,6 +51,8 @@ void ACPP_Maze_2S::Tick(float DeltaTime) //서버에서 특정 패킷 타입을 받으면 실행
 void ACPP_Maze_2S::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+	clear->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Maze_2S::OnComponentBeginOverlap_clear);
+
 }
 
 //서버에서 앞으로 가라는 패킷을 받았을때 실행
@@ -84,4 +89,14 @@ void ACPP_Maze_2S::target_left()
 	if (!left_target_collision->IsOverlappingComponent(Maze))
 		Target->AddLocalOffset(FVector(0.0f, -1.f, 0.0f));
 	return;
+}
+
+void ACPP_Maze_2S::OnComponentBeginOverlap_clear(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	UE_LOG(LogTemp, Warning, TEXT("OnComponentBeginOverlap_clear"));
+
+	//plan = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DynamicMaterialMesh"));
+	plan->CreateDynamicMaterialInstance(0);
+	plan->SetScalarParameterValueOnMaterials(TEXT("time"), 1.0f);
+
 }
