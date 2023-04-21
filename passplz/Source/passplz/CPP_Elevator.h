@@ -50,4 +50,8 @@ private:
 	FVector elevatorDoorRightPos;
 	FVector elevatorFloorPos;
 	int checkMyStage;
+
+public:
+	// 문 열리고 닫히고 올라가고 카메라 바꾸고 레벨 바꾸고
+	// 컬리전 박스 부모로 바꾸기
 };

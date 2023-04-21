@@ -79,8 +79,7 @@ void ACPP_Elevator::OnComponentBeginOverlap_box_collision(UPrimitiveComponent* O
 	checkNumOfCobot += 1;
 
 	UE_LOG(LogTemp, Warning, TEXT("hi~"));
-	//서버로 엘베 들어온거 보내기 (패킷)
-
+	// 서버로 엘베 들어온거 보내기 (패킷)
 }
 
 void ACPP_Elevator::OnComponentEndOverlap_box_collision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
@@ -89,6 +88,6 @@ void ACPP_Elevator::OnComponentEndOverlap_box_collision(UPrimitiveComponent* Ove
 	checkNumOfCobot -= 1;
 
 	//서버로 엘베 나간거 보내기 (패킷)
-
 }
+
 
