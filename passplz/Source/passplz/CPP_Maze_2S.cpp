@@ -2,7 +2,8 @@
 
 
 #include "CPP_Maze_2S.h"
-
+#include "Materials/MaterialParameterCollection.h"
+#include "Materials/MaterialParameterCollectionInstance.h"
 
 // Sets default values
 ACPP_Maze_2S::ACPP_Maze_2S()
@@ -96,7 +97,33 @@ void ACPP_Maze_2S::OnComponentBeginOverlap_clear(UPrimitiveComponent* Overlapped
 	UE_LOG(LogTemp, Warning, TEXT("OnComponentBeginOverlap_clear"));
 
 	//plan = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("DynamicMaterialMesh"));
-	plan->CreateDynamicMaterialInstance(0);
-	plan->SetScalarParameterValueOnMaterials(TEXT("time"), 1.0f);
+	/*plan->CreateDynamicMaterialInstance(0);
+	plan->SetScalarParameterValueOnMaterials(TEXT("time"), 1.0f);*/
 
+
+	// Load the Material Parameter Collection from the asset registry
+	//UMaterialParameterCollection* MPC = LoadObject<UMaterialParameterCollection>(nullptr, TEXT("/Game/material/function/mpc_bridge_time.mpc_bridge_time"));
+
+	// Set the "WaterLevel" parameter to a new value
+	//MPC->SetScalarParameterDefaultValue(TEXT("fisrttime"), 1.0f);
+	Timer = new FTimerHandle;
+	clear->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetWorldTimerManager().SetTimer(*Timer, this, &ACPP_Maze_2S::timer, 0.1f, true);
+	
+
+}
+
+void ACPP_Maze_2S::timer()
+{
+	UE_LOG(LogTemp, Warning, TEXT("timer"));
+
+	t += 0.03;
+	UMaterialParameterCollection* MPC = LoadObject<UMaterialParameterCollection>(nullptr, TEXT("/Game/material/function/mpc_bridge_time.mpc_bridge_time"));
+	UMaterialParameterCollectionInstance* MyMPCInstance = GetWorld()->GetParameterCollectionInstance(MPC);
+	MyMPCInstance->SetScalarParameterValue(FName("fisrt time"), t);
+
+	if (t > 1.0f) {
+		GetWorldTimerManager().ClearTimer(*Timer);
+		delete Timer;
+	}
 }
