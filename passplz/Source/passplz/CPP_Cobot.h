@@ -30,6 +30,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	void AnimatiomChange(int mode);
+	void SetCollision();
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)

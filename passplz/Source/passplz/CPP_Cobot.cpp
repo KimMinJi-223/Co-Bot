@@ -70,6 +70,7 @@ void ACPP_Cobot::BeginPlay()
 	Start_right = GetMesh()->GetSocketLocation("right");
 	Target_right = GetMesh()->GetSocketLocation("right");
 	GetMesh()->SetAnimInstanceClass(AnimInstanceClass);
+	GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), FVector(0.0f, 1.0f, 0.0f));
 }
 
 // Called every frame
@@ -129,5 +130,11 @@ void ACPP_Cobot::AnimatiomChange(int mode)
 		//SpringArm->bInheritYaw = true;
 		//SpringArm->bInheritRoll = true;
 	}
+}
+
+void ACPP_Cobot::SetCollision()
+{
+	Foot_left_Zone->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Foot_right_Zone->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 

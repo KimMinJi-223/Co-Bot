@@ -49,6 +49,12 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		UBoxComponent* Gear_target_left;
 
+	FTimerHandle Timer;
+	bool isForward;
+	bool isBack;
+	bool isRight;
+	bool isLeft;
+
 private:
 	//미로 충돌 시작 이벤트==========================================================================
 	UFUNCTION()
@@ -90,4 +96,6 @@ private:
 		void OnGearLeftEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 	//=============================================================================================
 
+public:
+	void SendTimer();
 };
