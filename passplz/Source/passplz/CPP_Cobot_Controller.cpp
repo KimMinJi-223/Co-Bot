@@ -65,18 +65,19 @@ void ACPP_Cobot_Controller::Tick(float DeltaTime)
 {
     Super::Tick(DeltaTime);
 
-    if (is_maze_button_push_forward) {
-        Cast<ACPP_Maze_2S>(arrOutActors[0])->target_forward();
-    }
-    if (is_maze_button_push_back) {
-        Cast<ACPP_Maze_2S>(arrOutActors[0])->target_back();
-    }
-    if (is_maze_button_push_left) {
-        Cast<ACPP_Maze_2S>(arrOutActors[0])->target_left();
-    }
-    if (is_maze_button_push_right) {
-        Cast<ACPP_Maze_2S>(arrOutActors[0])->target_right();
-    }
+    //if (is_maze_button_push_forward) {
+    //    Cast<ACPP_Maze_2S>(arrOutActors[0])->target_forward();
+    //}
+    //if (is_maze_button_push_back) {
+    //    Cast<ACPP_Maze_2S>(arrOutActors[0])->target_back();
+    //}
+    //if (is_maze_button_push_left) {
+    //    Cast<ACPP_Maze_2S>(arrOutActors[0])->target_left();
+    //}
+    //if (is_maze_button_push_right) {
+    //    Cast<ACPP_Maze_2S>(arrOutActors[0])->target_right();
+    //}
+
     //if (IsUnion) {
     //    UE_LOG(LogTemp, Warning, TEXT("Union"));
     //    //합체 요청을 하는 곳, 스페이스 바를 계속 누르고 있으면 여기에 계속 들어온다.
@@ -221,7 +222,7 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
     case static_cast<int>(packet_type::sc_push_button_maze_forward):
     {
         UE_LOG(LogTemp, Warning, TEXT("push_forward"));
-        is_maze_button_push_forward = true;
+        Cast<ACPP_Maze_2S>(arrOutActors[0])->target_forward();
         //TArray<AActor*> arrOutActors;
         //UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Maze_2S::StaticClass(), arrOutActors);
 
@@ -230,35 +231,35 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
     case static_cast<int>(packet_type::sc_push_button_maze_back):
     {
         UE_LOG(LogTemp, Warning, TEXT("push_back"));
-        is_maze_button_push_back = true;
+        Cast<ACPP_Maze_2S>(arrOutActors[0])->target_back();
     } break;
     case static_cast<int>(packet_type::sc_push_button_maze_left):
     {
         UE_LOG(LogTemp, Warning, TEXT("push_left"));
-        is_maze_button_push_left = true;
+        Cast<ACPP_Maze_2S>(arrOutActors[0])->target_left();
     } break;
     case static_cast<int>(packet_type::sc_push_button_maze_right):
     {
         UE_LOG(LogTemp, Warning, TEXT("push_right"));
-        is_maze_button_push_right = true;
+        Cast<ACPP_Maze_2S>(arrOutActors[0])->target_right();
     } break;
-    case static_cast<int>(packet_type::sc_end_button_maze_forward):
-    {
-        UE_LOG(LogTemp, Error, TEXT("end forward"));
-        is_maze_button_push_forward = false;
-    } break;
-    case static_cast<int>(packet_type::sc_end_button_maze_back):
-    {
-        is_maze_button_push_back = false;
-    } break;
-    case static_cast<int>(packet_type::sc_end_button_maze_left):
-    {
-        is_maze_button_push_left = false;
-    } break;
-    case static_cast<int>(packet_type::sc_end_button_maze_right):
-    {
-        is_maze_button_push_right = false;
-    } break;
+    //case static_cast<int>(packet_type::sc_end_button_maze_forward):
+    //{
+    //    UE_LOG(LogTemp, Error, TEXT("end forward"));
+    //    is_maze_button_push_forward = false;
+    //} break;
+    //case static_cast<int>(packet_type::sc_end_button_maze_back):
+    //{
+    //    is_maze_button_push_back = false;
+    //} break;
+    //case static_cast<int>(packet_type::sc_end_button_maze_left):
+    //{
+    //    is_maze_button_push_left = false;
+    //} break;
+    //case static_cast<int>(packet_type::sc_end_button_maze_right):
+    //{
+    //    is_maze_button_push_right = false;
+    //} break;
     }
 }
 
