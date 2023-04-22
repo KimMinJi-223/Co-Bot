@@ -70,7 +70,9 @@ void ACPP_Cobot::BeginPlay()
 	Start_right = GetMesh()->GetSocketLocation("right");
 	Target_right = GetMesh()->GetSocketLocation("right");
 	GetMesh()->SetAnimInstanceClass(AnimInstanceClass);
-	GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), FVector(0.0f, 1.0f, 0.0f));
+
+	color = FVector(0.0f, 1.0f, 0.0f);
+	GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), color);
 }
 
 // Called every frame

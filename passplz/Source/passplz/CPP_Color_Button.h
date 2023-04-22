@@ -54,14 +54,24 @@ private:
 		UStaticMeshComponent* black;
 
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* redFoothold;
+		UStaticMeshComponent* redFoothold; //빨간색 발판
 
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* cyanFoothold;
+		UBoxComponent* redFootholdCollision;
+
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* cyanFoothold; //청록색 발탄
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* cyanFootholdCollision;
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* respawnCollision;
 
 	FVector color;
 
 private:
+	//버튼의 충돌
 	UFUNCTION()
 		void OnComponentBeginOverlap_redCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
@@ -70,4 +80,14 @@ private:
 		void OnComponentBeginOverlap_blueCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
 		void OnComponentBeginOverlap_blackCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	//발판의 충돌
+	UFUNCTION()
+		void OnComponentBeginOverlap_redFootholdCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+		void OnComponentBeginOverlap_cyanCollisionCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	//리스폰 충돌
+	UFUNCTION()
+		void OnComponentBeginOverlap_respawnCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+
 };

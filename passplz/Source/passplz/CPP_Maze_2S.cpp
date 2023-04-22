@@ -109,8 +109,6 @@ void ACPP_Maze_2S::OnComponentBeginOverlap_clear(UPrimitiveComponent* Overlapped
 	Timer = new FTimerHandle;
 	clear->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetWorldTimerManager().SetTimer(*Timer, this, &ACPP_Maze_2S::timer, 0.1f, true);
-	
-
 }
 
 void ACPP_Maze_2S::timer()
