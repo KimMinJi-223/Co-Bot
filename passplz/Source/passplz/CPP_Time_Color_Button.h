@@ -23,6 +23,7 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	void PostInitializeComponents() override;
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -33,4 +34,71 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* timeColorFoothold;
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* redCollision1;
+
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* red1;
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* greenCollision1;
+
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* green1;
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* blueCollision1;
+
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* blue1;
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* blackCollision1;
+
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* black1;
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* redCollision2;
+
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* red2;
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* greenCollision2;
+
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* green2;
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* blueCollision2;
+
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* blue2;
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* blackCollision2;
+
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* black2;
+
+	FVector footholdColor;
+
+	FTimerHandle footholdColorChageTimer;
+
+private:
+	//버튼1의 충돌
+	UFUNCTION()
+		void OnComponentBeginOverlap_redCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+		void OnComponentBeginOverlap_greenCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+		void OnComponentBeginOverlap_blueCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+		void OnComponentBeginOverlap_blackCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	UFUNCTION()
+		void OnComponentBeginOverlap_timeColorFootholdCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	void FootholdColorChageTimer();
 };
