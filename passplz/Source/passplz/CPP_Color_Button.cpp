@@ -19,17 +19,30 @@ ACPP_Color_Button::ACPP_Color_Button()
 	black = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("black"));
 	blackCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("blackCollision"));
 
+	redFoothold = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("redFoothold"));
+	cyanFoothold = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("cyanFoothold"));
+	redFootholdCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("redFootholdCollision"));
+	cyanFootholdCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("cyanFootholdCollision"));
+
+	respawnCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("respawnCollision"));
+
 	RootComponent = center;
 
 	red->SetupAttachment(RootComponent);
 	green->SetupAttachment(RootComponent);
 	blue->SetupAttachment(RootComponent);
 	black->SetupAttachment(RootComponent);
+	redFoothold->SetupAttachment(RootComponent);
+	cyanFoothold->SetupAttachment(RootComponent);
+
 	redCollision->SetupAttachment(red);
 	greenCollision->SetupAttachment(green);
 	blueCollision->SetupAttachment(blue);
 	blackCollision->SetupAttachment(black);
+	redFootholdCollision->SetupAttachment(redFoothold);
+	cyanFootholdCollision->SetupAttachment(cyanFoothold);
 
+	respawnCollision->SetupAttachment(RootComponent);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_BUTTON(TEXT("/Engine/BasicShapes/Cylinder.Cylinder"));
 	if (SM_BUTTON.Succeeded()) {
@@ -39,10 +52,11 @@ ACPP_Color_Button::ACPP_Color_Button()
 		black->SetStaticMesh(SM_BUTTON.Object);
 	}
 
-	//static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_FOOTHOLD(TEXT("/Engine/BasicShapes/Cube.Cube"));
-	//if (SM_FOOTHOLD.Succeeded()) {
-	//	Foothold->SetStaticMesh(SM_FOOTHOLD.Object);
-	//}
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_FOOTHOLD(TEXT("/Engine/BasicShapes/Cube.Cube"));
+	if (SM_FOOTHOLD.Succeeded()) {
+		redFoothold->SetStaticMesh(SM_FOOTHOLD.Object);
+		cyanFoothold->SetStaticMesh(SM_FOOTHOLD.Object);
+	}
 
 	color = FVector(0.f, 1.f, 0.f);
 }
@@ -51,11 +65,12 @@ ACPP_Color_Button::ACPP_Color_Button()
 void ACPP_Color_Button::BeginPlay()
 {
 	Super::BeginPlay();
-	red->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(1.0f, 0.0f, 0.0f)); 
+	red->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(1.0f, 0.0f, 0.0f));
 	green->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(0.0f, 1.0f, 0.0f));
 	blue->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(0.0f, 0.0f, 1.0f));
 	black->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(0.0f, 0.0f, 0.0f));
-
+	redFoothold->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(1.0f, 0.0f, 0.0f));
+	cyanFoothold->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(0.0f, 1.0f, 1.0f));
 }
 
 void ACPP_Color_Button::PostInitializeComponents()
@@ -65,6 +80,10 @@ void ACPP_Color_Button::PostInitializeComponents()
 	greenCollision->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Color_Button::OnComponentBeginOverlap_greenCollision);
 	blueCollision->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Color_Button::OnComponentBeginOverlap_blueCollision);
 	blackCollision->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Color_Button::OnComponentBeginOverlap_blackCollision);
+	redFootholdCollision->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Color_Button::OnComponentBeginOverlap_redFootholdCollision);
+	cyanFootholdCollision->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Color_Button::OnComponentBeginOverlap_cyanCollisionCollision);
+	respawnCollision->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Color_Button::OnComponentBeginOverlap_respawnCollision);
+
 }
 
 // Called every frame
@@ -79,18 +98,21 @@ void ACPP_Color_Button::OnComponentBeginOverlap_redCollision(UPrimitiveComponent
 	color.X = 1.0f;
 	//이부분은 서버 통신 구현때 변경 예정
 	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), color);
+	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->SetColor(color);
 }
 
 void ACPP_Color_Button::OnComponentBeginOverlap_greenCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	color.Y = 1.0f;
 	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), color);
+	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->SetColor(color);
 }
 
 void ACPP_Color_Button::OnComponentBeginOverlap_blueCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	color.Z = 1.0f;
 	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), color);
+	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->SetColor(color);
 }
 
 void ACPP_Color_Button::OnComponentBeginOverlap_blackCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -99,5 +121,66 @@ void ACPP_Color_Button::OnComponentBeginOverlap_blackCollision(UPrimitiveCompone
 	color.Y = 0.0f;
 	color.Z = 0.0f;
 	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), color);
+	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->SetColor(color);
 }
 
+//코봇이 발판과 충돌했을때 컬러를 확인해야한다.
+void ACPP_Color_Button::OnComponentBeginOverlap_redFootholdCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	ACPP_Cobot* cobot = Cast<ACPP_Cobot>(OtherActor);
+	if (cobot) {
+
+		FVector cobotColor = cobot->GetColor();
+		FTimerHandle WaitHandle;
+		float WaitTime = 5.0;
+
+		if (!cobotColor.Equals(FVector(1.0f, 0.0f, 0.0f))) {
+			//같지 않으면 콜리전을 없앤다.
+			redFoothold->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			redFootholdCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+				{
+
+					redFoothold->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+					redFootholdCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+
+				}), WaitTime, false);
+		}
+	}
+}
+
+void ACPP_Color_Button::OnComponentBeginOverlap_cyanCollisionCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+
+	ACPP_Cobot* cobot = Cast<ACPP_Cobot>(OtherActor);
+	if (cobot) {
+		FVector cobotColor = cobot->GetColor();
+		FTimerHandle WaitHandle;
+		float WaitTime = 5.0;
+
+		if (!cobotColor.Equals(FVector(0.0f, 1.0f, 1.0f))) {
+			//같지 않으면 콜리전을 없앤다.
+			cyanFoothold->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			cyanFootholdCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+			GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
+				{
+
+					cyanFoothold->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+					cyanFootholdCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+
+				}), WaitTime, false);
+		}
+	}
+}
+
+void ACPP_Color_Button::OnComponentBeginOverlap_respawnCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+
+	ACPP_Cobot* cobot = Cast<ACPP_Cobot>(OtherActor);
+	if (cobot) {
+		cobot->SetActorLocation(GetActorLocation());
+	}
+}

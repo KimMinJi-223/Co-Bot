@@ -31,6 +31,8 @@ public:
 
 	void AnimatiomChange(int mode);
 	void SetCollision();
+	FVector GetColor() { return color; }
+	void SetColor(FVector newColor) { color = newColor; }
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -67,4 +69,6 @@ public:
 		bool IsUnion_Jump_anim;
 	UPROPERTY(BlueprintReadWrite)
 		bool IsFast_run;
+	UPROPERTY(BlueprintReadWrite)
+		FVector color;
 };

@@ -5,73 +5,90 @@
 #include "passplz.h"
 #include "GameFramework/Actor.h"
 #include "Components/ArrowComponent.h"
-#include "CPP_Color_Button.generated.h"
+#include "CPP_Time_Color_Button.generated.h"
 
 UCLASS()
-class PASSPLZ_API ACPP_Color_Button : public AActor
+class PASSPLZ_API ACPP_Time_Color_Button : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ACPP_Color_Button();
+	ACPP_Time_Color_Button();
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	void PostInitializeComponents() override;
 
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	void PostInitializeComponents() override;
 
 private:
 	UPROPERTY(VisibleAnywhere)
 		UArrowComponent* center;
 
 	UPROPERTY(VisibleAnywhere)
-		UBoxComponent* redCollision;
+		UBoxComponent* timeColorFootholdCollision;
 
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* red;
+		UStaticMeshComponent* timeColorFoothold;
 
 	UPROPERTY(VisibleAnywhere)
-		UBoxComponent* greenCollision;
+		UBoxComponent* redCollision1;
 
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* green;
+		UStaticMeshComponent* red1;
 
 	UPROPERTY(VisibleAnywhere)
-		UBoxComponent* blueCollision;
+		UBoxComponent* greenCollision1;
 
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* blue;
+		UStaticMeshComponent* green1;
 
 	UPROPERTY(VisibleAnywhere)
-		UBoxComponent* blackCollision;
+		UBoxComponent* blueCollision1;
 
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* black;
+		UStaticMeshComponent* blue1;
 
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* redFoothold; //빨간색 발판
+		UBoxComponent* blackCollision1;
 
 	UPROPERTY(VisibleAnywhere)
-		UBoxComponent* redFootholdCollision;
+		UStaticMeshComponent* black1;
 
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* cyanFoothold; //청록색 발탄
+		UBoxComponent* redCollision2;
 
 	UPROPERTY(VisibleAnywhere)
-		UBoxComponent* cyanFootholdCollision;
+		UStaticMeshComponent* red2;
 
 	UPROPERTY(VisibleAnywhere)
-		UBoxComponent* respawnCollision;
+		UBoxComponent* greenCollision2;
 
-	FVector color;
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* green2;
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* blueCollision2;
+
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* blue2;
+
+	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* blackCollision2;
+
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* black2;
+
+	FVector footholdColor;
+
+	FTimerHandle footholdColorChageTimer;
 
 private:
-	//버튼의 충돌
+	//버튼1의 충돌
 	UFUNCTION()
 		void OnComponentBeginOverlap_redCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
@@ -80,14 +97,8 @@ private:
 		void OnComponentBeginOverlap_blueCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
 		void OnComponentBeginOverlap_blackCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	//발판의 충돌
 	UFUNCTION()
-		void OnComponentBeginOverlap_redFootholdCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	UFUNCTION()
-		void OnComponentBeginOverlap_cyanCollisionCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-	//리스폰 충돌
-	UFUNCTION()
-		void OnComponentBeginOverlap_respawnCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+		void OnComponentBeginOverlap_timeColorFootholdCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
-
+	void FootholdColorChageTimer();
 };

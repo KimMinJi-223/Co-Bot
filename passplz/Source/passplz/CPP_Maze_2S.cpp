@@ -106,14 +106,11 @@ void ACPP_Maze_2S::OnComponentBeginOverlap_clear(UPrimitiveComponent* Overlapped
 
 	// Set the "WaterLevel" parameter to a new value
 	//MPC->SetScalarParameterDefaultValue(TEXT("fisrttime"), 1.0f);
-	Timer = new FTimerHandle;
 	clear->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetWorldTimerManager().SetTimer(*Timer, this, &ACPP_Maze_2S::timer, 0.1f, true);
-	
-
+	GetWorldTimerManager().SetTimer(timer, this, &ACPP_Maze_2S::Timer, 0.1f, true);
 }
 
-void ACPP_Maze_2S::timer()
+void ACPP_Maze_2S::Timer()
 {
 	UE_LOG(LogTemp, Warning, TEXT("timer"));
 
@@ -123,7 +120,6 @@ void ACPP_Maze_2S::timer()
 	MyMPCInstance->SetScalarParameterValue(FName("fisrt time"), t);
 
 	if (t > 1.0f) {
-		GetWorldTimerManager().ClearTimer(*Timer);
-		delete Timer;
+		GetWorldTimerManager().ClearTimer(timer);
 	}
 }
