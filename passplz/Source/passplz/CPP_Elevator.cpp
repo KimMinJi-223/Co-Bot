@@ -16,18 +16,18 @@ ACPP_Elevator::ACPP_Elevator()
 	camera = CreateDefaultSubobject<UCameraComponent>(TEXT("camera"));
 	doorFloorForSeekButton = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("doorFloorForSeekButton"));
 
-	RootComponent = doorFloor;
+	RootComponent = boxCollision;
 
+	doorFloor->SetupAttachment(RootComponent);
 	doorLeft->SetupAttachment(RootComponent);
 	doorRight->SetupAttachment(RootComponent);
-	boxCollision->SetupAttachment(RootComponent);
 	camera->SetupAttachment(RootComponent);
-	doorFloorForSeekButton->SetupAttachment(RootComponent);
+	doorFloorForSeekButton->SetupAttachment(doorFloor);
 
+	boxCollision->SetBoxExtent(FVector(71.069857f, 84.826179f, 779.27683f));
 	doorLeft->SetRelativeLocation(FVector(0.f, 130.f, 0.f));
-	doorRight->SetRelativeLocation(FVector(0.f, 130, 0.f));
+	doorRight->SetRelativeLocation(FVector(0.f, 130.f, 0.f));
 	doorRight->SetRelativeRotation(FRotator(0.f, -180.f, 0.f));
-	boxCollision->SetBoxExtent(FVector(71.069857, 84.826179, 779.276830));
 	camera->SetRelativeLocation(FVector(0.f, 680.f, 338.32f));
 	camera->SetRelativeRotation(FRotator(-14.45f, -90.f, 0.f));
 	doorFloorForSeekButton->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
@@ -46,9 +46,6 @@ ACPP_Elevator::ACPP_Elevator()
 	}
 
 	checkNumOfCobot = 0;
-	elevatorDoorLeftPos = { 130.f, 0.f, 0.f };
-	elevatorDoorRightPos = { 130.f, 0.f, 0.f };
-	elevatorFloorPos = { 0.f, 0.f, 0.f };
 	checkMyStage = 1;
 }
 
@@ -62,8 +59,8 @@ void ACPP_Elevator::BeginPlay()
 void ACPP_Elevator::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
-	boxCollision->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Elevator::OnComponentBeginOverlap_box_collision);
-	boxCollision->OnComponentEndOverlap.AddDynamic(this, &ACPP_Elevator::OnComponentEndOverlap_box_collision);
+	boxCollision->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Elevator::OnComponentBeginOverlap_boxCollision);
+	boxCollision->OnComponentEndOverlap.AddDynamic(this, &ACPP_Elevator::OnComponentEndOverlap_boxCollision);
 }
 
 // Called every frame
@@ -73,16 +70,18 @@ void ACPP_Elevator::Tick(float DeltaTime)
 
 }
 
-void ACPP_Elevator::OnComponentBeginOverlap_box_collision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void ACPP_Elevator::OnComponentBeginOverlap_boxCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	checkNumOfCobot += 1;
 
 	UE_LOG(LogTemp, Warning, TEXT("hi~"));
 	// 서버로 엘베 들어온거 보내기 (패킷)
+	//if (checkNumOfCobot == 2)
+	ElevatorOperateCameraMoveLevelChange();
 }
 
-void ACPP_Elevator::OnComponentEndOverlap_box_collision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+void ACPP_Elevator::OnComponentEndOverlap_boxCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
 	checkNumOfCobot -= 1;
@@ -90,4 +89,50 @@ void ACPP_Elevator::OnComponentEndOverlap_box_collision(UPrimitiveComponent* Ove
 	//서버로 엘베 나간거 보내기 (패킷)
 }
 
+void ACPP_Elevator::ElevatorOperateCameraMoveLevelChange()
+{
+	APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+	PlayerController->SetViewTargetWithBlend(camera->GetOwner(), 1.5, VTBlend_Linear);	// 카메라 바꿔주고
 
+	boxCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	//waitTimer = new FTimerHandle;
+	//elevatorTimer = new FTimerHandle;
+
+	GetWorld()->GetTimerManager().SetTimer(waitTimer, FTimerDelegate::CreateLambda([&]()
+	{
+		UE_LOG(LogTemp, Warning, TEXT("waitTimer"));
+		GetWorldTimerManager().ClearTimer(waitTimer);
+		//delete waitTimer;
+
+		choose = 0;
+		GetWorldTimerManager().SetTimer(elevatorTimer, this, &ACPP_Elevator::DoorCloseFloorUpTimer, 0.05f, true);
+	}), 1.f, false);
+}
+
+void ACPP_Elevator::DoorCloseFloorUpTimer()
+{
+	UE_LOG(LogTemp, Warning, TEXT("timer2"));
+
+	switch (choose) {
+	case 0 :
+		doorLeft->AddLocalOffset(FVector(-2.f, 0, 0));
+		doorRight->AddLocalOffset(FVector(-2.f, 0, 0));
+
+		if (-120.f >= doorLeft->GetRelativeLocation().X)
+			choose = 1;
+		break;
+	case 1 :
+		doorFloor->AddLocalOffset({ 0, 0, 4.f });
+
+		if (500.f <= doorFloor->GetRelativeLocation().Z)
+			choose = 2;
+		break;
+	case 2 :
+		UE_LOG(LogTemp, Warning, TEXT("FIN"));
+		GetWorldTimerManager().ClearTimer(elevatorTimer);
+		break;
+	default :
+		UE_LOG(LogTemp, Warning, TEXT("default"));
+		break;
+	}
+}

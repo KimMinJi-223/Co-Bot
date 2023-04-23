@@ -4,7 +4,7 @@
 
 #include "passplz.h"
 #include "GameFramework/Actor.h"
-#include "Components/TextRenderComponent.h"
+#include "GameFramework/PlayerController.h"
 #include "CPP_Elevator.generated.h"
 
 UCLASS()
@@ -19,7 +19,7 @@ public:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-	void PostInitializeComponents() override;
+	void PostInitializeComponents() override;	
 
 public:
 	// Called every frame
@@ -41,17 +41,18 @@ private:
 
 private:
 	UFUNCTION()
-		void OnComponentBeginOverlap_box_collision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+		void OnComponentBeginOverlap_boxCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()
-		void OnComponentEndOverlap_box_collision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+		void OnComponentEndOverlap_boxCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 private:
 	int checkNumOfCobot;
-	FVector elevatorDoorLeftPos;
-	FVector elevatorDoorRightPos;
-	FVector elevatorFloorPos;
 	int checkMyStage;
 
+	FTimerHandle elevatorTimer;
+	FTimerHandle waitTimer;
+	int choose;
 public:
 	// 문 열리고 닫히고 올라가고 카메라 바꾸고 레벨 바꾸고
-	// 컬리전 박스 부모로 바꾸기
+	void ElevatorOperateCameraMoveLevelChange();
+	void DoorCloseFloorUpTimer();
 };
