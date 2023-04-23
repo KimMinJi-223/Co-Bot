@@ -107,19 +107,19 @@ void ACPP_Maze_2S::OnComponentBeginOverlap_clear(UPrimitiveComponent* Overlapped
 	// Set the "WaterLevel" parameter to a new value
 	//MPC->SetScalarParameterDefaultValue(TEXT("fisrttime"), 1.0f);
 	clear->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	GetWorldTimerManager().SetTimer(timer, this, &ACPP_Maze_2S::Timer, 0.1f, true);
+	GetWorldTimerManager().SetTimer(bridgeTimer, this, &ACPP_Maze_2S::BridgeTimer, 0.1f, true);
 }
 
-void ACPP_Maze_2S::Timer()
+void ACPP_Maze_2S::BridgeTimer()
 {
-	UE_LOG(LogTemp, Warning, TEXT("timer"));
+	UE_LOG(LogTemp, Warning, TEXT("BridgeTimer"));
 
-	t += 0.03;
+	bridgeTime += 0.03;
 	UMaterialParameterCollection* MPC = LoadObject<UMaterialParameterCollection>(nullptr, TEXT("/Game/material/function/mpc_bridge_time.mpc_bridge_time"));
 	UMaterialParameterCollectionInstance* MyMPCInstance = GetWorld()->GetParameterCollectionInstance(MPC);
-	MyMPCInstance->SetScalarParameterValue(FName("fisrt time"), t);
+	MyMPCInstance->SetScalarParameterValue(FName("fisrt time"), bridgeTime);
 
-	if (t > 1.0f) {
-		GetWorldTimerManager().ClearTimer(timer);
+	if (bridgeTime > 1.0f) {
+		GetWorldTimerManager().ClearTimer(bridgeTimer);
 	}
 }

@@ -40,10 +40,10 @@ void ACPP_Stage2_MissionButton::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	isForward = false;
-	isBack = false;
-	isRight = false;
-	isLeft = false;
+	isMazeForward = false;
+	isMazeBack = false;
+	isMazeRight = false;
+	isMazeLeft = false;
 }
 
 // Called every frame
@@ -71,51 +71,50 @@ void ACPP_Stage2_MissionButton::PostInitializeComponents()
 }
 
 //서버로 보내는 타이머 함수
-void ACPP_Stage2_MissionButton::SendTimer()
+void ACPP_Stage2_MissionButton::SendMazeTimer()
 {
-	UE_LOG(LogTemp, Warning, TEXT("SendTimer"));	
+	UE_LOG(LogTemp, Warning, TEXT("SendMazeTimer"));	
 
 	packet_type packetType;
 	//bool값들로 타이머를 끌지 결정한다.
-	if (!isForward && !isBack && !isRight && !isLeft) {
-		UE_LOG(LogTemp, Warning, TEXT("return"));
+	if (!isMazeForward && !isMazeBack && !isMazeRight && !isMazeLeft) {
+		UE_LOG(LogTemp, Warning, TEXT("Mazereturn"));
 
 		//모두 다 false이면 타이머를 종료한다.
-		GetWorldTimerManager().ClearTimer(Timer);
+		GetWorldTimerManager().ClearTimer(mazeTimer);
 		return;
 	}
 
 	//4개 중 하나라도 true면 아래 if문들이 실행된다.
-	if (isForward && isBack) {
-		UE_LOG(LogTemp, Warning, TEXT("return"));
+	if (isMazeForward && isMazeBack) {
+		UE_LOG(LogTemp, Warning, TEXT("Mazereturn"));
 
 		return;
 	}
-	else if (isForward) {
+	else if (isMazeForward) {
 		packetType = packet_type::cs_push_button_maze_forward;
-		UE_LOG(LogTemp, Warning, TEXT("isForward"));
+		UE_LOG(LogTemp, Warning, TEXT("isMazeForward"));
 	}
-	else if (isBack) {
+	else if (isMazeBack) {
 		packetType = packet_type::cs_push_button_maze_back;
-		UE_LOG(LogTemp, Warning, TEXT("isBack"));
+		UE_LOG(LogTemp, Warning, TEXT("isMazeBack"));
 
 	}
-	else if (isRight && isLeft) {
-		UE_LOG(LogTemp, Warning, TEXT("return"));
+	else if (isMazeRight && isMazeLeft) {
+		UE_LOG(LogTemp, Warning, TEXT("Mazereturn"));
 
 		return;
 	}
-	else if(isRight){
+	else if(isMazeRight){
 		packetType = packet_type::cs_push_button_maze_right;
-		UE_LOG(LogTemp, Warning, TEXT("isRight"));
+		UE_LOG(LogTemp, Warning, TEXT("isMazeRight"));
 
 	}
-	else if (isLeft) {
+	else if (isMazeLeft) {
 		packetType = packet_type::cs_push_button_maze_left;
-		UE_LOG(LogTemp, Warning, TEXT("isLeft"));
-
+		UE_LOG(LogTemp, Warning, TEXT("isMazeLeft"));
 	}
-	UE_LOG(LogTemp, Warning, TEXT("send"));
+	UE_LOG(LogTemp, Warning, TEXT("Mazesend"));
 
 	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
 
@@ -126,174 +125,179 @@ void ACPP_Stage2_MissionButton::SendTimer()
 	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
 }
 
+void ACPP_Stage2_MissionButton::SendGearTimer()
+{
+	UE_LOG(LogTemp, Warning, TEXT("SendGearTimer"));
+
+	packet_type packetType;
+	//bool값들로 타이머를 끌지 결정한다.
+	if (!isGearForward && !isGearBack && !isGearRight && !isGearLeft) {
+		UE_LOG(LogTemp, Warning, TEXT("Gearreturn"));
+
+		//모두 다 false이면 타이머를 종료한다.
+		GetWorldTimerManager().ClearTimer(gearTimer);
+		return;
+	}
+
+	//4개 중 하나라도 true면 아래 if문들이 실행된다.
+	if (isGearForward && isGearBack) {
+		UE_LOG(LogTemp, Warning, TEXT("Gearreturn"));
+
+		return;
+	}
+	else if (isGearForward) {
+		packetType = packet_type::cs_push_button_gear_forward;
+		UE_LOG(LogTemp, Warning, TEXT("isGearForward"));
+	}
+	else if (isGearBack) {
+		packetType = packet_type::cs_push_button_gear_back;
+		UE_LOG(LogTemp, Warning, TEXT("isGearBack"));
+
+	}
+	else if (isGearRight && isGearLeft) {
+		UE_LOG(LogTemp, Warning, TEXT("Gearreturn"));
+
+		return;
+	}
+	else if (isGearRight) {
+		packetType = packet_type::cs_push_button_gear_right;
+		UE_LOG(LogTemp, Warning, TEXT("isGearRight"));
+
+	}
+	else if (isGearLeft) {
+		packetType = packet_type::cs_push_button_gear_left;
+		UE_LOG(LogTemp, Warning, TEXT("isGearLeft"));
+	}
+	UE_LOG(LogTemp, Warning, TEXT("Gearsend"));
+
+	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+	cs_button_packet button_pack;
+	button_pack.size = sizeof(button_pack);
+	button_pack.type = static_cast<char>(packetType);
+
+	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+}
+
+//현재 타이머가 존재하는지 검사하는 함수
+void ACPP_Stage2_MissionButton::HasTimer(FTimerHandle timer, int timerType)
+{
+	if (!GetWorldTimerManager().IsTimerActive(timer)) {
+		UE_LOG(LogTemp, Warning, TEXT("SendMazeTimercreate"));
+
+		if(timerType == 0)
+			GetWorldTimerManager().SetTimer(timer, this, &ACPP_Stage2_MissionButton::SendMazeTimer, 0.03f, true);
+		else if(timerType == 1)
+			GetWorldTimerManager().SetTimer(timer, this, &ACPP_Stage2_MissionButton::SendGearTimer, 0.03f, true);
+	}
+}
+
 //미로버튼을 밟았을때 어떤 버튼을 밟았는지 서버로 보낸다======================================================
 void ACPP_Stage2_MissionButton::OnMazeforwardOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	isForward = true;
-
-	//타이머가 꺼지는 것은 타이머 함수에서 결정한다. (bool값으로)
-	if (!GetWorldTimerManager().IsTimerActive(Timer)) {
-		UE_LOG(LogTemp, Warning, TEXT("timercreate"));
-
-		GetWorldTimerManager().SetTimer(Timer, this, &ACPP_Stage2_MissionButton::SendTimer, 0.03f, true);
-	}
+	isMazeForward = true;
+	HasTimer(mazeTimer, 0);
 	UE_LOG(LogTemp, Warning, TEXT("OnMazeforwardOverlap"));
 }
 
 void ACPP_Stage2_MissionButton::OnMazeBackOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	isBack = true;
-
-	if (!GetWorldTimerManager().IsTimerActive(Timer)) {
-		GetWorldTimerManager().SetTimer(Timer, this, &ACPP_Stage2_MissionButton::SendTimer, 0.03f, true);
-	}
+	isMazeBack = true;
+	HasTimer(mazeTimer, 0);
 	UE_LOG(LogTemp, Warning, TEXT("OnMazeBackOverlap"));
 }
 
 void ACPP_Stage2_MissionButton::OnMazeRightOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	isRight = true;
-
-	if (!GetWorldTimerManager().IsTimerActive(Timer)) {
-		GetWorldTimerManager().SetTimer(Timer, this, &ACPP_Stage2_MissionButton::SendTimer, 0.03f, true);
-	}
-
+	isMazeRight = true;
+	HasTimer(mazeTimer, 0);
 	UE_LOG(LogTemp, Warning, TEXT("OnMazeRightOverlap"));
 }
 
 void ACPP_Stage2_MissionButton::OnMazeLeftOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	isLeft = true;
-
-	if (!GetWorldTimerManager().IsTimerActive(Timer)) {
-		GetWorldTimerManager().SetTimer(Timer, this, &ACPP_Stage2_MissionButton::SendTimer, 0.03f, true);
-	}
-
+	isMazeLeft = true;
+	HasTimer(mazeTimer, 0);
 	UE_LOG(LogTemp, Warning, TEXT("OnMazeLeftOverlap"));
 }
 
-//미로버튼의 충돌이 끝났다면 패킷타입이 본인 충돌과 같은지 확인하고 같다면 
+//미로 충돌 끝 ====================================================
 void ACPP_Stage2_MissionButton::OnMazeforwardEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	isForward = false;
-
+	isMazeForward = false;
 	UE_LOG(LogTemp, Warning, TEXT("OnMazeforwardEndOverlap"));
 }
+
 void ACPP_Stage2_MissionButton::OnMazeBackEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	isBack = false;
-
+	isMazeBack = false;
 	UE_LOG(LogTemp, Warning, TEXT("OnMazeBackEndOverlap"));
 }
+
 void ACPP_Stage2_MissionButton::OnMazeRightEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	isRight = false;
-
+	isMazeRight = false;
 	UE_LOG(LogTemp, Warning, TEXT("OnMazeRightEndOverlap"));
 }
+
 void ACPP_Stage2_MissionButton::OnMazeLeftEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	isLeft = false;
-
+	isMazeLeft = false;
 	UE_LOG(LogTemp, Warning, TEXT("OnMazeLeftEndOverlap"));
 }
+
 //===================================================================================================================
 //기어 버튼 충돌 시작
 void ACPP_Stage2_MissionButton::OnGearforwardOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
-
-	cs_button_packet button_pack;
-	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(packet_type::cs_push_button_gear_forward);
-
-	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
-
+	isGearForward = true;
+	HasTimer(gearTimer, 1);
 	UE_LOG(LogTemp, Warning, TEXT("OnGearforwardOverlap"));
 }
+
 void ACPP_Stage2_MissionButton::OnGearBackOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
-
-	cs_button_packet button_pack;
-	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(packet_type::cs_push_button_gear_back);
-
-	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
-
+	isGearBack = true;
+	HasTimer(gearTimer, 1);
 	UE_LOG(LogTemp, Warning, TEXT("OnGearBackOverlap"));
 }
+
 void ACPP_Stage2_MissionButton::OnGearRightOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
-
-	cs_button_packet button_pack;
-	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(packet_type::cs_push_button_gear_right);
-
-	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
-
+	isGearRight = true;
+	HasTimer(gearTimer, 1);
 	UE_LOG(LogTemp, Warning, TEXT("OnGearRightOverlap"));
 }
+
 void ACPP_Stage2_MissionButton::OnGearLeftOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
-
-	cs_button_packet button_pack;
-	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(packet_type::cs_push_button_gear_left);
-
-	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
-
+	isGearLeft = true;
+	HasTimer(gearTimer, 1);
 	UE_LOG(LogTemp, Warning, TEXT("OnGearLeftOverlap"));
 }
-//기어버튼 충돌 끝
+
+//기어버튼 충돌 끝=============================================================
 void ACPP_Stage2_MissionButton::OnGearforwardEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
-
-	cs_button_packet button_pack;
-	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(packet_type::cs_end_button_gear_forward);
-
-	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
-
+	isGearForward = false;
 	UE_LOG(LogTemp, Warning, TEXT("OnGearforwardEndOverlap"));
 }
+
 void ACPP_Stage2_MissionButton::OnGearBackEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
-
-	cs_button_packet button_pack;
-	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(packet_type::cs_end_button_gear_back);
-
-	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
-
+	isGearBack = false;
 	UE_LOG(LogTemp, Warning, TEXT("OnGearBackEndOverlap"));
 }
+
 void ACPP_Stage2_MissionButton::OnGearRightEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
-
-	cs_button_packet button_pack;
-	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(packet_type::cs_end_button_gear_right);
-
-	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
-
+	isGearRight = false;
 	UE_LOG(LogTemp, Warning, TEXT("OnGearRightEndOverlap"));
 }
+
 void ACPP_Stage2_MissionButton::OnGearLeftEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
-
-	cs_button_packet button_pack;
-	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(packet_type::cs_end_button_gear_left);
-
-	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
-
+	isGearLeft = false;
 	UE_LOG(LogTemp, Warning, TEXT("OnGearLeftEndOverlap"));
 }
 //===================================================================================================================

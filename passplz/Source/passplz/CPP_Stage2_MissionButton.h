@@ -49,13 +49,20 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		UBoxComponent* Gear_target_left;
 
-	FTimerHandle Timer;
-	bool isForward;
-	bool isBack;
-	bool isRight;
-	bool isLeft;
+	FTimerHandle mazeTimer;
+	bool isMazeForward;
+	bool isMazeBack;
+	bool isMazeRight;
+	bool isMazeLeft;
+
+	FTimerHandle gearTimer;
+	bool isGearForward;
+	bool isGearBack;
+	bool isGearRight;
+	bool isGearLeft;
 
 private:
+
 	//미로 충돌 시작 이벤트==========================================================================
 	UFUNCTION()
 		void OnMazeforwardOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -97,5 +104,7 @@ private:
 	//=============================================================================================
 
 public:
-	void SendTimer();
+	void SendMazeTimer();
+	void SendGearTimer();
+	void HasTimer(FTimerHandle timer, int timerType);
 };

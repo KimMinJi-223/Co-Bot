@@ -62,11 +62,14 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		UBoxComponent* left_Key_collision;
 
-
-
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* Key_frame;
 
+	FTimerHandle bridgeTimer;
+	float bridgeTime = 0.f;
+
 	UFUNCTION()
 		void OnClearOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	void BridgeTimer();
 };

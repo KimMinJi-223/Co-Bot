@@ -2,6 +2,8 @@
 
 
 #include "CPP_GearKey_2S.h"
+#include "Materials/MaterialParameterCollection.h"
+#include "Materials/MaterialParameterCollectionInstance.h"
 
 // Sets default values
 ACPP_GearKey_2S::ACPP_GearKey_2S()
@@ -150,14 +152,20 @@ void ACPP_GearKey_2S::target_left()
 
 void ACPP_GearKey_2S::OnClearOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	//clear->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//forward_lever_collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//back_lever_collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//right_button_collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//left_button_collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//forward_Key_collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//back_Key_collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//right_Key_collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//left_Key_collision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	clear->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetWorldTimerManager().SetTimer(bridgeTimer, this, &ACPP_GearKey_2S::BridgeTimer, 0.1f, true);
 }
 
+void ACPP_GearKey_2S::BridgeTimer()
+{
+	UE_LOG(LogTemp, Warning, TEXT("BridgeTimer"));
+	
+	bridgeTime += 0.03;
+	UMaterialParameterCollection* MPC = LoadObject<UMaterialParameterCollection>(nullptr, TEXT("/Game/material/function/mpc_bridge_time.mpc_bridge_time"));
+	UMaterialParameterCollectionInstance* MyMPCInstance = GetWorld()->GetParameterCollectionInstance(MPC);
+	MyMPCInstance->SetScalarParameterValue(FName("second time"), bridgeTime);
+
+	if (bridgeTime > 1.0f) {
+		GetWorldTimerManager().ClearTimer(bridgeTimer);
+	}
+}

@@ -83,9 +83,10 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* black2;
 
-	FVector footholdColor;
-
-	FTimerHandle footholdColorChageTimer;
+	FVector nextFootholdColor;
+	FVector currentFootholdColor;
+	FVector chageCobotColor;
+	
 
 private:
 	//버튼1의 충돌
