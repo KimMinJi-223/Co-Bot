@@ -1,8 +1,8 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
+#include "CPP_Stage2_MissionButton.h"
 #include "../../../server/server/protocol.h"
 #include "CPP_Cobot_Controller.h"
-#include "CPP_Stage2_MissionButton.h"
 
 // Sets default values
 ACPP_Stage2_MissionButton::ACPP_Stage2_MissionButton()
