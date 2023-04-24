@@ -73,12 +73,12 @@ void ACPP_Stage2_MissionButton::PostInitializeComponents()
 //서버로 보내는 타이머 함수
 void ACPP_Stage2_MissionButton::SendMazeTimer()
 {
-	UE_LOG(LogTemp, Warning, TEXT("SendMazeTimer"));	
+	//UE_LOG(LogTemp, Warning, TEXT("StartSendMazeTimer"));	
 
 	packet_type packetType;
 	//bool값들로 타이머를 끌지 결정한다.
 	if (!isMazeForward && !isMazeBack && !isMazeRight && !isMazeLeft) {
-		UE_LOG(LogTemp, Warning, TEXT("Mazereturn"));
+		//UE_LOG(LogTemp, Warning, TEXT("!isMazeForward && !isMazeBack && !isMazeRight && !isMazeLeft Mazereturn"));
 
 		//모두 다 false이면 타이머를 종료한다.
 		GetWorldTimerManager().ClearTimer(mazeTimer);
@@ -123,6 +123,8 @@ void ACPP_Stage2_MissionButton::SendMazeTimer()
 	button_pack.type = static_cast<char>(packetType);
 
 	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+	UE_LOG(LogTemp, Warning, TEXT("EndSendMazeTimer"));
+
 }
 
 void ACPP_Stage2_MissionButton::SendGearTimer()
@@ -180,7 +182,7 @@ void ACPP_Stage2_MissionButton::SendGearTimer()
 }
 
 //현재 타이머가 존재하는지 검사하는 함수
-void ACPP_Stage2_MissionButton::HasTimer(FTimerHandle timer, int timerType)
+void ACPP_Stage2_MissionButton::HasTimer(FTimerHandle& timer, int timerType)
 {
 	if (!GetWorldTimerManager().IsTimerActive(timer)) {
 		UE_LOG(LogTemp, Warning, TEXT("SendMazeTimercreate"));

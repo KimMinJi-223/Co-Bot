@@ -39,6 +39,16 @@ private:
 		UStaticMeshComponent* pillar6;
 
 	UPROPERTY(VisibleAnywhere)
+		TArray<UStaticMeshComponent*> Forklifts;
+
+	FVector PillarColor;
+	int currentColorForklift; //현재 기둥색(플레이어가 만든 색)
+	float forklifrsdirection[8]; //지게차가 앞으로 가는지 뒤로가는 확인하는 변수
+	bool isForkliftsMove[8]; //지게차가 현재 움직이는 지
+	float forkliftsMoveTime[8]; //지게차가 움직인 시간
+
+	FTimerHandle forkliftsMoveTimer;
+	/*UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* redForklift;
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* greenForklift;
@@ -53,5 +63,12 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* magentaForklift;
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* cyanForklift;
+		UStaticMeshComponent* cyanForklift;*/
+
+public:
+	FVector GetPillarColor() { return PillarColor; };
+	void SetPillarColor(FVector color);
+	void FindAndMoveForkliftByColor();
+	void ForkliftMoveTimer();
+
 };
