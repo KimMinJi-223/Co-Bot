@@ -243,23 +243,11 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
         UE_LOG(LogTemp, Warning, TEXT("push_right"));
         Cast<ACPP_Maze_2S>(arrOutActors[0])->target_right();
     } break;
-    //case static_cast<int>(packet_type::sc_end_button_maze_forward):
-    //{
-    //    UE_LOG(LogTemp, Error, TEXT("end forward"));
-    //    is_maze_button_push_forward = false;
-    //} break;
-    //case static_cast<int>(packet_type::sc_end_button_maze_back):
-    //{
-    //    is_maze_button_push_back = false;
-    //} break;
-    //case static_cast<int>(packet_type::sc_end_button_maze_left):
-    //{
-    //    is_maze_button_push_left = false;
-    //} break;
-    //case static_cast<int>(packet_type::sc_end_button_maze_right):
-    //{
-    //    is_maze_button_push_right = false;
-    //} break;
+    case static_cast<int>(packet_type::sc_elevator):
+    {
+        Cast<ACPP_Elevator>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Elevator::StaticClass()))->ElevatorOperateCameraMoveLevelChange();
+        UE_LOG(LogTemp, Warning, TEXT("sc_elevator"));
+    } break;
     }
 }
 

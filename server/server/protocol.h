@@ -46,6 +46,9 @@ enum class packet_type {
 	sc_end_button_maze_back,
 	sc_end_button_maze_left,
 	sc_end_button_maze_right,
+
+	cs_elevator,
+	sc_elevator,
 };
 enum class direction { forward, back, left, right };
 enum class synch_type { button1, button2, button3 };
@@ -157,6 +160,19 @@ struct cs_button_packet {
 };
 
 struct sc_button_packet {
+	char size;
+	char type;
+};
+
+struct cs_elevator_packet
+{
+	char size;
+	char type;
+	int elevator_number;
+};
+
+struct sc_elevator_packet
+{
 	char size;
 	char type;
 };

@@ -2,10 +2,12 @@
 
 #pragma once
 
+#include <array>
+
 #include "passplz.h"
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
-#include <array>
+#include "CPP_Elevator.h"
 #include "CPP_Tutorial_Light.generated.h"
 
 UCLASS()
@@ -35,8 +37,10 @@ private:
 private:
 	UFUNCTION()
 		void OnComponentBeginOverlap_boxCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
+	//UFUNCTION()
+	//	void OnComponentEndOverlap_boxCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 private:
-	std::array<FVector, 3> lightLocation;
-	int lightIndex;
+	//std::array<FVector, 3> lightLocation;
+	TArray<FVector> lightLocation;
+	int32 lightIndex;
 };
