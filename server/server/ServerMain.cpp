@@ -319,50 +319,50 @@ void ServerMain::process_packet(char* packet, int client_id)
     case static_cast<int>(packet_type::cs_push_button_maze_forward):
     {
         std::cout << client_id << " client가 forward button을 밟았습니다." << std::endl;
-        clients[client_id].send_push_button_packet(direction::forward);
-        clients[clients[client_id].tm_id].send_push_button_packet(direction::forward);
+        clients[client_id].send_push_maze_button_packet(direction::forward);
+        clients[clients[client_id].tm_id].send_push_maze_button_packet(direction::forward);
     } break;
     case static_cast<int>(packet_type::cs_push_button_maze_back):
     {
         std::cout << client_id << " client가 back button을 밟았습니다." << std::endl;
-        clients[client_id].send_push_button_packet(direction::back);
-        clients[clients[client_id].tm_id].send_push_button_packet(direction::back);
+        clients[client_id].send_push_maze_button_packet(direction::back);
+        clients[clients[client_id].tm_id].send_push_maze_button_packet(direction::back);
     } break;
     case static_cast<int>(packet_type::cs_push_button_maze_left):
     {
         std::cout << client_id << " client가 left button을 밟았습니다." << std::endl;
-        clients[client_id].send_push_button_packet(direction::left);
-        clients[clients[client_id].tm_id].send_push_button_packet(direction::left);
+        clients[client_id].send_push_maze_button_packet(direction::left);
+        clients[clients[client_id].tm_id].send_push_maze_button_packet(direction::left);
     } break;
     case static_cast<int>(packet_type::cs_push_button_maze_right):
     {
         std::cout << client_id << " client가 right button을 밟았습니다." << std::endl;
-        clients[client_id].send_push_button_packet(direction::right);
-        clients[clients[client_id].tm_id].send_push_button_packet(direction::right);
+        clients[client_id].send_push_maze_button_packet(direction::right);
+        clients[clients[client_id].tm_id].send_push_maze_button_packet(direction::right);
     } break;
-    case static_cast<int>(packet_type::cs_end_button_maze_forward):
+    case static_cast<int>(packet_type::cs_push_button_gear_forward):
     {
-        std::cout << client_id << " client가 forward button에서 떨어졌습니다." << std::endl;
-        clients[client_id].send_end_button_packet(direction::forward);
-        clients[clients[client_id].tm_id].send_end_button_packet(direction::forward);
+        std::cout << "gear-------------------------------------\n";
+        clients[client_id].send_push_gear_button_packet(direction::forward);
+        clients[clients[client_id].tm_id].send_push_gear_button_packet(direction::forward);
     } break;
-    case static_cast<int>(packet_type::cs_end_button_maze_back):
+    case static_cast<int>(packet_type::cs_push_button_gear_back):
     {
-        std::cout << client_id << " client가 back button에서 떨어졌습니다." << std::endl;
-        clients[client_id].send_end_button_packet(direction::back);
-        clients[clients[client_id].tm_id].send_end_button_packet(direction::back);
+        std::cout << "gear-------------------------------------\n";
+        clients[client_id].send_push_gear_button_packet(direction::back);
+        clients[clients[client_id].tm_id].send_push_gear_button_packet(direction::back);
     } break;
-    case static_cast<int>(packet_type::cs_end_button_maze_left):
+    case static_cast<int>(packet_type::cs_push_button_gear_left):
     {
-        std::cout << client_id << " client가 left button에서 떨어졌습니다." << std::endl;
-        clients[client_id].send_end_button_packet(direction::left);
-        clients[clients[client_id].tm_id].send_end_button_packet(direction::left);
+        std::cout << "gear-------------------------------------\n";
+        clients[client_id].send_push_gear_button_packet(direction::left);
+        clients[clients[client_id].tm_id].send_push_gear_button_packet(direction::left);
     } break;
-    case static_cast<int>(packet_type::cs_end_button_maze_right):
+    case static_cast<int>(packet_type::cs_push_button_gear_right):
     {
-        std::cout << client_id << " client가 right button에서 떨어졌습니다." << std::endl;
-        clients[client_id].send_end_button_packet(direction::forward);
-        clients[clients[client_id].tm_id].send_end_button_packet(direction::right);
+        std::cout << "gear-------------------------------------\n";
+        clients[client_id].send_push_gear_button_packet(direction::right);
+        clients[clients[client_id].tm_id].send_push_gear_button_packet(direction::right);
     } break;
     }
 }

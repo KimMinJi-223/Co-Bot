@@ -1,8 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #include "CPP_Stage2_MissionButton.h"
-#include "../../../server/server/protocol.h"
-#include "CPP_Cobot_Controller.h"
+
 
 // Sets default values
 ACPP_Stage2_MissionButton::ACPP_Stage2_MissionButton()
@@ -44,6 +43,8 @@ void ACPP_Stage2_MissionButton::BeginPlay()
 	isMazeBack = false;
 	isMazeRight = false;
 	isMazeLeft = false;
+
+	
 }
 
 // Called every frame
@@ -68,6 +69,18 @@ void ACPP_Stage2_MissionButton::PostInitializeComponents()
 	Maze_target_back->OnComponentEndOverlap.AddDynamic(this, &ACPP_Stage2_MissionButton::OnMazeBackEndOverlap);
 	Maze_target_right->OnComponentEndOverlap.AddDynamic(this, &ACPP_Stage2_MissionButton::OnMazeRightEndOverlap);
 	Maze_target_left->OnComponentEndOverlap.AddDynamic(this, &ACPP_Stage2_MissionButton::OnMazeLeftEndOverlap);
+
+	//충돌 시작 함수 지정
+	Gear_target_forward->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Stage2_MissionButton::OnGearforwardOverlap);
+	Gear_target_back->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Stage2_MissionButton::OnGearBackOverlap);
+	Gear_target_right->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Stage2_MissionButton::OnGearRightOverlap);
+	Gear_target_left->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Stage2_MissionButton::OnGearLeftOverlap);
+
+	//충돌 종료 함수 지정
+	Gear_target_forward->OnComponentEndOverlap.AddDynamic(this, &ACPP_Stage2_MissionButton::OnGearforwardEndOverlap);
+	Gear_target_back->OnComponentEndOverlap.AddDynamic(this, &ACPP_Stage2_MissionButton::OnGearBackEndOverlap);
+	Gear_target_right->OnComponentEndOverlap.AddDynamic(this, &ACPP_Stage2_MissionButton::OnGearRightEndOverlap);
+	Gear_target_left->OnComponentEndOverlap.AddDynamic(this, &ACPP_Stage2_MissionButton::OnGearLeftEndOverlap);
 }
 
 //서버로 보내는 타이머 함수
@@ -75,7 +88,12 @@ void ACPP_Stage2_MissionButton::SendMazeTimer()
 {
 	UE_LOG(LogTemp, Warning, TEXT("SendMazeTimer"));	
 
-	packet_type packetType;
+	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+	cs_button_packet button_pack;
+	button_pack.size = sizeof(button_pack);
+
+	// packet_type packetType;
 	//bool값들로 타이머를 끌지 결정한다.
 	if (!isMazeForward && !isMazeBack && !isMazeRight && !isMazeLeft) {
 		UE_LOG(LogTemp, Warning, TEXT("Mazereturn"));
@@ -92,13 +110,16 @@ void ACPP_Stage2_MissionButton::SendMazeTimer()
 		return;
 	}
 	else if (isMazeForward) {
-		packetType = packet_type::cs_push_button_maze_forward;
+		button_pack.type = static_cast<char>(packet_type::cs_push_button_maze_forward);
 		UE_LOG(LogTemp, Warning, TEXT("isMazeForward"));
+		int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+		return;
 	}
 	else if (isMazeBack) {
-		packetType = packet_type::cs_push_button_maze_back;
+		button_pack.type = static_cast<char>(packet_type::cs_push_button_maze_back);
 		UE_LOG(LogTemp, Warning, TEXT("isMazeBack"));
-
+		int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+		return;
 	}
 	else if (isMazeRight && isMazeLeft) {
 		UE_LOG(LogTemp, Warning, TEXT("Mazereturn"));
@@ -106,30 +127,33 @@ void ACPP_Stage2_MissionButton::SendMazeTimer()
 		return;
 	}
 	else if(isMazeRight){
-		packetType = packet_type::cs_push_button_maze_right;
+		button_pack.type = static_cast<char>(packet_type::cs_push_button_maze_right);
 		UE_LOG(LogTemp, Warning, TEXT("isMazeRight"));
-
+		send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+		return;
 	}
 	else if (isMazeLeft) {
-		packetType = packet_type::cs_push_button_maze_left;
+		button_pack.type = static_cast<char>(packet_type::cs_push_button_maze_left);
 		UE_LOG(LogTemp, Warning, TEXT("isMazeLeft"));
+		send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+		return;
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("elseelseelseesle errrrrrrrrr"));
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Mazesend"));
-
-	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
-
-	cs_button_packet button_pack;
-	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(packetType);
-
-	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
 }
 
 void ACPP_Stage2_MissionButton::SendGearTimer()
 {
 	UE_LOG(LogTemp, Warning, TEXT("SendGearTimer"));
 
-	packet_type packetType;
+	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+	cs_button_packet button_pack;
+	button_pack.size = sizeof(button_pack);
+
+	// packet_type packetType;
 	//bool값들로 타이머를 끌지 결정한다.
 	if (!isGearForward && !isGearBack && !isGearRight && !isGearLeft) {
 		UE_LOG(LogTemp, Warning, TEXT("Gearreturn"));
@@ -146,13 +170,16 @@ void ACPP_Stage2_MissionButton::SendGearTimer()
 		return;
 	}
 	else if (isGearForward) {
-		packetType = packet_type::cs_push_button_gear_forward;
+		button_pack.type = static_cast<char>(packet_type::cs_push_button_gear_forward);
 		UE_LOG(LogTemp, Warning, TEXT("isGearForward"));
+		send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+		return;
 	}
 	else if (isGearBack) {
-		packetType = packet_type::cs_push_button_gear_back;
+		button_pack.type = static_cast<char>(packet_type::cs_push_button_gear_back);
 		UE_LOG(LogTemp, Warning, TEXT("isGearBack"));
-
+		send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+		return;
 	}
 	else if (isGearRight && isGearLeft) {
 		UE_LOG(LogTemp, Warning, TEXT("Gearreturn"));
@@ -160,27 +187,22 @@ void ACPP_Stage2_MissionButton::SendGearTimer()
 		return;
 	}
 	else if (isGearRight) {
-		packetType = packet_type::cs_push_button_gear_right;
+		button_pack.type = static_cast<char>(packet_type::cs_push_button_gear_right);
 		UE_LOG(LogTemp, Warning, TEXT("isGearRight"));
-
+		send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+		return;
 	}
 	else if (isGearLeft) {
-		packetType = packet_type::cs_push_button_gear_left;
+		button_pack.type = static_cast<char>(packet_type::cs_push_button_gear_left);
 		UE_LOG(LogTemp, Warning, TEXT("isGearLeft"));
+		send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+		return;
 	}
 	UE_LOG(LogTemp, Warning, TEXT("Gearsend"));
-
-	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
-
-	cs_button_packet button_pack;
-	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(packetType);
-
-	int ret = send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
 }
 
 //현재 타이머가 존재하는지 검사하는 함수
-void ACPP_Stage2_MissionButton::HasTimer(FTimerHandle timer, int timerType)
+void ACPP_Stage2_MissionButton::HasTimer(FTimerHandle& timer, int timerType)
 {
 	if (!GetWorldTimerManager().IsTimerActive(timer)) {
 		UE_LOG(LogTemp, Warning, TEXT("SendMazeTimercreate"));

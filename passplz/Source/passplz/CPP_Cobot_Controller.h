@@ -42,7 +42,8 @@ private:
 	float tm_time_left;
 	float tm_time_right;
 
-	TArray<AActor*> arrOutActors;
+	TArray<AActor*> maze_actor;
+	TArray<AActor*> gear_actor;
 
 	bool is_maze_button_push_forward;
 	bool is_maze_button_push_back;

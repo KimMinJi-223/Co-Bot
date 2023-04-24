@@ -42,10 +42,10 @@ enum class packet_type {
 	sc_push_button_maze_left,
 	sc_push_button_maze_right,
 
-	sc_end_button_maze_forward,
-	sc_end_button_maze_back,
-	sc_end_button_maze_left,
-	sc_end_button_maze_right,
+	sc_push_button_gear_forward,
+	sc_push_button_gear_back,
+	sc_push_button_gear_left,
+	sc_push_button_gear_right,
 };
 enum class direction { forward, back, left, right };
 enum class synch_type { button1, button2, button3 };

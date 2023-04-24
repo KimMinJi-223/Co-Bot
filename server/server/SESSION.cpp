@@ -120,7 +120,7 @@ void SESSION::send_right_move_packet(int client_id)
 	send_packet(reinterpret_cast<char*>(&pack));
 }
 
-void SESSION::send_push_button_packet(direction direction)
+void SESSION::send_push_maze_button_packet(direction direction)
 {
 	sc_button_packet pack;
 	pack.size = sizeof(pack);
@@ -137,19 +137,18 @@ void SESSION::send_push_button_packet(direction direction)
 	send_packet(reinterpret_cast<char*>(&pack));
 }
 
-void SESSION::send_end_button_packet(direction direction)
+void SESSION::send_push_gear_button_packet(direction direction)
 {
 	sc_button_packet pack;
 	pack.size = sizeof(pack);
-
 	if (direction::forward == direction) {
-		pack.type = static_cast<char>(packet_type::sc_end_button_maze_forward);
+		pack.type = static_cast<char>(packet_type::sc_push_button_gear_forward);
 	} else if (direction::back == direction) {
-		pack.type = static_cast<char>(packet_type::sc_end_button_maze_back);
+		pack.type = static_cast<char>(packet_type::sc_push_button_gear_back);
 	} else if (direction::left == direction) {
-		pack.type = static_cast<char>(packet_type::sc_end_button_maze_left);
+		pack.type = static_cast<char>(packet_type::sc_push_button_gear_left);
 	} else if (direction::right == direction) {
-		pack.type = static_cast<char>(packet_type::sc_end_button_maze_right);
+		pack.type = static_cast<char>(packet_type::sc_push_button_gear_right);
 	}
 
 	send_packet(reinterpret_cast<char*>(&pack));

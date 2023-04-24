@@ -2,6 +2,9 @@
 
 #pragma once
 
+#include "../../../server/server/protocol.h"
+#include "CPP_Cobot_Controller.h"
+
 #include "passplz.h"
 #include "GameFramework/Actor.h"
 #include "Components/ArrowComponent.h"
@@ -24,6 +27,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void PostInitializeComponents() override;
+
+
+private:
+	// SOCKET* sock;
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -106,5 +113,5 @@ private:
 public:
 	void SendMazeTimer();
 	void SendGearTimer();
-	void HasTimer(FTimerHandle timer, int timerType);
+	void HasTimer(FTimerHandle& timer, int timerType);
 };

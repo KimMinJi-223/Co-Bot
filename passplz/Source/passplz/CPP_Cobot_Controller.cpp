@@ -5,6 +5,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
 #include "CPP_Maze_2S.h"
+#include "CPP_GearKey_2S.h"
 
 #include "../../../server/server/protocol.h"
 
@@ -58,7 +59,8 @@ void ACPP_Cobot_Controller::BeginPlay()
     previous_input = 0;
     current_input = 0;
 
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Maze_2S::StaticClass(), arrOutActors);
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Maze_2S::StaticClass(), maze_actor);
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_GearKey_2S::StaticClass(), gear_actor);
 }
 
 void ACPP_Cobot_Controller::Tick(float DeltaTime)
@@ -222,7 +224,7 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
     case static_cast<int>(packet_type::sc_push_button_maze_forward):
     {
         UE_LOG(LogTemp, Warning, TEXT("push_forward"));
-        Cast<ACPP_Maze_2S>(arrOutActors[0])->target_forward();
+        Cast<ACPP_Maze_2S>(maze_actor[0])->target_forward();
         //TArray<AActor*> arrOutActors;
         //UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Maze_2S::StaticClass(), arrOutActors);
 
@@ -231,35 +233,42 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
     case static_cast<int>(packet_type::sc_push_button_maze_back):
     {
         UE_LOG(LogTemp, Warning, TEXT("push_back"));
-        Cast<ACPP_Maze_2S>(arrOutActors[0])->target_back();
+        Cast<ACPP_Maze_2S>(maze_actor[0])->target_back();
     } break;
     case static_cast<int>(packet_type::sc_push_button_maze_left):
     {
         UE_LOG(LogTemp, Warning, TEXT("push_left"));
-        Cast<ACPP_Maze_2S>(arrOutActors[0])->target_left();
+        Cast<ACPP_Maze_2S>(maze_actor[0])->target_left();
     } break;
     case static_cast<int>(packet_type::sc_push_button_maze_right):
     {
         UE_LOG(LogTemp, Warning, TEXT("push_right"));
-        Cast<ACPP_Maze_2S>(arrOutActors[0])->target_right();
+        Cast<ACPP_Maze_2S>(maze_actor[0])->target_right();
     } break;
-    //case static_cast<int>(packet_type::sc_end_button_maze_forward):
-    //{
-    //    UE_LOG(LogTemp, Error, TEXT("end forward"));
-    //    is_maze_button_push_forward = false;
-    //} break;
-    //case static_cast<int>(packet_type::sc_end_button_maze_back):
-    //{
-    //    is_maze_button_push_back = false;
-    //} break;
-    //case static_cast<int>(packet_type::sc_end_button_maze_left):
-    //{
-    //    is_maze_button_push_left = false;
-    //} break;
-    //case static_cast<int>(packet_type::sc_end_button_maze_right):
-    //{
-    //    is_maze_button_push_right = false;
-    //} break;
+    case static_cast<int>(packet_type::sc_push_button_gear_forward):
+    {
+        UE_LOG(LogTemp, Warning, TEXT("push_forward"));
+        Cast<ACPP_GearKey_2S>(gear_actor[0])->target_forward();
+        //TArray<AActor*> arrOutActors;
+        //UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Maze_2S::StaticClass(), arrOutActors);
+
+        //Cast<ACPP_Maze_2S>(arrOutActors[0])->target_forward();
+    } break;
+    case static_cast<int>(packet_type::sc_push_button_gear_back):
+    {
+        UE_LOG(LogTemp, Warning, TEXT("push_back"));
+        Cast<ACPP_GearKey_2S>(gear_actor[0])->target_back();
+    } break;
+    case static_cast<int>(packet_type::sc_push_button_gear_left):
+    {
+        UE_LOG(LogTemp, Warning, TEXT("push_left"));
+        Cast<ACPP_GearKey_2S>(gear_actor[0])->target_left();
+    } break;
+    case static_cast<int>(packet_type::sc_push_button_gear_right):
+    {
+        UE_LOG(LogTemp, Warning, TEXT("push_right"));
+        Cast<ACPP_GearKey_2S>(gear_actor[0])->target_right();
+    } break;
     }
 }
 
