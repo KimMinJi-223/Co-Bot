@@ -269,6 +269,11 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
         UE_LOG(LogTemp, Warning, TEXT("push_right"));
         Cast<ACPP_GearKey_2S>(gear_actor[0])->target_right();
     } break;
+    case static_cast<int>(packet_type::sc_elevator):
+    {
+        Cast<ACPP_Elevator>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Elevator::StaticClass()))->ElevatorOperateCameraMoveLevelChange();
+        UE_LOG(LogTemp, Warning, TEXT("sc_elevator"));
+    } break;
     }
 }
 

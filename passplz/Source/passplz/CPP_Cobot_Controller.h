@@ -14,6 +14,7 @@
 
 #include "Windows/PostWindowsApi.h"
 #include "Windows/HideWindowsPlatformTypes.h"
+#include "CPP_Elevator.h"
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"

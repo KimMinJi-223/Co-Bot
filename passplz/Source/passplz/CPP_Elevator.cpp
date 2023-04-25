@@ -2,6 +2,7 @@
 
 
 #include "CPP_Elevator.h"
+#include "CPP_Cobot_Controller.h"
 
 // Sets default values
 ACPP_Elevator::ACPP_Elevator()
@@ -15,6 +16,9 @@ ACPP_Elevator::ACPP_Elevator()
 	boxCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("boxCollision"));
 	camera = CreateDefaultSubobject<UCameraComponent>(TEXT("camera"));
 	doorFloorForSeekButton = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("doorFloorForSeekButton"));
+	evLightAfterClearTutorial = CreateDefaultSubobject<URectLightComponent>(TEXT("evLightAfterClearTutorial"));
+
+	//widgetNextStage = CreateWidget<UUserWidget>(GetWorld(), widgetNextStage);
 
 	RootComponent = boxCollision;
 
@@ -23,6 +27,7 @@ ACPP_Elevator::ACPP_Elevator()
 	doorRight->SetupAttachment(RootComponent);
 	camera->SetupAttachment(RootComponent);
 	doorFloorForSeekButton->SetupAttachment(doorFloor);
+	evLightAfterClearTutorial->SetupAttachment(RootComponent);
 
 	boxCollision->SetBoxExtent(FVector(71.069857f, 84.826179f, 779.27683f));
 	doorLeft->SetRelativeLocation(FVector(0.f, 130.f, 0.f));
@@ -33,6 +38,12 @@ ACPP_Elevator::ACPP_Elevator()
 	doorFloorForSeekButton->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
 	doorFloorForSeekButton->SetRelativeRotation(FRotator(0.f, 180.f, 180.f));
 	doorFloorForSeekButton->SetRelativeScale3D(FVector(1.f, 1.f, 1.241087f));
+
+	evLightAfterClearTutorial->SetRelativeLocation(FVector(0.f, -70.f, 460.f));
+	evLightAfterClearTutorial->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+	evLightAfterClearTutorial->SetIntensity(0.f);
+	evLightAfterClearTutorial->SetLightColor(FLinearColor(233, 255, 113));
+	evLightAfterClearTutorial->SetAttenuationRadius(4325.f);
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_ELEVATOR_DOOR(TEXT("/Game/model/EV/ev_door.ev_door"));
 	if (SM_ELEVATOR_DOOR.Succeeded()) {
@@ -47,6 +58,7 @@ ACPP_Elevator::ACPP_Elevator()
 
 	checkNumOfCobot = 0;
 	checkMyStage = 1;
+	levelName = "STAGE_2";
 }
 
 // Called when the game starts or when spawned
@@ -73,20 +85,48 @@ void ACPP_Elevator::Tick(float DeltaTime)
 void ACPP_Elevator::OnComponentBeginOverlap_boxCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	checkNumOfCobot += 1;
+	++checkNumOfCobot;;
 
 	UE_LOG(LogTemp, Warning, TEXT("hi~"));
+
+	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
 	// 서버로 엘베 들어온거 보내기 (패킷)
-	//if (checkNumOfCobot == 2)
-	ElevatorOperateCameraMoveLevelChange();
+	cs_elevator_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::cs_elevator);
+	pack.elevator_number = checkNumOfCobot;
+
+	send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 }
 
 void ACPP_Elevator::OnComponentEndOverlap_boxCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	checkNumOfCobot -= 1;
+	--checkNumOfCobot;
+
+	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+	cs_elevator_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::cs_elevator);
+	pack.elevator_number = checkNumOfCobot;
+
+	send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 
 	//서버로 엘베 나간거 보내기 (패킷)
+}
+
+void ACPP_Elevator::LightOnEvDoorOpen()
+{
+	evLightAfterClearTutorial->SetIntensity(15000.f);
+	evLightAfterClearTutorial->SetLightColor(FLinearColor(233, 255, 113));
+
+	FTimerHandle waitTimer;
+	GetWorld()->GetTimerManager().SetTimer(waitTimer, FTimerDelegate::CreateLambda([&]()
+	{
+		GetWorldTimerManager().SetTimer(elevatorDoorOpenTimer, this, &ACPP_Elevator::DoorOpenTimer, 0.05f, true);
+	}), 5.f, false);
 }
 
 void ACPP_Elevator::ElevatorOperateCameraMoveLevelChange()
@@ -95,43 +135,60 @@ void ACPP_Elevator::ElevatorOperateCameraMoveLevelChange()
 	PlayerController->SetViewTargetWithBlend(camera->GetOwner(), 1.5, VTBlend_Linear);	// 카메라 바꿔주고
 
 	boxCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//waitTimer = new FTimerHandle;
-	//elevatorTimer = new FTimerHandle;
 
+	FTimerHandle waitTimer;
 	GetWorld()->GetTimerManager().SetTimer(waitTimer, FTimerDelegate::CreateLambda([&]()
 	{
-		UE_LOG(LogTemp, Warning, TEXT("waitTimer"));
+		//UE_LOG(LogTemp, Warning, TEXT("waitTimer"));
 		GetWorldTimerManager().ClearTimer(waitTimer);
-		//delete waitTimer;
 
 		choose = 0;
-		GetWorldTimerManager().SetTimer(elevatorTimer, this, &ACPP_Elevator::DoorCloseFloorUpTimer, 0.05f, true);
+		GetWorldTimerManager().SetTimer(elevatorDoorCloseTimer, this, &ACPP_Elevator::DoorCloseFloorUpTimer, 0.05f, true);
 	}), 1.f, false);
+}
+
+void ACPP_Elevator::DoorOpenTimer()
+{
+	doorLeft->AddLocalOffset(FVector(-2.f, 0, 0));
+	doorRight->AddLocalOffset(FVector(-2.f, 0, 0));
+
+	if (-120.f >= doorLeft->GetRelativeLocation().X)
+		GetWorldTimerManager().ClearTimer(elevatorDoorOpenTimer);
 }
 
 void ACPP_Elevator::DoorCloseFloorUpTimer()
 {
-	UE_LOG(LogTemp, Warning, TEXT("timer2"));
-
 	switch (choose) {
-	case 0 :
-		doorLeft->AddLocalOffset(FVector(-2.f, 0, 0));
-		doorRight->AddLocalOffset(FVector(-2.f, 0, 0));
+	case 0:
+		doorLeft->AddLocalOffset(FVector(2.f, 0, 0));
+		doorRight->AddLocalOffset(FVector(2.f, 0, 0));
 
-		if (-120.f >= doorLeft->GetRelativeLocation().X)
+		if (0 <= doorLeft->GetRelativeLocation().X)
 			choose = 1;
 		break;
-	case 1 :
+	case 1:
 		doorFloor->AddLocalOffset({ 0, 0, 4.f });
 
 		if (500.f <= doorFloor->GetRelativeLocation().Z)
 			choose = 2;
 		break;
-	case 2 :
-		UE_LOG(LogTemp, Warning, TEXT("FIN"));
-		GetWorldTimerManager().ClearTimer(elevatorTimer);
-		break;
-	default :
+	case 2:
+	{
+		GetWorldTimerManager().ClearTimer(elevatorDoorCloseTimer);
+		// check level
+		if (1 == checkMyStage) {
+			UGameplayStatics::OpenLevel(GetWorld(), FName(*levelName), true);
+		}
+		else if (2 == checkMyStage) {
+			levelName = "STAGE_5";
+			UGameplayStatics::OpenLevel(GetWorld(), FName(*levelName), true);
+		}
+		/*else if (3 == checkMyStage) {
+			
+		}*/
+	}
+	break;
+	default:
 		UE_LOG(LogTemp, Warning, TEXT("default"));
 		break;
 	}

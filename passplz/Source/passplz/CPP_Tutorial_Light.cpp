@@ -37,13 +37,15 @@ void ACPP_Tutorial_Light::BeginPlay()
 {
 	Super::BeginPlay();
 
-	boxCollision->SetWorldLocation(lightLocation.at(lightIndex));
+	boxCollision->SetWorldLocation(lightLocation[lightIndex]);
 }
 
 void ACPP_Tutorial_Light::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+
 	boxCollision->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Tutorial_Light::OnComponentBeginOverlap_boxCollision);
+	////boxCollision->OnComponentEndOverlap.AddDynamic(this, &ACPP_Tutorial_Light::OnComponentEndOverlap_boxCollision);
 }
 
 // Called every frame
@@ -56,14 +58,22 @@ void ACPP_Tutorial_Light::OnComponentBeginOverlap_boxCollision(UPrimitiveCompone
 	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
-	lightIndex += 1;
-	UE_LOG(LogTemp, Error, TEXT("+++++++++++ %d"), int(lightIndex));
 	boxCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	TeleportTo(lightLocation.at(lightIndex), boxCollision->GetRelativeRotation());
-	UE_LOG(LogTemp, Warning, TEXT("---------------- %d"), int(lightIndex));
-	//boxCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
-	
-	if (3 <= lightIndex)
+	lightIndex++;
+
+	if (lightIndex < lightLocation.Num()) {
+		TeleportTo(lightLocation[lightIndex], boxCollision->GetRelativeRotation());
+	}
+	if (3 <= lightIndex) {
 		spotLight->SetIntensity(0.f);
+
+		Cast<ACPP_Elevator>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Elevator::StaticClass()))->LightOnEvDoorOpen();
+	}
+
+	FTimerHandle waitTimer;
+	GetWorld()->GetTimerManager().SetTimer(waitTimer, FTimerDelegate::CreateLambda([&]()
+	{
+		boxCollision->SetCollisionEnabled(ECollisionEnabled::QueryOnly);
+	}), 1.f, false);
 }
