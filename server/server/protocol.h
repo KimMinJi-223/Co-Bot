@@ -17,20 +17,10 @@ enum class packet_type {
 	cs_push_button_maze_left,
 	cs_push_button_maze_right,
 
-	cs_end_button_maze_forward,
-	cs_end_button_maze_back,
-	cs_end_button_maze_left,
-	cs_end_button_maze_right,
-
 	cs_push_button_gear_forward,
 	cs_push_button_gear_back,
 	cs_push_button_gear_left,
 	cs_push_button_gear_right,
-
-	cs_end_button_gear_forward,
-	cs_end_button_gear_back,
-	cs_end_button_gear_left,
-	cs_end_button_gear_right,
 
 	sc_login, 
 	sc_add_player,
@@ -42,10 +32,10 @@ enum class packet_type {
 	sc_push_button_maze_left,
 	sc_push_button_maze_right,
 
-	sc_end_button_maze_forward,
-	sc_end_button_maze_back,
-	sc_end_button_maze_left,
-	sc_end_button_maze_right,
+	sc_push_button_gear_forward,
+	sc_push_button_gear_back,
+	sc_push_button_gear_left,
+	sc_push_button_gear_right,
 
 	cs_elevator,
 	sc_elevator,
