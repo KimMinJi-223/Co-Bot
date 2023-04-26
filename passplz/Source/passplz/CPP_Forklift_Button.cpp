@@ -2,6 +2,7 @@
 
 
 #include "CPP_Forklift_Button.h"
+#include "CPP_Color_Forklift.h"
 
 // Sets default values
 ACPP_Forklift_Button::ACPP_Forklift_Button()
@@ -56,6 +57,10 @@ void ACPP_Forklift_Button::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	red->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(1.0f, 0.0f, 0.0f));
+	green->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(0.0f, 1.0f, 0.0f));
+	blue->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(0.0f, 0.0f, 1.0f));
+	black->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(0.0f, 0.0f, 0.0f));
 }
 
 // Called every frame
@@ -65,3 +70,43 @@ void ACPP_Forklift_Button::Tick(float DeltaTime)
 
 }
 
+void ACPP_Forklift_Button::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	redCollision->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Forklift_Button::OnComponentBeginOverlap_redCollision);
+	greenCollision->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Forklift_Button::OnComponentBeginOverlap_greenCollision);
+	blueCollision->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Forklift_Button::OnComponentBeginOverlap_blueCollision);
+	blackCollision->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Forklift_Button::OnComponentBeginOverlap_blackCollision);
+}
+
+void ACPP_Forklift_Button::OnComponentBeginOverlap_redCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	OutActor = Cast<ACPP_Color_Forklift>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Color_Forklift::StaticClass()));
+	FVector pillarColor = OutActor->GetPillarColor();
+	pillarColor.X = 1.0;
+	
+	OutActor->SetPillarColor(pillarColor);
+}
+
+void ACPP_Forklift_Button::OnComponentBeginOverlap_greenCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	OutActor = Cast<ACPP_Color_Forklift>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Color_Forklift::StaticClass()));
+	FVector pillarColor = OutActor->GetPillarColor();
+	pillarColor.Y = 1.0;
+	OutActor->SetPillarColor(pillarColor);
+}
+
+void ACPP_Forklift_Button::OnComponentBeginOverlap_blueCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	OutActor = Cast<ACPP_Color_Forklift>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Color_Forklift::StaticClass()));
+	FVector pillarColor = OutActor->GetPillarColor();
+	pillarColor.Z = 1.0;
+	OutActor->SetPillarColor(pillarColor);
+}
+
+void ACPP_Forklift_Button::OnComponentBeginOverlap_blackCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	OutActor = Cast<ACPP_Color_Forklift>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Color_Forklift::StaticClass()));
+	OutActor->SetPillarColor(FVector(0.f, 0.f, 0.f));
+}

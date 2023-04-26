@@ -39,19 +39,19 @@ private:
 		UStaticMeshComponent* pillar6;
 
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* redForklift;
-	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* greenForklift;
-	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* blueForklift;
-	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* blackForklift;
-	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* whiteForklift;
-	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* yellowForklift;
-	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* magentaForklift;
-	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* cyanForklift;
+		TArray<UStaticMeshComponent*> Forklifts;
+
+	FVector PillarColor;
+	int currentColorForklift; 
+	float forklifrsdirection[8]; 
+	bool isForkliftsMove[8]; 
+	float forkliftsMoveTime[8]; 
+
+	FTimerHandle forkliftsMoveTimer;
+
+public:
+	FVector GetPillarColor() { return PillarColor; };
+	void SetPillarColor(FVector color);
+	void FindAndMoveForkliftByColor();
+	void ForkliftMoveTimer();
 };
