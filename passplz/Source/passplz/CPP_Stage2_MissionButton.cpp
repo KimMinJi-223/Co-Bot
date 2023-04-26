@@ -217,6 +217,9 @@ void ACPP_Stage2_MissionButton::HasTimer(FTimerHandle& timer, int timerType)
 //미로버튼을 밟았을때 어떤 버튼을 밟았는지 서버로 보낸다======================================================
 void ACPP_Stage2_MissionButton::OnMazeforwardOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_1/button_click_Cue.button_click_Cue"));
+	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
+
 	isMazeForward = true;
 	HasTimer(mazeTimer, 0);
 	UE_LOG(LogTemp, Warning, TEXT("OnMazeforwardOverlap"));
@@ -224,6 +227,9 @@ void ACPP_Stage2_MissionButton::OnMazeforwardOverlap(UPrimitiveComponent* Overla
 
 void ACPP_Stage2_MissionButton::OnMazeBackOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_1/button_click_Cue.button_click_Cue"));
+	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
+
 	isMazeBack = true;
 	HasTimer(mazeTimer, 0);
 	UE_LOG(LogTemp, Warning, TEXT("OnMazeBackOverlap"));
@@ -231,6 +237,9 @@ void ACPP_Stage2_MissionButton::OnMazeBackOverlap(UPrimitiveComponent* Overlappe
 
 void ACPP_Stage2_MissionButton::OnMazeRightOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_1/button_click_Cue.button_click_Cue"));
+	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
+
 	isMazeRight = true;
 	HasTimer(mazeTimer, 0);
 	UE_LOG(LogTemp, Warning, TEXT("OnMazeRightOverlap"));
@@ -238,6 +247,9 @@ void ACPP_Stage2_MissionButton::OnMazeRightOverlap(UPrimitiveComponent* Overlapp
 
 void ACPP_Stage2_MissionButton::OnMazeLeftOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_1/button_click_Cue.button_click_Cue"));
+	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
+
 	isMazeLeft = true;
 	HasTimer(mazeTimer, 0);
 	UE_LOG(LogTemp, Warning, TEXT("OnMazeLeftOverlap"));
