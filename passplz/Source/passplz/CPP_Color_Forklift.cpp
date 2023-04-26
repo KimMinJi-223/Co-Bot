@@ -134,7 +134,7 @@ void ACPP_Color_Forklift::ForkliftMoveTimer()
 		if (isForkliftsMove[i]) {
 			stopTimer = false;
 		
-			Forklifts[i]->AddRelativeLocation(FVector(forklifrsdirection[i], 0.0f, 0.0f));
+			Forklifts[i]->AddLocalOffset(FVector(forklifrsdirection[i], 0.0f, 0.0f));
 			forkliftsMoveTime[i] += 0.03;
 			if (forkliftsMoveTime[i] > 3.f) {
 				isForkliftsMove[i] = false;

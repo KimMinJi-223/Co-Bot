@@ -47,7 +47,7 @@ void ACPP_Cobot_Controller::BeginPlay()
 
     SendEnterPacket();
 
-    Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(-8100.f, 2180.f, 59.149971f), FRotator(0.0f, 0.0f, 0.0f));
+    Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(-7500.f, 2180.f, 59.149971f), FRotator(0.0f, 0.0f, 0.0f));
     Player_2->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), FVector(0.0f, 1.0f, 0.0f));
     Player_2->SetCollision();
     Cobot_Curve = LoadObject<UCurveFloat>(nullptr, TEXT("/Game/curve/Cobot_Curve.Cobot_Curve"));
