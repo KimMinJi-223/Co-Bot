@@ -33,6 +33,7 @@ public:
 	void SetCollision();
 	FVector GetColor() { return color; }
 	void SetColor(FVector newColor) { color = newColor; }
+	void RecvColor(int newcolor);
 
 private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)

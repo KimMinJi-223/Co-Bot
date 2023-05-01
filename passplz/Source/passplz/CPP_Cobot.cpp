@@ -140,3 +140,23 @@ void ACPP_Cobot::SetCollision()
 	Foot_right_Zone->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
+void ACPP_Cobot::RecvColor(int newcolor)
+{
+	switch (newcolor) {
+	case 0: //레드
+		color.X = 1.0;
+		break;
+	case 1: //그린
+		color.Y = 1.0;
+		break;
+	case 2: //블루
+		color.Z = 1.0;
+		break;
+	case 3: //블랙
+		color = FVector(0.0f, 0.0f, 0.0f);
+		break;
+	}
+
+	GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), color);
+}
+

@@ -6,11 +6,21 @@ constexpr int BUF_SIZE = 2048;
 constexpr int MAX_USER = 10;
 constexpr int MAX_LOGIN_LEN = 15;
 
-enum class packet_type { 
-	cs_login, 
-	cs_enter, 
+enum class packet_type {
+	cs_login,
+	cs_enter,
 	cs_move,
 	cs_logout,
+
+	cs_push_button_Forklift_red,
+	cs_push_button_Forklift_green,
+	cs_push_button_Forklift_blue,
+	cs_push_button_Forklift_black,
+
+	cs_push_button_cobot_red,
+	cs_push_button_cobot_green,
+	cs_push_button_cobot_blue,
+	cs_push_button_cobot_black,
 
 	cs_push_button_maze_forward,
 	cs_push_button_maze_back,

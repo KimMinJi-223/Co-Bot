@@ -3,6 +3,8 @@
 #pragma once
 
 #include "passplz.h"
+#include "../../../server/server/protocol.h"
+#include "CPP_Cobot_Controller.h"
 #include "GameFramework/Actor.h"
 #include "Components/ArrowComponent.h"
 #include "CPP_Color_Button.generated.h"
@@ -71,6 +73,8 @@ private:
 	FVector color;
 
 private:
+	void CobotButtonSend(packet_type type);
+
 	//버튼의 충돌
 	UFUNCTION()
 		void OnComponentBeginOverlap_redCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -88,6 +92,4 @@ private:
 	//리스폰 충돌
 	UFUNCTION()
 		void OnComponentBeginOverlap_respawnCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-
 };

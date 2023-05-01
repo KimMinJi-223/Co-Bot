@@ -93,35 +93,40 @@ void ACPP_Color_Button::Tick(float DeltaTime)
 
 }
 
+void ACPP_Color_Button::CobotButtonSend(packet_type type)
+{
+	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+	cs_button_packet button_pack;
+	button_pack.size = sizeof(button_pack);
+	button_pack.type = static_cast<char>(type);
+	UE_LOG(LogTemp, Warning, TEXT("CobotButtonSend"));
+	send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+}
+
+//버튼 충돌===================================================
 void ACPP_Color_Button::OnComponentBeginOverlap_redCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	color.X = 1.0f;
-	//이부분은 서버 통신 구현때 변경 예정
-	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), color);
-	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->SetColor(color);
+	UE_LOG(LogTemp, Warning, TEXT("red_button"));
+	CobotButtonSend(packet_type::cs_push_button_cobot_red);
 }
 
 void ACPP_Color_Button::OnComponentBeginOverlap_greenCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	color.Y = 1.0f;
-	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), color);
-	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->SetColor(color);
+	UE_LOG(LogTemp, Warning, TEXT("green_button"));
+	CobotButtonSend(packet_type::cs_push_button_cobot_green);
 }
 
 void ACPP_Color_Button::OnComponentBeginOverlap_blueCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	color.Z = 1.0f;
-	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), color);
-	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->SetColor(color);
+	UE_LOG(LogTemp, Warning, TEXT("blue_button"));
+	CobotButtonSend(packet_type::cs_push_button_cobot_blue);
 }
 
 void ACPP_Color_Button::OnComponentBeginOverlap_blackCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	color.X = 0.0f;
-	color.Y = 0.0f;
-	color.Z = 0.0f;
-	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), color);
-	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->SetColor(color);
+	UE_LOG(LogTemp, Warning, TEXT("black_button"));
+	CobotButtonSend(packet_type::cs_push_button_cobot_black);
 }
 
 //코봇이 발판과 충돌했을때 컬러를 확인해야한다.
@@ -176,11 +181,12 @@ void ACPP_Color_Button::OnComponentBeginOverlap_cyanCollisionCollision(UPrimitiv
 	}
 }
 
+//리스폰
 void ACPP_Color_Button::OnComponentBeginOverlap_respawnCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-
 	ACPP_Cobot* cobot = Cast<ACPP_Cobot>(OtherActor);
 	if (cobot) {
 		cobot->SetActorLocation(GetActorLocation());
 	}
 }
+

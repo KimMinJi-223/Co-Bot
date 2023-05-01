@@ -428,7 +428,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 
 
             //현재 발의 위치를 업데이트 한다.
-            float curvevalue = Cobot_Curve->GetFloatValue(player->Time_left);
+            float curvevalue = FMath::Sin(FMath::DegreesToRadians(player->Time_left * 180.f)) * 0.8f;
             player->Current_left = (player->GetActorRightVector() * -curvevalue * distance_two_feet) + (UKismetMathLibrary::VLerp(player->Start_left, player->Target_left, player->Time_left));
 
             UE_LOG(LogTemp, Warning, TEXT("Target_left %f"), player->Target_left.Z);
@@ -474,7 +474,7 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
           
 
                 //현재 발의 위치를 업데이트 한다.
-                float curvevalue = Cobot_Curve->GetFloatValue(player->Time_right);
+                float curvevalue = FMath::Sin(FMath::DegreesToRadians(player->Time_right * 180.f)) * 0.8f;
                 player->Current_right = (player->GetActorRightVector() * curvevalue * distance_two_feet) + (UKismetMathLibrary::VLerp(player->Start_right, player->Target_right, player->Time_right));
 
                 FHitResult HitResult;

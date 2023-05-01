@@ -3,6 +3,9 @@
 #pragma once
 
 #include "passplz.h"
+#include "../../../server/server/protocol.h"
+#include "CPP_Cobot_Controller.h"
+
 #include "Components/ArrowComponent.h"
 #include "GameFramework/Actor.h"
 #include "CPP_Forklift_Button.generated.h"
@@ -56,6 +59,8 @@ private:
 	class ACPP_Color_Forklift* OutActor;
 
 private:
+	void ForkliftButtonSend(packet_type type);
+
 	UFUNCTION()
 		void OnComponentBeginOverlap_redCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 	UFUNCTION()

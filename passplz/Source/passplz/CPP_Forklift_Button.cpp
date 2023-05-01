@@ -80,53 +80,38 @@ void ACPP_Forklift_Button::PostInitializeComponents()
 	blackCollision->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Forklift_Button::OnComponentBeginOverlap_blackCollision);
 }
 
+
+void ACPP_Forklift_Button::ForkliftButtonSend(packet_type type)
+{
+	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+	cs_button_packet button_pack;
+	button_pack.size = sizeof(button_pack);
+	button_pack.type = static_cast<char>(type);
+	UE_LOG(LogTemp, Warning, TEXT("ForkliftButtonSend"));
+	send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);
+}
+
 void ACPP_Forklift_Button::OnComponentBeginOverlap_redCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("red_button"));
-
-	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_1/button_click_Cue.button_click_Cue"));
-	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
-
-	OutActor = Cast<ACPP_Color_Forklift>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Color_Forklift::StaticClass()));
-	FVector pillarColor = OutActor->GetPillarColor();
-	pillarColor.X = 1.0;
-	
-	OutActor->SetPillarColor(pillarColor);
+	ForkliftButtonSend(packet_type::cs_push_button_Forklift_red);
 }
 
 void ACPP_Forklift_Button::OnComponentBeginOverlap_greenCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("green_button"));
-
-	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_1/button_click_Cue.button_click_Cue"));
-	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
-
-	OutActor = Cast<ACPP_Color_Forklift>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Color_Forklift::StaticClass()));
-	FVector pillarColor = OutActor->GetPillarColor();
-	pillarColor.Y = 1.0;
-	OutActor->SetPillarColor(pillarColor);
+	ForkliftButtonSend(packet_type::cs_push_button_Forklift_green);
 }
 
 void ACPP_Forklift_Button::OnComponentBeginOverlap_blueCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("blue_button"));
-
-	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_1/button_click_Cue.button_click_Cue"));
-	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
-
-	OutActor = Cast<ACPP_Color_Forklift>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Color_Forklift::StaticClass()));
-	FVector pillarColor = OutActor->GetPillarColor();
-	pillarColor.Z = 1.0;
-	OutActor->SetPillarColor(pillarColor);
+	ForkliftButtonSend(packet_type::cs_push_button_Forklift_blue);
 }
 
 void ACPP_Forklift_Button::OnComponentBeginOverlap_blackCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	UE_LOG(LogTemp, Warning, TEXT("black_button"));
-
-	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_1/button_click_Cue.button_click_Cue"));
-	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
-
-	OutActor = Cast<ACPP_Color_Forklift>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Color_Forklift::StaticClass()));
-	OutActor->SetPillarColor(FVector(0.f, 0.f, 0.f));
+	ForkliftButtonSend(packet_type::cs_push_button_Forklift_black);
 }

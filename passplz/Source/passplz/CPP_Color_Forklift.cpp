@@ -66,7 +66,7 @@ ACPP_Color_Forklift::ACPP_Color_Forklift()
 		Forklifts[7]->SetStaticMesh(SM_FORKLIFT.Object);
 	}
 
-	PillarColor = FVector(0.f, 0.f, 0.f);
+	pillarColor = FVector(0.f, 0.f, 0.f);
 	for (int i = 0; i < 8; ++i) {
 		isForkliftsMove[i] = false;
 		forklifrsdirection[i] = 1.f;
@@ -104,21 +104,23 @@ void ACPP_Color_Forklift::Tick(float DeltaTime)
 
 }
 
-void ACPP_Color_Forklift::SetPillarColor(FVector color)
+void ACPP_Color_Forklift::SetPillarColor()
 {
-	PillarColor = color;
-	pillar1->SetVectorParameterValueOnMaterials(TEXT("color"), PillarColor);
-	pillar2->SetVectorParameterValueOnMaterials(TEXT("color"), PillarColor);
-	pillar3->SetVectorParameterValueOnMaterials(TEXT("color"), PillarColor);
-	pillar4->SetVectorParameterValueOnMaterials(TEXT("color"), PillarColor);
-	pillar5->SetVectorParameterValueOnMaterials(TEXT("color"), PillarColor);
-	pillar6->SetVectorParameterValueOnMaterials(TEXT("color"), PillarColor);
+	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_1/button_click_Cue.button_click_Cue"));
+	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
+
+	pillar1->SetVectorParameterValueOnMaterials(TEXT("color"), pillarColor);
+	pillar2->SetVectorParameterValueOnMaterials(TEXT("color"), pillarColor);
+	pillar3->SetVectorParameterValueOnMaterials(TEXT("color"), pillarColor);
+	pillar4->SetVectorParameterValueOnMaterials(TEXT("color"), pillarColor);
+	pillar5->SetVectorParameterValueOnMaterials(TEXT("color"), pillarColor);
+	pillar6->SetVectorParameterValueOnMaterials(TEXT("color"), pillarColor);
 	FindAndMoveForkliftByColor();
 }
 
 void ACPP_Color_Forklift::FindAndMoveForkliftByColor()
 {
-	currentColorForklift = (int)((PillarColor.X * 2 * 2) + (PillarColor.Y * 2) + (PillarColor.Z * 1));
+	currentColorForklift = (int)((pillarColor.X * 2 * 2) + (pillarColor.Y * 2) + (pillarColor.Z * 1));
 
 	isForkliftsMove[currentColorForklift] = true;
 
@@ -133,7 +135,7 @@ void ACPP_Color_Forklift::ForkliftMoveTimer()
 	for (int i = 0; i < 8; ++i) {
 		if (isForkliftsMove[i]) {
 			stopTimer = false;
-		
+
 			Forklifts[i]->AddLocalOffset(FVector(forklifrsdirection[i], 0.0f, 0.0f));
 			forkliftsMoveTime[i] += 0.03;
 			if (forkliftsMoveTime[i] > 3.f) {
@@ -146,4 +148,25 @@ void ACPP_Color_Forklift::ForkliftMoveTimer()
 
 	if (stopTimer)
 		GetWorldTimerManager().ClearTimer(forkliftsMoveTimer);
+}
+
+//버튼이 눌림 사운드를 울리고 색을 바꾼다.
+void ACPP_Color_Forklift::RecvColor(int color)
+{
+	switch (color) {
+	case 0: //레드
+		pillarColor.X = 1.0;
+		break;
+	case 1: //그린
+		pillarColor.Y = 1.0;
+		break;
+	case 2: //블루
+		pillarColor.Z = 1.0;
+		break;
+	case 3: //블랙
+		pillarColor = FVector(0.0f, 0.0f, 0.0f);
+		break;
+
+	}
+	SetPillarColor();
 }

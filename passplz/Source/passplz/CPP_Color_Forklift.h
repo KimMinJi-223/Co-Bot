@@ -41,7 +41,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		TArray<UStaticMeshComponent*> Forklifts;
 
-	FVector PillarColor;
+	FVector pillarColor;
 	int currentColorForklift; 
 	float forklifrsdirection[8]; 
 	bool isForkliftsMove[8]; 
@@ -50,8 +50,9 @@ private:
 	FTimerHandle forkliftsMoveTimer;
 
 public:
-	FVector GetPillarColor() { return PillarColor; };
-	void SetPillarColor(FVector color);
+	FVector GetPillarColor() { return pillarColor; };
+	void SetPillarColor();
 	void FindAndMoveForkliftByColor();
 	void ForkliftMoveTimer();
+	void RecvColor(int color);
 };
