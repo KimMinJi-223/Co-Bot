@@ -6,6 +6,8 @@
 #include "Engine/World.h"
 #include "CPP_Maze_2S.h"
 #include "CPP_GearKey_2S.h"
+#include "CPP_Color_Forklift.h"
+#include "CPP_Cobot.h"
 
 #include "../../../server/server/protocol.h"
 
@@ -61,6 +63,8 @@ void ACPP_Cobot_Controller::BeginPlay()
 
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Maze_2S::StaticClass(), maze_actor);
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_GearKey_2S::StaticClass(), gear_actor);
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Color_Forklift::StaticClass(), forklift_actor);
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Cobot::StaticClass(), cobot_actor);
 }
 
 void ACPP_Cobot_Controller::Tick(float DeltaTime)
@@ -273,6 +277,43 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
     {
         Cast<ACPP_Elevator>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Elevator::StaticClass()))->ElevatorOperateCameraMoveLevelChange();
         UE_LOG(LogTemp, Warning, TEXT("sc_elevator"));
+    } break;
+    case static_cast<int>(packet_type::sc_push_button_Forklift_red):
+    {
+        Cast<ACPP_Color_Forklift>(forklift_actor[0])->RecvColor(0);
+    } break;
+    case static_cast<int>(packet_type::sc_push_button_Forklift_green):
+    {
+        Cast<ACPP_Color_Forklift>(forklift_actor[0])->RecvColor(1);
+    } break;
+    case static_cast<int>(packet_type::sc_push_button_Forklift_blue):
+    {
+        Cast<ACPP_Color_Forklift>(forklift_actor[0])->RecvColor(2);
+    } break;
+    case static_cast<int>(packet_type::sc_push_button_Forklift_black):
+    {
+        Cast<ACPP_Color_Forklift>(forklift_actor[0])->RecvColor(3);
+    } break;
+    case static_cast<int>(packet_type::sc_push_button_cobot_red):
+    {
+        //Cast<ACPP_Cobot>(cobot_actor[0])->RecvColor(0);
+        player->RecvColor(0);
+        Player_2->RecvColor(0);
+    } break;
+    case static_cast<int>(packet_type::sc_push_button_cobot_green):
+    {
+        player->RecvColor(1);
+        Player_2->RecvColor(1);
+    } break;
+    case static_cast<int>(packet_type::sc_push_button_cobot_blue):
+    {
+        player->RecvColor(2);
+        Player_2->RecvColor(2);
+    } break;
+    case static_cast<int>(packet_type::sc_push_button_cobot_black):
+    {
+        player->RecvColor(3);
+        Player_2->RecvColor(3);
     } break;
     }
 }

@@ -11,16 +11,26 @@ enum class packet_type {
 	cs_enter,
 	cs_move,
 	cs_logout,
-
+	
 	cs_push_button_Forklift_red,
 	cs_push_button_Forklift_green,
 	cs_push_button_Forklift_blue,
 	cs_push_button_Forklift_black,
 
+	sc_push_button_Forklift_red,
+	sc_push_button_Forklift_green,
+	sc_push_button_Forklift_blue,
+	sc_push_button_Forklift_black,
+
 	cs_push_button_cobot_red,
 	cs_push_button_cobot_green,
 	cs_push_button_cobot_blue,
 	cs_push_button_cobot_black,
+
+	sc_push_button_cobot_red,
+	sc_push_button_cobot_green,
+	sc_push_button_cobot_blue,
+	sc_push_button_cobot_black,
 
 	cs_push_button_maze_forward,
 	cs_push_button_maze_back,
@@ -49,9 +59,14 @@ enum class packet_type {
 
 	cs_elevator,
 	sc_elevator,
+
+	cs_stage2_last_gate,
+
+	sc_stage2_last_button,
+	sc_count,
 };
 enum class direction { forward, back, left, right };
-enum class synch_type { button1, button2, button3 };
+enum class color { red, green, blue, black };
 enum class button_type { s2_maze_forward, s2_maze_back, s2_maze_right, s2_maze_left };
 enum class endbutton_type { s2_maze_forward, s2_maze_back, s2_maze_right, s2_maze_left };
 
@@ -175,4 +190,24 @@ struct sc_elevator_packet
 {
 	char size;
 	char type;
+};
+
+struct cs_stage2_last_gate_packet
+{
+	char size;
+	char type;
+};
+
+struct sc_stage2_last_button_packet
+{
+	char size;
+	char type;
+	int color;
+};
+
+struct sc_count_packet
+{
+	char size;
+	char type;
+	int count;
 };

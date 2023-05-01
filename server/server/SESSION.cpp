@@ -163,6 +163,44 @@ void SESSION::send_elevator_ok_packet()
 	send_packet(reinterpret_cast<char*>(&pack));
 }
 
+void SESSION::send_forklift_button(packet_type type)
+{
+	sc_button_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(type);
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_cobot_button(packet_type type)
+{
+	sc_button_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(type);
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_stage2_last_button(int color)
+{
+	sc_stage2_last_button_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_stage2_last_button);
+	pack.color = color;
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_count_packet(int count)
+{
+	sc_count_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_count);
+	pack.count = count;
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
 // 23.4.14
 // 1. OVER_EX 동적 할당해주는 부분에서 메모리 릭이 있는 듯하다.
 // 2. std::atomic<std::shared_ptr>에 대해서 더 조사해보기

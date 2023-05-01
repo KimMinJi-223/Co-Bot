@@ -155,15 +155,19 @@ void ACPP_Color_Forklift::RecvColor(int color)
 {
 	switch (color) {
 	case 0: //레드
+		UE_LOG(LogTemp, Warning, TEXT("Forklift::Red"));
 		pillarColor.X = 1.0;
 		break;
 	case 1: //그린
+		UE_LOG(LogTemp, Warning, TEXT("Forklift::Green"));
 		pillarColor.Y = 1.0;
 		break;
 	case 2: //블루
+		UE_LOG(LogTemp, Warning, TEXT("Forklift::Blue"));
 		pillarColor.Z = 1.0;
 		break;
 	case 3: //블랙
+		UE_LOG(LogTemp, Warning, TEXT("Forklift::Black"));
 		pillarColor = FVector(0.0f, 0.0f, 0.0f);
 		break;
 

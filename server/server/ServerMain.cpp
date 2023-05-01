@@ -376,6 +376,72 @@ void ServerMain::process_packet(char* packet, int client_id)
 			clients[clients[client_id].tm_id].send_elevator_ok_packet();
 		}
 	} break;
+	case static_cast<int>(packet_type::cs_push_button_Forklift_red):
+	{
+		clients[client_id].send_forklift_button(packet_type::sc_push_button_Forklift_red);
+		clients[clients[client_id].tm_id].send_forklift_button(packet_type::sc_push_button_Forklift_red);
+	} break;
+	case static_cast<int>(packet_type::cs_push_button_Forklift_green):
+	{
+		clients[client_id].send_forklift_button(packet_type::sc_push_button_Forklift_green);
+		clients[clients[client_id].tm_id].send_forklift_button(packet_type::sc_push_button_Forklift_green);
+	} break;
+	case static_cast<int>(packet_type::cs_push_button_Forklift_blue):
+	{
+		clients[client_id].send_forklift_button(packet_type::sc_push_button_Forklift_blue);
+		clients[clients[client_id].tm_id].send_forklift_button(packet_type::sc_push_button_Forklift_blue);
+	} break;
+	case static_cast<int>(packet_type::cs_push_button_Forklift_black):
+	{
+		clients[client_id].send_forklift_button(packet_type::sc_push_button_Forklift_black);
+		clients[clients[client_id].tm_id].send_forklift_button(packet_type::sc_push_button_Forklift_black);
+	} break;
+	case static_cast<int>(packet_type::cs_push_button_cobot_red):
+	{
+		clients[client_id].send_cobot_button(packet_type::sc_push_button_cobot_red);
+		clients[clients[client_id].tm_id].send_cobot_button(packet_type::sc_push_button_cobot_red);
+	} break;
+	case static_cast<int>(packet_type::cs_push_button_cobot_green):
+	{
+		clients[client_id].send_cobot_button(packet_type::sc_push_button_cobot_green);
+		clients[clients[client_id].tm_id].send_cobot_button(packet_type::sc_push_button_cobot_green);
+	} break;
+	case static_cast<int>(packet_type::cs_push_button_cobot_blue):
+	{
+		clients[client_id].send_cobot_button(packet_type::sc_push_button_cobot_blue);
+		clients[clients[client_id].tm_id].send_cobot_button(packet_type::sc_push_button_cobot_blue);
+	} break;
+	case static_cast<int>(packet_type::cs_push_button_cobot_black):
+	{
+		clients[client_id].send_cobot_button(packet_type::sc_push_button_cobot_black);
+		clients[clients[client_id].tm_id].send_cobot_button(packet_type::sc_push_button_cobot_black);
+	} break;
+	case static_cast<int>(packet_type::cs_stage2_last_gate):
+	{
+		// timer thread로 바꾸자 다음에
+		while (true)
+		{
+			int color = rand() % 8;
+			clients[client_id].send_stage2_last_button(color);
+			clients[clients[client_id].tm_id].send_stage2_last_button(color);
+
+			clients[client_id].send_count_packet(3);
+			clients[clients[client_id].tm_id].send_count_packet(3);
+			SleepEx(1, false);
+
+			clients[client_id].send_count_packet(2);
+			clients[clients[client_id].tm_id].send_count_packet(2);
+			SleepEx(1, false);
+
+			clients[client_id].send_count_packet(1);
+			clients[clients[client_id].tm_id].send_count_packet(1);
+			SleepEx(1, false);
+
+			color = rand() % 8;
+			clients[client_id].send_stage2_last_button(color);
+			clients[clients[client_id].tm_id].send_stage2_last_button(color);
+		}
+	} break;
 	}
 }
 

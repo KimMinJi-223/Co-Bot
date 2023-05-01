@@ -45,6 +45,8 @@ private:
 
 	TArray<AActor*> maze_actor;
 	TArray<AActor*> gear_actor;
+	TArray<AActor*> forklift_actor;
+	TArray<AActor*> cobot_actor;
 
 	bool is_maze_button_push_forward;
 	bool is_maze_button_push_back;

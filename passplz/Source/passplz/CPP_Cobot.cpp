@@ -144,15 +144,19 @@ void ACPP_Cobot::RecvColor(int newcolor)
 {
 	switch (newcolor) {
 	case 0: //레드
+		UE_LOG(LogTemp, Warning, TEXT("Cobot::Red"));
 		color.X = 1.0;
 		break;
 	case 1: //그린
+		UE_LOG(LogTemp, Warning, TEXT("Cobot::Green"));
 		color.Y = 1.0;
 		break;
 	case 2: //블루
+		UE_LOG(LogTemp, Warning, TEXT("Cobot::Blue"));
 		color.Z = 1.0;
 		break;
 	case 3: //블랙
+		UE_LOG(LogTemp, Warning, TEXT("Cobot::Black"));
 		color = FVector(0.0f, 0.0f, 0.0f);
 		break;
 	}

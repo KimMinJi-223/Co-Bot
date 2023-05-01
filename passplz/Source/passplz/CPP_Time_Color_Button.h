@@ -3,6 +3,9 @@
 #pragma once
 
 #include "passplz.h"
+#include "../../../server/server/protocol.h"
+#include "CPP_Cobot_Controller.h"
+
 #include "GameFramework/Actor.h"
 #include "Components/ArrowComponent.h"
 #include "CPP_Time_Color_Button.generated.h"
