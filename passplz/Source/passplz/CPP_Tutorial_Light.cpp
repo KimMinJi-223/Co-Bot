@@ -25,9 +25,9 @@ ACPP_Tutorial_Light::ACPP_Tutorial_Light()
 	spotLight->SetVolumetricScatteringIntensity(30.f);
 	spotLight->SetIntensityUnits(ELightUnits::Unitless);
 
-	lightLocation = { FVector(-8640.f, 2692.f, 20.f),
-		FVector(-6247.f, 4250.f, 20.f),
-		FVector(-1031.f, 5088.f, 20.f),
+	lightLocation = { FVector(-7950.f, 2140.f, 20.f),
+		FVector(-6220.f, 2720.f, 20.f),
+		FVector(-1900.f, 3940.f, 20.f),
 	};
 	lightIndex = 0;
 }
