@@ -1,7 +1,9 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
-
+#include "passplz.h"
+#include "../../../server/server/protocol.h"
+#include "CPP_Cobot_Controller.h"
 #include "passplz.h"
 #include "../../../server/server/protocol.h"
 #include "CPP_Cobot_Controller.h"
@@ -104,5 +106,7 @@ private:
 	UFUNCTION()
 		void OnComponentBeginOverlap_timeColorFootholdCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+public:
 	void FootholdColorChageTimer();
+	void TimeColorButtonSend(packet_type type);
 };

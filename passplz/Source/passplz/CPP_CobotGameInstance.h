@@ -30,6 +30,6 @@ public:
 	//bool			is_connect;
 	//ClientInfo		cl_info;
 
-	//void SetInfo();
+	virtual void Init() override;
 	//void GetInfo(int client_id, double x, double y, double z, int tm_id, double tm_x, double tm_y, double);
 };
