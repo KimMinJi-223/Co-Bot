@@ -42,6 +42,9 @@ enum class packet_type {
 	cs_push_button_gear_left,
 	cs_push_button_gear_right,
 
+	cs_start_time_color,
+
+
 	sc_login, 
 	sc_add_player,
 	sc_move,

@@ -32,6 +32,9 @@ public:
 
 private:
 	UPROPERTY(VisibleAnywhere)
+		UBoxComponent* startCollision;
+
+	UPROPERTY(VisibleAnywhere)
 		UArrowComponent* center;
 
 	UPROPERTY(VisibleAnywhere)
@@ -90,10 +93,14 @@ private:
 
 	FVector nextFootholdColor;
 	FVector currentFootholdColor;
-	FVector chageCobotColor;
+	FVector changeCobotColor;
 	
 
 private:
+	//시작을 서버에 알리는 함수
+	UFUNCTION()
+		void OnComponentBeginOverlap_startCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
 	//버튼1의 충돌
 	UFUNCTION()
 		void OnComponentBeginOverlap_redCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -106,7 +113,10 @@ private:
 	UFUNCTION()
 		void OnComponentBeginOverlap_timeColorFootholdCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
+	FTimerHandle changeTimer;
+	float changeTime = 0.f;
+
 public:
-	void FootholdColorChageTimer();
-	void TimeColorButtonSend(packet_type type);
+	void FootholdColorChangeTimer();
+	void RecvColor(int newcolor);
 };

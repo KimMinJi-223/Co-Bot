@@ -13,6 +13,7 @@ ACPP_Time_Color_Button::ACPP_Time_Color_Button()
 	center = CreateDefaultSubobject<UArrowComponent>(TEXT("Center"));
 	timeColorFoothold = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("timeColorFoothold"));
 	timeColorFootholdCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("timeColorFootholdCollision"));
+	startCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("startCollision"));
 
 	//첫번째 컬러 버튼
 	red1 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("red1"));
@@ -35,6 +36,7 @@ ACPP_Time_Color_Button::ACPP_Time_Color_Button()
 
 	RootComponent = center;
 
+	startCollision->SetupAttachment(RootComponent);
 	timeColorFoothold->SetupAttachment(RootComponent);
 	timeColorFootholdCollision->SetupAttachment(timeColorFoothold);
 
@@ -81,8 +83,8 @@ void ACPP_Time_Color_Button::BeginPlay()
 	/*UMaterialParameterCollection* MPC = LoadObject<UMaterialParameterCollection>(nullptr, TEXT("/Game/material/MPC_baseColor.MPC_baseColor"));
 	UMaterialParameterCollectionInstance* MyMPCInstance = GetWorld()->GetParameterCollectionInstance(MPC);
 	MyMPCInstance->SetVectorParameterValue(FName("Color"), FVector(1.0f, 0.0f, 0.0f));*/
-	currentFootholdColor = FVector(1.0f, 1.0f, 1.0f);
-
+	currentFootholdColor = FVector(0.0f, 1.0f, 0.0f);
+	nextFootholdColor = FVector(0.0f, 1.0f, 0.0f);
 	red1->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(1.0f, 0.0f, 0.0f));
 	green1->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(0.0f, 1.0f, 0.0f));
 	blue1->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(0.0f, 0.0f, 1.0f));
@@ -93,9 +95,11 @@ void ACPP_Time_Color_Button::BeginPlay()
 	blue2->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(0.0f, 0.0f, 1.0f));
 	black2->SetVectorParameterValueOnMaterials(TEXT("Color"), FVector(0.0f, 0.0f, 0.0f));
 
-	timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("next color"), currentFootholdColor);
+	timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("current color"), currentFootholdColor);
+	timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("next color"), nextFootholdColor);
 
-	chageCobotColor = FVector(0.0f, 1.0f, 0.0f);
+
+	changeCobotColor = FVector(0.0f, 1.0f, 0.0f);
 }
 
 // Called every frame
@@ -108,6 +112,9 @@ void ACPP_Time_Color_Button::Tick(float DeltaTime)
 void ACPP_Time_Color_Button::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+
+	startCollision->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Time_Color_Button::OnComponentBeginOverlap_startCollision);
+
 	redCollision1->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Time_Color_Button::OnComponentBeginOverlap_redCollision);
 	greenCollision1->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Time_Color_Button::OnComponentBeginOverlap_greenCollision);
 	blueCollision1->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Time_Color_Button::OnComponentBeginOverlap_blueCollision);
@@ -122,19 +129,80 @@ void ACPP_Time_Color_Button::PostInitializeComponents()
 
 }
 
-void ACPP_Time_Color_Button::FootholdColorChageTimer()
+void ACPP_Time_Color_Button::FootholdColorChangeTimer()
 {
+	UE_LOG(LogTemp, Warning, TEXT("FootholdColorChangeTimer"));
+
+	changeTime += 0.01f;
+	UMaterialParameterCollection* MPC = LoadObject<UMaterialParameterCollection>(nullptr, TEXT("/Game/material/function/mpc_bridge_time.mpc_bridge_time"));
+	UMaterialParameterCollectionInstance* MyMPCInstance = GetWorld()->GetParameterCollectionInstance(MPC);
+	MyMPCInstance->SetScalarParameterValue(FName("change time"), changeTime);
+
+	if (changeTime > 1.0f) {
+		changeTime = 0.f;
+		MyMPCInstance->SetScalarParameterValue(FName("change time"), changeTime);
+
+		currentFootholdColor = nextFootholdColor;
+		timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("current color"), currentFootholdColor);
+		//타이머를 죽이기 전에 서버로 새로운 색을 달라고 패킷을 보낸다.
+		SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+		cs_button_packet pack;
+		pack.size = sizeof(pack);
+		pack.type = static_cast<char>(packet_type::cs_start_time_color);
+
+		send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+
+		GetWorldTimerManager().ClearTimer(changeTimer);
+	}
 }
 
-void ACPP_Time_Color_Button::TimeColorButtonSend(packet_type type)
+//타이머를 생성하고 다음 색 지정 컨틀로러에서 패킷을 받으면 이 함수 호출하면 된다.
+void ACPP_Time_Color_Button::RecvColor(int newcolor)
 {
-	/*SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+	switch (newcolor) {
+	case 0:
+		nextFootholdColor = FVector(0.f, 0.f, 0.f);
+		break;
+	case 1:
+		nextFootholdColor = FVector(0.f, 0.f, 1.f);
+		break;
+	case 2:
+		nextFootholdColor = FVector(0.f, 1.f, 0.f);
+		break;
+	case 3:
+		nextFootholdColor = FVector(0.f, 1.f, 1.f);
+		break;
+	case 4:
+		nextFootholdColor = FVector(1.f, 0.f, 0.f);
+		break;
+	case 5:
+		nextFootholdColor = FVector(1.f, 0.f, 1.f);
+		break;
+	case 6:
+		nextFootholdColor = FVector(1.f, 1.f, 0.f);
+		break;
+	case 7:
+		nextFootholdColor = FVector(1.f, 1.f, 1.f);
+		break;
+	}
+	timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("next color"), nextFootholdColor);
 
-	cs_button_packet button_pack;
-	button_pack.size = sizeof(button_pack);
-	button_pack.type = static_cast<char>(type);
-	UE_LOG(LogTemp, Warning, TEXT("ForkliftButtonSend"));
-	send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);*/
+	GetWorldTimerManager().SetTimer(changeTimer, this, &ACPP_Time_Color_Button::FootholdColorChangeTimer, 0.05f, true);
+}
+
+void ACPP_Time_Color_Button::OnComponentBeginOverlap_startCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	startCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	//서버에 cs_start_time_color패킷을 보내고 서버가 색을 보내주면 타이머 함수가 작동한다.
+	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+	cs_button_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::cs_start_time_color);
+
+	send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 }
 
 //버튼1의 충돌==========================================================================================
@@ -142,11 +210,6 @@ void ACPP_Time_Color_Button::OnComponentBeginOverlap_redCollision(UPrimitiveComp
 {
 	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_2/button_colorChange_click_Cue.button_colorChange_click_Cue"));
 	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
-
-	chageCobotColor.X = 1.0f;
-	//이부분은 서버 통신 구현때 변경 예정
-	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), chageCobotColor);
-	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->SetColor(chageCobotColor);
 
 	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
 
@@ -162,10 +225,6 @@ void ACPP_Time_Color_Button::OnComponentBeginOverlap_greenCollision(UPrimitiveCo
 	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_2/button_colorChange_click_Cue.button_colorChange_click_Cue"));
 	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
 
-	chageCobotColor.Y = 1.0f;
-
-	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), chageCobotColor);
-	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->SetColor(chageCobotColor);
 
 	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
 
@@ -181,11 +240,6 @@ void ACPP_Time_Color_Button::OnComponentBeginOverlap_blueCollision(UPrimitiveCom
 	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_2/button_colorChange_click_Cue.button_colorChange_click_Cue"));
 	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
 
-	chageCobotColor.Z = 1.0f;
-
-	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), chageCobotColor);
-	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->SetColor(chageCobotColor);
-
 	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
 
 	cs_button_packet pack;
@@ -199,13 +253,6 @@ void ACPP_Time_Color_Button::OnComponentBeginOverlap_blackCollision(UPrimitiveCo
 {
 	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_2/button_colorChange_click_Cue.button_colorChange_click_Cue"));
 	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
-
-	chageCobotColor.X = 0.0f;
-	chageCobotColor.Y = 0.0f;
-	chageCobotColor.Z = 0.0f;
-
-	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), chageCobotColor);
-	(Cast<ACPP_Cobot>(GetWorld()->GetFirstPlayerController()->GetPawn()))->SetColor(chageCobotColor);
 
 	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
 
