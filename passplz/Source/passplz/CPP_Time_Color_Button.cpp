@@ -122,6 +122,21 @@ void ACPP_Time_Color_Button::PostInitializeComponents()
 
 }
 
+void ACPP_Time_Color_Button::FootholdColorChageTimer()
+{
+}
+
+void ACPP_Time_Color_Button::TimeColorButtonSend(packet_type type)
+{
+	/*SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+	cs_button_packet button_pack;
+	button_pack.size = sizeof(button_pack);
+	button_pack.type = static_cast<char>(type);
+	UE_LOG(LogTemp, Warning, TEXT("ForkliftButtonSend"));
+	send(*sock, reinterpret_cast<char*>(&button_pack), sizeof(button_pack), 0);*/
+}
+
 //버튼1의 충돌==========================================================================================
 void ACPP_Time_Color_Button::OnComponentBeginOverlap_redCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
