@@ -8,6 +8,7 @@
 #include "CPP_GearKey_2S.h"
 #include "CPP_Color_Forklift.h"
 #include "CPP_Cobot.h"
+#include "CPP_Time_Color_Button.h"
 
 #include "../../../server/server/protocol.h"
 
@@ -64,7 +65,7 @@ void ACPP_Cobot_Controller::BeginPlay()
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Maze_2S::StaticClass(), maze_actor);
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_GearKey_2S::StaticClass(), gear_actor);
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Color_Forklift::StaticClass(), forklift_actor);
-    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Cobot::StaticClass(), cobot_actor);
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Time_Color_Button::StaticClass(), board_actor);
 }
 
 void ACPP_Cobot_Controller::Tick(float DeltaTime)
@@ -315,6 +316,12 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
         player->RecvColor(3);
         Player_2->RecvColor(3);
     } break;
+    case static_cast<int>(packet_type::sc_board_color):
+    {
+        UE_LOG(LogTemp, Warning, TEXT("packet_type::sc_board_color"));
+        sc_board_color_packet* pack = reinterpret_cast<sc_board_color_packet*>(packet);
+        Cast<ACPP_Time_Color_Button>(board_actor[0])->RecvColor(pack->color);
+    } break;
     }
 }
 
@@ -472,8 +479,8 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
             float curvevalue = FMath::Sin(FMath::DegreesToRadians(player->Time_left * 180.f)) * 0.8f;
             player->Current_left = (player->GetActorRightVector() * -curvevalue * distance_two_feet) + (UKismetMathLibrary::VLerp(player->Start_left, player->Target_left, player->Time_left));
 
-            UE_LOG(LogTemp, Warning, TEXT("Target_left %f"), player->Target_left.Z);
-            UE_LOG(LogTemp, Warning, TEXT("Current_left %f"), player->Current_left.Z);
+            //UE_LOG(LogTemp, Warning, TEXT("Target_left %f"), player->Target_left.Z);
+            //UE_LOG(LogTemp, Warning, TEXT("Current_left %f"), player->Current_left.Z);
             
             //FHitResult HitResult;
             //FVector StartTraceLocation = player->Current_left + FVector(0.f, 0.f, 30.f);

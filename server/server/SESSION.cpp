@@ -181,22 +181,12 @@ void SESSION::send_cobot_button(packet_type type)
 	send_packet(reinterpret_cast<char*>(&pack));
 }
 
-void SESSION::send_stage2_last_button(int color)
+void SESSION::send_board_color(int color)
 {
-	sc_stage2_last_button_packet pack;
+	sc_board_color_packet pack;
 	pack.size = sizeof(pack);
-	pack.type = static_cast<char>(packet_type::sc_stage2_last_button);
+	pack.type = static_cast<char>(packet_type::sc_board_color);
 	pack.color = color;
-
-	send_packet(reinterpret_cast<char*>(&pack));
-}
-
-void SESSION::send_count_packet(int count)
-{
-	sc_count_packet pack;
-	pack.size = sizeof(pack);
-	pack.type = static_cast<char>(packet_type::sc_count);
-	pack.count = count;
 
 	send_packet(reinterpret_cast<char*>(&pack));
 }

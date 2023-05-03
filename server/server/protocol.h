@@ -42,9 +42,6 @@ enum class packet_type {
 	cs_push_button_gear_left,
 	cs_push_button_gear_right,
 
-	cs_start_time_color,
-
-
 	sc_login, 
 	sc_add_player,
 	sc_move,
@@ -63,10 +60,8 @@ enum class packet_type {
 	cs_elevator,
 	sc_elevator,
 
-	cs_stage2_last_gate,
-
-	sc_stage2_last_button,
-	sc_count,
+	cs_start_time_color,
+	sc_board_color,
 };
 enum class direction { forward, back, left, right };
 enum class color { red, green, blue, black };
@@ -201,16 +196,9 @@ struct cs_stage2_last_gate_packet
 	char type;
 };
 
-struct sc_stage2_last_button_packet
+struct sc_board_color_packet
 {
 	char size;
 	char type;
 	int color;
-};
-
-struct sc_count_packet
-{
-	char size;
-	char type;
-	int count;
 };

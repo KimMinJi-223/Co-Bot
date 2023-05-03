@@ -152,6 +152,7 @@ void ACPP_Time_Color_Button::FootholdColorChangeTimer()
 		pack.type = static_cast<char>(packet_type::cs_start_time_color);
 
 		send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+		UE_LOG(LogTemp, Warning, TEXT("send cs start time color!!!!!!!!!!!!!!!!22"));
 
 		GetWorldTimerManager().ClearTimer(changeTimer);
 	}
@@ -203,6 +204,8 @@ void ACPP_Time_Color_Button::OnComponentBeginOverlap_startCollision(UPrimitiveCo
 	pack.type = static_cast<char>(packet_type::cs_start_time_color);
 
 	send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+
+	UE_LOG(LogTemp, Warning, TEXT("send cs start time color packet!!!11"));
 }
 
 //버튼1의 충돌==========================================================================================

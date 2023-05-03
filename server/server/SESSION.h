@@ -59,8 +59,7 @@ public:
 	void send_elevator_ok_packet();
 	void send_forklift_button(packet_type type);
 	void send_cobot_button(packet_type type);
-	void send_stage2_last_button(int color);
-	void send_count_packet(int count);
+	void send_board_color(int color);
 	//void send_move_packet(int client_id);
 	//void send_rotate_packet(int client_id);
 

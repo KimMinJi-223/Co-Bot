@@ -416,31 +416,25 @@ void ServerMain::process_packet(char* packet, int client_id)
 		clients[client_id].send_cobot_button(packet_type::sc_push_button_cobot_black);
 		clients[clients[client_id].tm_id].send_cobot_button(packet_type::sc_push_button_cobot_black);
 	} break;
-	case static_cast<int>(packet_type::cs_stage2_last_gate):
+	case static_cast<int>(packet_type::cs_start_time_color):
 	{
 		// timer thread로 바꾸자 다음에
-		while (true)
-		{
-			int color = rand() % 8;
-			clients[client_id].send_stage2_last_button(color);
-			clients[clients[client_id].tm_id].send_stage2_last_button(color);
-
-			clients[client_id].send_count_packet(3);
-			clients[clients[client_id].tm_id].send_count_packet(3);
-			SleepEx(1, false);
-
-			clients[client_id].send_count_packet(2);
-			clients[clients[client_id].tm_id].send_count_packet(2);
-			SleepEx(1, false);
-
-			clients[client_id].send_count_packet(1);
-			clients[clients[client_id].tm_id].send_count_packet(1);
-			SleepEx(1, false);
-
-			color = rand() % 8;
-			clients[client_id].send_stage2_last_button(color);
-			clients[clients[client_id].tm_id].send_stage2_last_button(color);
-		}
+		std::cout << "recv cs_start_time_color" << std::endl;
+		//static int count = 0;
+		//static std::mutex m;
+		//m.lock();
+		//++count;
+		////m.unlock();
+		//if (4 == count) {
+		int color = rand() % 8;
+		clients[client_id].send_board_color(color);
+		clients[clients[client_id].tm_id].send_board_color(color);
+		//	m.lock();
+		//	count = 0;
+		//	m.unlock();
+		//} else if (count > 4) {
+		//	std::cout << "count: " << count << std::endl;
+		//}
 	} break;
 	}
 }
