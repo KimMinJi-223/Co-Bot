@@ -26,6 +26,7 @@ public:
 	
 	std::mutex	state_lock;
 	std::mutex	match_lock;
+	std::mutex	sock_lock;
 
 	OVER_EX		recv_over;
 
@@ -60,6 +61,7 @@ public:
 	void send_forklift_button(packet_type type);
 	void send_cobot_button(packet_type type);
 	void send_board_color(int color);
+	void send_logout_packet();
 	//void send_move_packet(int client_id);
 	//void send_rotate_packet(int client_id);
 

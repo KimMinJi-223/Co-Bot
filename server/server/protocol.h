@@ -62,6 +62,8 @@ enum class packet_type {
 
 	cs_start_time_color,
 	sc_board_color,
+
+	sc_logout,
 };
 enum class direction { forward, back, left, right };
 enum class color { red, green, blue, black };
@@ -201,4 +203,10 @@ struct sc_board_color_packet
 	char size;
 	char type;
 	int color;
+};
+
+struct sc_logout_packet
+{
+	char size;
+	char type;
 };

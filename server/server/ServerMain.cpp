@@ -102,6 +102,28 @@ bool ServerMain::AssociateSocketWithIOCP(SOCKET sock, ULONG_PTR key)
 	return (h == iocp_handle);
 }
 
+void disconnect(int c_id)
+{
+	for (auto& pl : clients) {
+		{
+			std::lock_guard<std::mutex> ll(pl.sock_lock);
+			if (state::ingame != pl.state) continue;
+		}
+		{
+			std::lock_guard<std::mutex> ll(clients[pl.tm_id].sock_lock);
+			if (state::ingame != clients[pl.tm_id].state) continue;
+		}
+		sc_logout_packet p;
+		p.size = sizeof(p);
+		p.type = static_cast<char>(packet_type::sc_logout);
+		clients[pl.tm_id].send_logout_packet();
+	}
+	closesocket(clients[c_id].sock);
+
+	std::lock_guard<std::mutex> ll(clients[c_id].sock_lock);
+	clients[c_id].state = state::free;
+}
+
 void ServerMain::worker_thread()
 {
 	DWORD num_bytes;
@@ -117,9 +139,8 @@ void ServerMain::worker_thread()
 		//std::shared_ptr<OVER_EX> over_ex = std::make_shared<OVER_EX>(over1);
 
 		if ((0 == num_bytes) && ((IO_RECV == over_ex->mode) || (IO_SEND == over_ex->mode))) {
-			/*
-				연결 끊기 코드 추가해야 함
-			*/
+			
+			disconnect(static_cast<int>(key));
 
 			std::cout << "num bytes: " << num_bytes << "over_ex mode: IO_RECV" << "over_ex mode: IO_SEND" << std::endl;
 

@@ -52,7 +52,7 @@ void SESSION::send_packet(char* packet)
 	if (ret == SOCKET_ERROR)
 	{
 		int err = WSAGetLastError();
-		std::cout << err << std::endl;
+		std::cout << "err: " << err << std::endl;
 	}
 }
 
@@ -187,6 +187,15 @@ void SESSION::send_board_color(int color)
 	pack.size = sizeof(pack);
 	pack.type = static_cast<char>(packet_type::sc_board_color);
 	pack.color = color;
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_logout_packet()
+{
+	sc_logout_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_logout);
 
 	send_packet(reinterpret_cast<char*>(&pack));
 }
