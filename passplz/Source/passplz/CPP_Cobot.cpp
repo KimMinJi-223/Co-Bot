@@ -142,6 +142,9 @@ void ACPP_Cobot::SetCollision()
 
 void ACPP_Cobot::RecvColor(int newcolor)
 {
+	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_2/button_colorChange_click_Cue.button_colorChange_click_Cue"));
+	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
+
 	switch (newcolor) {
 	case 0: //ทนตๅ
 		UE_LOG(LogTemp, Warning, TEXT("Cobot::Red"));
