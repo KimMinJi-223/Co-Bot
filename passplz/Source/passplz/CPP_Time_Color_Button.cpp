@@ -145,14 +145,14 @@ void ACPP_Time_Color_Button::FootholdColorChangeTimer()
 		currentFootholdColor = nextFootholdColor;
 		timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("current color"), currentFootholdColor);
 		//타이머를 죽이기 전에 서버로 새로운 색을 달라고 패킷을 보낸다.
-		SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+		//SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
 
-		cs_button_packet pack;
-		pack.size = sizeof(pack);
-		pack.type = static_cast<char>(packet_type::cs_start_time_color);
+		//cs_button_packet pack;
+		//pack.size = sizeof(pack);
+		//pack.type = static_cast<char>(packet_type::cs_start_time_color);
 
-		send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
-		UE_LOG(LogTemp, Warning, TEXT("send cs start time color!!!!!!!!!!!!!!!!22"));
+		//send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+		//UE_LOG(LogTemp, Warning, TEXT("send cs start time color!!!!!!!!!!!!!!!!22"));
 
 		GetWorldTimerManager().ClearTimer(changeTimer);
 	}

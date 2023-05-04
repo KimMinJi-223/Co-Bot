@@ -318,8 +318,8 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
     } break;
     case static_cast<int>(packet_type::sc_board_color):
     {
-        UE_LOG(LogTemp, Warning, TEXT("packet_type::sc_board_color"));
         sc_board_color_packet* pack = reinterpret_cast<sc_board_color_packet*>(packet);
+        UE_LOG(LogTemp, Warning, TEXT("packet_type::sc_board_color, color: %d"), pack->color);
         Cast<ACPP_Time_Color_Button>(board_actor[0])->RecvColor(pack->color);
     } break;
     case static_cast<int>(packet_type::sc_logout):
