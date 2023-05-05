@@ -68,7 +68,7 @@ private:
 	// 패킷 재조립을 위한 부분 나중에 무조건 수정
 	int		prev_remain;
 	int		prev_packet_size;
-	char	prev_packet_buff[BUF_SIZE];
+	char	prev_packet_buff[10000];
 
 	std::chrono::high_resolution_clock::time_point last_move_time;
 

@@ -129,7 +129,36 @@ void ACPP_Time_Color_Button::PostInitializeComponents()
 
 }
 
-void ACPP_Time_Color_Button::FootholdColorChangeTimer()
+//void ACPP_Time_Color_Button::FootholdColorChangeTimer()
+//{
+//	UE_LOG(LogTemp, Warning, TEXT("FootholdColorChangeTimer"));
+//
+//	changeTime += 0.01f;
+//	UMaterialParameterCollection* MPC = LoadObject<UMaterialParameterCollection>(nullptr, TEXT("/Game/material/function/mpc_bridge_time.mpc_bridge_time"));
+//	UMaterialParameterCollectionInstance* MyMPCInstance = GetWorld()->GetParameterCollectionInstance(MPC);
+//	MyMPCInstance->SetScalarParameterValue(FName("change time"), changeTime);
+//
+//	if (changeTime > 1.0f) {
+//		changeTime = 0.f;
+//		MyMPCInstance->SetScalarParameterValue(FName("change time"), changeTime);
+//
+//		currentFootholdColor = nextFootholdColor;
+//		timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("current color"), currentFootholdColor);
+//		//타이머를 죽이기 전에 서버로 새로운 색을 달라고 패킷을 보낸다.
+//		//SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+//
+//		//cs_button_packet pack;
+//		//pack.size = sizeof(pack);
+//		//pack.type = static_cast<char>(packet_type::cs_start_time_color);
+//
+//		//send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+//		//UE_LOG(LogTemp, Warning, TEXT("send cs start time color!!!!!!!!!!!!!!!!22"));
+//
+//		GetWorldTimerManager().ClearTimer(changeTimer);
+//	}
+//}
+
+void ACPP_Time_Color_Button::FootholdColorChangeTimerOnlyRecv()
 {
 	UE_LOG(LogTemp, Warning, TEXT("FootholdColorChangeTimer"));
 
@@ -158,8 +187,36 @@ void ACPP_Time_Color_Button::FootholdColorChangeTimer()
 	}
 }
 
-//타이머를 생성하고 다음 색 지정 컨틀로러에서 패킷을 받으면 이 함수 호출하면 된다.
-void ACPP_Time_Color_Button::RecvColor(int newcolor)
+void ACPP_Time_Color_Button::FootholdColorChangeTimerRecvSend()
+{
+	UE_LOG(LogTemp, Warning, TEXT("FootholdColorChangeTimer"));
+
+	changeTime += 0.01f;
+	UMaterialParameterCollection* MPC = LoadObject<UMaterialParameterCollection>(nullptr, TEXT("/Game/material/function/mpc_bridge_time.mpc_bridge_time"));
+	UMaterialParameterCollectionInstance* MyMPCInstance = GetWorld()->GetParameterCollectionInstance(MPC);
+	MyMPCInstance->SetScalarParameterValue(FName("change time"), changeTime);
+
+	if (changeTime > 1.0f) {
+		changeTime = 0.f;
+		MyMPCInstance->SetScalarParameterValue(FName("change time"), changeTime);
+
+		currentFootholdColor = nextFootholdColor;
+		timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("current color"), currentFootholdColor);
+		//타이머를 죽이기 전에 서버로 새로운 색을 달라고 패킷을 보낸다.
+		SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+
+		cs_button_packet pack;
+		pack.size = sizeof(pack);
+		pack.type = static_cast<char>(packet_type::cs_start_time_color);
+
+		send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+		UE_LOG(LogTemp, Warning, TEXT("send cs start time color!!!!!!!!!!!!!!!!22"));
+
+		GetWorldTimerManager().ClearTimer(changeTimer);
+	}
+}
+
+void ACPP_Time_Color_Button::OnlyRecvColor(int newcolor)
 {
 	switch (newcolor) {
 	case 0:
@@ -189,8 +246,76 @@ void ACPP_Time_Color_Button::RecvColor(int newcolor)
 	}
 	timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("next color"), nextFootholdColor);
 
-	GetWorldTimerManager().SetTimer(changeTimer, this, &ACPP_Time_Color_Button::FootholdColorChangeTimer, 0.05f, true);
+	GetWorldTimerManager().SetTimer(changeTimer, this, &ACPP_Time_Color_Button::FootholdColorChangeTimerOnlyRecv, 0.05f, true);
 }
+
+void ACPP_Time_Color_Button::RecvAndSendColor(int newcolor)
+{
+	switch (newcolor) {
+	case 0:
+		nextFootholdColor = FVector(0.f, 0.f, 0.f);
+		break;
+	case 1:
+		nextFootholdColor = FVector(0.f, 0.f, 1.f);
+		break;
+	case 2:
+		nextFootholdColor = FVector(0.f, 1.f, 0.f);
+		break;
+	case 3:
+		nextFootholdColor = FVector(0.f, 1.f, 1.f);
+		break;
+	case 4:
+		nextFootholdColor = FVector(1.f, 0.f, 0.f);
+		break;
+	case 5:
+		nextFootholdColor = FVector(1.f, 0.f, 1.f);
+		break;
+	case 6:
+		nextFootholdColor = FVector(1.f, 1.f, 0.f);
+		break;
+	case 7:
+		nextFootholdColor = FVector(1.f, 1.f, 1.f);
+		break;
+	}
+	timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("next color"), nextFootholdColor);
+
+	GetWorldTimerManager().SetTimer(changeTimer, this, &ACPP_Time_Color_Button::FootholdColorChangeTimerRecvSend, 0.05f, true);
+}
+
+//타이머를 생성하고 다음 색 지정 컨틀로러에서 패킷을 받으면 이 함수 호출하면 된다.
+//void ACPP_Time_Color_Button::RecvColor(int newcolor)
+//{
+//	switch (newcolor) {
+//	case 0:
+//		nextFootholdColor = FVector(0.f, 0.f, 0.f);
+//		break;
+//	case 1:
+//		nextFootholdColor = FVector(0.f, 0.f, 1.f);
+//		break;
+//	case 2:
+//		nextFootholdColor = FVector(0.f, 1.f, 0.f);
+//		break;
+//	case 3:
+//		nextFootholdColor = FVector(0.f, 1.f, 1.f);
+//		break;
+//	case 4:
+//		nextFootholdColor = FVector(1.f, 0.f, 0.f);
+//		break;
+//	case 5:
+//		nextFootholdColor = FVector(1.f, 0.f, 1.f);
+//		break;
+//	case 6:
+//		nextFootholdColor = FVector(1.f, 1.f, 0.f);
+//		break;
+//	case 7:
+//		nextFootholdColor = FVector(1.f, 1.f, 1.f);
+//		break;
+//	}
+//	timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("next color"), nextFootholdColor);
+//
+//	GetWorldTimerManager().SetTimer(changeTimer, this, &ACPP_Time_Color_Button::FootholdColorChangeTimer, 0.05f, true);
+//}
+
 
 void ACPP_Time_Color_Button::OnComponentBeginOverlap_startCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {

@@ -441,26 +441,22 @@ void ServerMain::process_packet(char* packet, int client_id)
 	{
 		// timer thread로 바꾸자 다음에
 		std::cout << "recv cs_start_time_color" << std::endl;
-		static int count = 0;
-		static std::mutex m;
-		m.lock();
-		++count;
-		m.unlock();
-		if (2 == count) {
-			while (true)
-			{
-				int color = rand() % 8;
-				clients[client_id].send_board_color(color);
-				clients[clients[client_id].tm_id].send_board_color(color);
 
-				Sleep(6000);
-				std::cout << "6초 쉬었다" << std::endl;
-			}
-			m.lock();
-			count = 0;
-			m.unlock();
-		} else if (count > 2) {
-			std::cout << "count: " << count << std::endl;
+		static int id = -1;
+
+		std::mutex m;
+		m.lock();
+		if (-1 == id) {
+			id = client_id;
+		}
+		m.unlock();
+
+		if (client_id == id) {
+			int color = rand() % 8;
+			clients[client_id].send_board_color(color, client_id);
+			clients[clients[client_id].tm_id].send_board_color(color, client_id);
+		} else {
+			std::cout << "packet_type::cs_start_time_color err!" << std::endl;
 		}
 	} break;
 	}

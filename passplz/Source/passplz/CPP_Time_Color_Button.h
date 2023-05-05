@@ -117,6 +117,10 @@ private:
 	float changeTime = 0.f;
 
 public:
-	void FootholdColorChangeTimer();
-	void RecvColor(int newcolor);
+	// void FootholdColorChangeTimer();
+	void FootholdColorChangeTimerOnlyRecv();
+	void FootholdColorChangeTimerRecvSend();
+	// void RecvColor(int newcolor);
+	void OnlyRecvColor(int newcolor);
+	void RecvAndSendColor(int newcolor);
 };

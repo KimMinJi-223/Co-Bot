@@ -47,7 +47,7 @@ public:
 	// 패킷 재조립을 위한 부분 이거 나중에 꼭 수정해야 함
 	int			prev_remain;
 	int			prev_packet_size;
-	char		prev_packet_buff[BUF_SIZE];
+	char		prev_packet_buff[10000];
 
 public:
 	void recv_packet();
@@ -60,7 +60,7 @@ public:
 	void send_elevator_ok_packet();
 	void send_forklift_button(packet_type type);
 	void send_cobot_button(packet_type type);
-	void send_board_color(int color);
+	void send_board_color(int color, int client_id);
 	void send_logout_packet();
 	//void send_move_packet(int client_id);
 	//void send_rotate_packet(int client_id);

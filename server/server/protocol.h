@@ -203,6 +203,7 @@ struct sc_board_color_packet
 	char size;
 	char type;
 	int color;
+	int id;
 };
 
 struct sc_logout_packet
