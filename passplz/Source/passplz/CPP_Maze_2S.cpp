@@ -2,6 +2,7 @@
 
 
 #include "CPP_Maze_2S.h"
+#include "CPP_Stage2_MissionButton.h"
 #include "Materials/MaterialParameterCollection.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
 
@@ -108,6 +109,14 @@ void ACPP_Maze_2S::OnComponentBeginOverlap_clear(UPrimitiveComponent* Overlapped
 	//MPC->SetScalarParameterDefaultValue(TEXT("fisrttime"), 1.0f);
 	clear->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetWorldTimerManager().SetTimer(bridgeTimer, this, &ACPP_Maze_2S::BridgeTimer, 0.1f, true);
+
+	
+	AActor* maze_actor;
+	maze_actor = UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Stage2_MissionButton::StaticClass());
+
+	if (maze_actor)
+		Cast<ACPP_Stage2_MissionButton>(maze_actor)->MazeNoCollision();
+
 }
 
 void ACPP_Maze_2S::BridgeTimer()

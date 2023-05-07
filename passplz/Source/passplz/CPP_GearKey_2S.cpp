@@ -2,6 +2,7 @@
 
 
 #include "CPP_GearKey_2S.h"
+#include "CPP_Stage2_MissionButton.h"
 #include "Materials/MaterialParameterCollection.h"
 #include "Materials/MaterialParameterCollectionInstance.h"
 
@@ -154,6 +155,13 @@ void ACPP_GearKey_2S::OnClearOverlap(UPrimitiveComponent* OverlappedComponent, A
 {
 	clear->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetWorldTimerManager().SetTimer(bridgeTimer, this, &ACPP_GearKey_2S::BridgeTimer, 0.1f, true);
+
+
+	AActor* maze_actor;
+	maze_actor = UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Stage2_MissionButton::StaticClass());
+
+	if (maze_actor)
+		Cast<ACPP_Stage2_MissionButton>(maze_actor)->GearNoCollision();
 }
 
 void ACPP_GearKey_2S::BridgeTimer()

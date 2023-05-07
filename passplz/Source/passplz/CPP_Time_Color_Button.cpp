@@ -168,11 +168,11 @@ void ACPP_Time_Color_Button::FootholdColorChangeTimerOnlyRecv()
 	MyMPCInstance->SetScalarParameterValue(FName("change time"), changeTime);
 
 	if (changeTime > 1.0f) {
-		changeTime = 0.f;
+		/*changeTime = 0.f;
 		MyMPCInstance->SetScalarParameterValue(FName("change time"), changeTime);
 
 		currentFootholdColor = nextFootholdColor;
-		timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("current color"), currentFootholdColor);
+		timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("current color"), currentFootholdColor);*/
 		//타이머를 죽이기 전에 서버로 새로운 색을 달라고 패킷을 보낸다.
 		//SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
 
@@ -197,11 +197,11 @@ void ACPP_Time_Color_Button::FootholdColorChangeTimerRecvSend()
 	MyMPCInstance->SetScalarParameterValue(FName("change time"), changeTime);
 
 	if (changeTime > 1.0f) {
-		changeTime = 0.f;
+		/*changeTime = 0.f;
 		MyMPCInstance->SetScalarParameterValue(FName("change time"), changeTime);
 
 		currentFootholdColor = nextFootholdColor;
-		timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("current color"), currentFootholdColor);
+		timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("current color"), currentFootholdColor);*/
 		//타이머를 죽이기 전에 서버로 새로운 색을 달라고 패킷을 보낸다.
 		SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
 
@@ -218,6 +218,16 @@ void ACPP_Time_Color_Button::FootholdColorChangeTimerRecvSend()
 
 void ACPP_Time_Color_Button::OnlyRecvColor(int newcolor)
 {
+	UE_LOG(LogTemp, Warning, TEXT("OnlyRecvColor"));
+	UMaterialParameterCollection* MPC = LoadObject<UMaterialParameterCollection>(nullptr, TEXT("/Game/material/function/mpc_bridge_time.mpc_bridge_time"));
+	UMaterialParameterCollectionInstance* MyMPCInstance = GetWorld()->GetParameterCollectionInstance(MPC);
+
+	changeTime = 0.f;
+	MyMPCInstance->SetScalarParameterValue(FName("change time"), changeTime);
+
+	currentFootholdColor = nextFootholdColor;
+	timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("current color"), currentFootholdColor);
+
 	switch (newcolor) {
 	case 0:
 		nextFootholdColor = FVector(0.f, 0.f, 0.f);
@@ -244,6 +254,8 @@ void ACPP_Time_Color_Button::OnlyRecvColor(int newcolor)
 		nextFootholdColor = FVector(1.f, 1.f, 1.f);
 		break;
 	}
+	
+
 	timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("next color"), nextFootholdColor);
 
 	GetWorldTimerManager().SetTimer(changeTimer, this, &ACPP_Time_Color_Button::FootholdColorChangeTimerOnlyRecv, 0.05f, true);
@@ -251,6 +263,16 @@ void ACPP_Time_Color_Button::OnlyRecvColor(int newcolor)
 
 void ACPP_Time_Color_Button::RecvAndSendColor(int newcolor)
 {
+	UE_LOG(LogTemp, Warning, TEXT("RecvAndSendColor"));
+	UMaterialParameterCollection* MPC = LoadObject<UMaterialParameterCollection>(nullptr, TEXT("/Game/material/function/mpc_bridge_time.mpc_bridge_time"));
+	UMaterialParameterCollectionInstance* MyMPCInstance = GetWorld()->GetParameterCollectionInstance(MPC);
+
+	changeTime = 0.f;
+	MyMPCInstance->SetScalarParameterValue(FName("change time"), changeTime);
+
+	currentFootholdColor = nextFootholdColor;
+	timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("current color"), currentFootholdColor);
+
 	switch (newcolor) {
 	case 0:
 		nextFootholdColor = FVector(0.f, 0.f, 0.f);
@@ -277,6 +299,8 @@ void ACPP_Time_Color_Button::RecvAndSendColor(int newcolor)
 		nextFootholdColor = FVector(1.f, 1.f, 1.f);
 		break;
 	}
+	
+
 	timeColorFoothold->SetVectorParameterValueOnMaterials(TEXT("next color"), nextFootholdColor);
 
 	GetWorldTimerManager().SetTimer(changeTimer, this, &ACPP_Time_Color_Button::FootholdColorChangeTimerRecvSend, 0.05f, true);

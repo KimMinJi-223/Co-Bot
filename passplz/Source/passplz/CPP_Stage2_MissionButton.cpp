@@ -214,6 +214,22 @@ void ACPP_Stage2_MissionButton::HasTimer(FTimerHandle& timer, int timerType)
 	}
 }
 
+void ACPP_Stage2_MissionButton::MazeNoCollision()
+{
+	Maze_target_forward->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Maze_target_back->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Maze_target_left->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Maze_target_right->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void ACPP_Stage2_MissionButton::GearNoCollision()
+{
+	Gear_target_forward->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Gear_target_back->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Gear_target_left->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	Gear_target_right->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
 //미로버튼을 밟았을때 어떤 버튼을 밟았는지 서버로 보낸다======================================================
 void ACPP_Stage2_MissionButton::OnMazeforwardOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {

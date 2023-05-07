@@ -114,4 +114,7 @@ public:
 	void SendMazeTimer();
 	void SendGearTimer();
 	void HasTimer(FTimerHandle& timer, int timerType);
+	void MazeNoCollision();
+	void GearNoCollision();
+
 };
