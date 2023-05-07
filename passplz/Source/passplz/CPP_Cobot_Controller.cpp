@@ -229,7 +229,11 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
     case static_cast<int>(packet_type::sc_push_button_maze_forward):
     {
         UE_LOG(LogTemp, Warning, TEXT("push_forward"));
-        Cast<ACPP_Maze_2S>(maze_actor[0])->target_forward();
+        if(maze_actor[0])   
+            Cast<ACPP_Maze_2S>(maze_actor[0])->target_forward();
+        else
+            UE_LOG(LogTemp, Warning, TEXT("No push_forward"));
+
         //TArray<AActor*> arrOutActors;
         //UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Maze_2S::StaticClass(), arrOutActors);
 
@@ -238,22 +242,38 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
     case static_cast<int>(packet_type::sc_push_button_maze_back):
     {
         UE_LOG(LogTemp, Warning, TEXT("push_back"));
-        Cast<ACPP_Maze_2S>(maze_actor[0])->target_back();
+        if (maze_actor[0])
+            Cast<ACPP_Maze_2S>(maze_actor[0])->target_back();
+        else
+            UE_LOG(LogTemp, Warning, TEXT("No push_back"));
+
     } break;
     case static_cast<int>(packet_type::sc_push_button_maze_left):
     {
         UE_LOG(LogTemp, Warning, TEXT("push_left"));
-        Cast<ACPP_Maze_2S>(maze_actor[0])->target_left();
+        if(maze_actor[0])
+            Cast<ACPP_Maze_2S>(maze_actor[0])->target_left();
+        else
+            UE_LOG(LogTemp, Warning, TEXT("No push_left"));
+
     } break;
     case static_cast<int>(packet_type::sc_push_button_maze_right):
     {
         UE_LOG(LogTemp, Warning, TEXT("push_right"));
-        Cast<ACPP_Maze_2S>(maze_actor[0])->target_right();
+        if(maze_actor[0])
+            Cast<ACPP_Maze_2S>(maze_actor[0])->target_right();
+        else
+            UE_LOG(LogTemp, Warning, TEXT("No push_right"));
+
     } break;
     case static_cast<int>(packet_type::sc_push_button_gear_forward):
     {
         UE_LOG(LogTemp, Warning, TEXT("push_forward"));
-        Cast<ACPP_GearKey_2S>(gear_actor[0])->target_forward();
+        if(gear_actor[0])
+            Cast<ACPP_GearKey_2S>(gear_actor[0])->target_forward();
+        else 
+            UE_LOG(LogTemp, Warning, TEXT("No push_forward"));
+
         //TArray<AActor*> arrOutActors;
         //UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Maze_2S::StaticClass(), arrOutActors);
 
@@ -262,17 +282,29 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
     case static_cast<int>(packet_type::sc_push_button_gear_back):
     {
         UE_LOG(LogTemp, Warning, TEXT("push_back"));
-        Cast<ACPP_GearKey_2S>(gear_actor[0])->target_back();
+        if(gear_actor[0])
+            Cast<ACPP_GearKey_2S>(gear_actor[0])->target_back();
+        else
+            UE_LOG(LogTemp, Warning, TEXT("No push_back"));
+
     } break;
     case static_cast<int>(packet_type::sc_push_button_gear_left):
     {
         UE_LOG(LogTemp, Warning, TEXT("push_left"));
-        Cast<ACPP_GearKey_2S>(gear_actor[0])->target_left();
+        if(gear_actor[0])
+            Cast<ACPP_GearKey_2S>(gear_actor[0])->target_left();
+        else
+            UE_LOG(LogTemp, Warning, TEXT("No push_left"));
+
     } break;
     case static_cast<int>(packet_type::sc_push_button_gear_right):
     {
         UE_LOG(LogTemp, Warning, TEXT("push_right"));
-        Cast<ACPP_GearKey_2S>(gear_actor[0])->target_right();
+        if(gear_actor[0])
+            Cast<ACPP_GearKey_2S>(gear_actor[0])->target_right();
+        else
+            UE_LOG(LogTemp, Warning, TEXT("No push_right"));
+
     } break;
     case static_cast<int>(packet_type::sc_elevator):
     {
@@ -519,6 +551,8 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
         }
 
         if (((int)NewAxisValue) == 2) { // D key
+            player->Start_left = player->Current_left;
+            player->Time_left = 0.f;
             player->Time_right += (GetWorld()->GetDeltaSeconds() * 2);
             if (player->Time_right < 1.0f) {
                 //캐릭터를 움직인다.
