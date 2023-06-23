@@ -72,10 +72,9 @@ private:
 
 	std::chrono::high_resolution_clock::time_point last_move_time;
 
-public:
+protected:
 	virtual void PostInitializeComponents() override;
 	virtual void OnPossess(APawn* aPawn) override;
-protected:
 	virtual void SetupInputComponent() override;
 
 private:
