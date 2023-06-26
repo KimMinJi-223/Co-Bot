@@ -2,6 +2,17 @@
 
 #pragma once
 
+#include "CPP_CobotGameInstance.h"
+
+#include "Windows/AllowWindowsPlatformTypes.h"
+#include "Windows/prewindowsapi.h"
+
+#include <WinSock2.h>
+#pragma comment(lib, "WS2_32.lib")
+
+#include "Windows/PostWindowsApi.h"
+#include "Windows/HideWindowsPlatformTypes.h"
+
 #include "passplz.h"
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
@@ -14,7 +25,7 @@ UCLASS()
 class PASSPLZ_API ACPP_Cobot_Car_Controller : public APlayerController
 {
 	GENERATED_BODY()
-		ACPP_Cobot_Car_Controller();
+	ACPP_Cobot_Car_Controller();
 	~ACPP_Cobot_Car_Controller();
 
 
@@ -23,6 +34,19 @@ protected:
 	virtual void PostInitializeComponents() override;
 	virtual void OnPossess(APawn* aPawn) override;
 	virtual void SetupInputComponent() override;
+
+private:
+	UCPP_CobotGameInstance* instance;
+
+	SOCKET* sock;
+
+	// 패킷 재조립을 위한 부분 나중에 무조건 수정
+	int		prev_remain;
+	int		prev_packet_size;
+	char	prev_packet_buff[10000];
+
+	void RecvPacket();
+	void ProcessPacket(char* packet);
 
 private:
 	class ACPP_Cobot_Car* player;

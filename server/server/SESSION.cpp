@@ -201,6 +201,14 @@ void SESSION::send_logout_packet()
 	send_packet(reinterpret_cast<char*>(&pack));
 }
 
+void SESSION::send_move_car_packet(int direction)
+{
+	sc_car_direction_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_car_direction);
+	pack.direction = direction;
+}
+
 // 23.4.14
 // 1. OVER_EX 동적 할당해주는 부분에서 메모리 릭이 있는 듯하다.
 // 2. std::atomic<std::shared_ptr>에 대해서 더 조사해보기

@@ -4,16 +4,17 @@
 #include <vector>
 #include <thread>
 #include <iostream>
+#include <chrono>
 #include <array>
 #include <mutex>
 #include <memory>
-
+#include <time.h>
+#include <concurrent_priority_queue.h>
 
 #pragma comment(lib, "mswsock.lib")
 
 #include "RingBuffer.h"
 #include "SESSION.h"
-
 
 std::array<SESSION, MAX_USER> clients;
 
@@ -67,9 +68,9 @@ bool ServerMain::init()
 		GetLastError();
 		return false;
 	}
-
+	
 	std::cout << "서버가 활성화 되었습니다. 접속을 기다립니다..." << std::endl;
-
+	
 	return true;
 }
 
@@ -86,7 +87,8 @@ void ServerMain::server_main() // 본격적인 서버 루프 들어가는 곳
 	int thread_num = std::thread::hardware_concurrency();
 	for (int i{}; i < thread_num; ++i)
 		worker_threads.emplace_back(std::thread(&ServerMain::worker_thread, this));
-
+	std::thread timer_thread = std::thread{ &ServerMain::do_timer_thread,this };
+	timer_thread.join();
 	for (auto& th : worker_threads)
 		th.join();
 }
@@ -244,6 +246,31 @@ void ServerMain::worker_thread()
 		case IO_SEND:
 		{
 			//delete over_ex;
+		} break;
+		case MOVE_CAR:
+		{
+			using namespace std;
+
+			static int direction = 0;
+			// 일단 0이 직진
+			// 오른쪽으로는 +1
+			// 왼쪽으로는 -1
+			if (clients[key].move_car) {
+				if (key < clients[key].tm_id)
+					direction -= 1;
+				else
+					direction += 1;
+
+				clients[key].send_move_car_packet(direction);
+				clients[clients[key].tm_id].send_move_car_packet(direction);
+
+				TIMER_EVENT event;
+				event.object_id = key;
+				event.event_type = event_type::move_car;
+				event.execute_time = std::chrono::system_clock::now() + 5ms;
+
+				timer_queue.push(event);
+			}
 		} break;
 		}
 	}
@@ -459,6 +486,24 @@ void ServerMain::process_packet(char* packet, int client_id)
 			std::cout << "packet_type::cs_start_time_color err!" << std::endl;
 		}
 	} break;
+	case static_cast<int>(packet_type::cs_car_direction):
+	{
+		using namespace std;
+		
+		cs_car_direction_packet* pack = reinterpret_cast<cs_car_direction_packet*>(packet);
+		if (pack->direction) {
+			clients[client_id].move_car = true;
+
+			TIMER_EVENT timer_event;
+			timer_event.event_type = event_type::move_car;
+			timer_event.execute_time = std::chrono::system_clock::now() + 5ms;
+			timer_event.object_id = client_id;
+
+			timer_queue.push(timer_event);
+		} else {
+			clients[client_id].move_car = false;
+		}
+	} break;
 	}
 }
 
@@ -497,4 +542,35 @@ bool ServerMain::matching(int client_id)
 void ServerMain::set_team_position(int client_id)
 {
 	clients[client_id].tm_location = clients[clients[client_id].tm_id].location;
+}
+
+void ServerMain::do_timer_thread()
+{
+	using namespace std;
+
+	while (true)
+	{
+		TIMER_EVENT event;
+		if (!timer_queue.try_pop(event)) {
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+			continue;
+		}
+
+		if (event.execute_time <= std::chrono::system_clock::now()) {
+			switch (event.event_type)
+			{
+			case event_type::move_car:
+			{
+				OVER_EX* over = new OVER_EX;
+				over->mode = COMP_MODE::MOVE_CAR;
+				over->object_id = event.object_id;
+
+				PostQueuedCompletionStatus(iocp_handle, 1, event.object_id, &over->over);
+			} break;
+			default: continue;
+			}
+		} else {
+			std::this_thread::sleep_for(5ms);
+		}
+	}
 }
