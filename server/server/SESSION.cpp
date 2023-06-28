@@ -201,12 +201,14 @@ void SESSION::send_logout_packet()
 	send_packet(reinterpret_cast<char*>(&pack));
 }
 
-void SESSION::send_move_car_packet(int direction)
+void SESSION::send_move_car_packet(float direction)
 {
 	sc_car_direction_packet pack;
 	pack.size = sizeof(pack);
 	pack.type = static_cast<char>(packet_type::sc_car_direction);
 	pack.direction = direction;
+
+	send_packet(reinterpret_cast<char*>(&pack));
 }
 
 // 23.4.14

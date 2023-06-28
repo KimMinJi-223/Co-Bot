@@ -249,17 +249,25 @@ void ServerMain::worker_thread()
 		} break;
 		case MOVE_CAR:
 		{
+			// std::cout << "move car enter\n";
 			using namespace std;
 
-			static int direction = 0;
+			static float direction = 0.0;
 			// 일단 0이 직진
 			// 오른쪽으로는 +1
 			// 왼쪽으로는 -1
+
 			if (clients[key].move_car) {
-				if (key < clients[key].tm_id)
-					direction -= 1;
-				else
-					direction += 1;
+				if (clients[clients[key].tm_id].move_car) {
+					direction = 0.0;
+				} else {
+					if (key < clients[key].tm_id)
+						direction = -0.1;
+					else
+						direction = 0.1;
+				}
+
+				std::cout << key << " client is push? " << clients[key].move_car << ", " << clients[key].tm_id << " client is push? " << clients[clients[key].tm_id].move_car << std::endl;
 
 				clients[key].send_move_car_packet(direction);
 				clients[clients[key].tm_id].send_move_car_packet(direction);
@@ -267,7 +275,7 @@ void ServerMain::worker_thread()
 				TIMER_EVENT event;
 				event.object_id = key;
 				event.event_type = event_type::move_car;
-				event.execute_time = std::chrono::system_clock::now() + 5ms;
+				event.execute_time = std::chrono::system_clock::now() + 1ms;
 
 				timer_queue.push(event);
 			}
@@ -486,17 +494,39 @@ void ServerMain::process_packet(char* packet, int client_id)
 			std::cout << "packet_type::cs_start_time_color err!" << std::endl;
 		}
 	} break;
+	case static_cast<int>(packet_type::cs_stage3_enter):
+	{
+		std::cout << client_id << "client enter!" << std::endl;
+
+		{
+			std::lock_guard<std::mutex> lock{ clients[client_id].state_lock };
+			clients[client_id].state = state::ingame;
+		}
+
+		bool is_matching = matching(client_id);
+		if (!is_matching)
+			std::cout << "이미 다른 팀원이 있습니다." << std::endl;
+
+		std::cout << "complete matching\n";
+
+		set_team_position(client_id);
+
+		clients[client_id].send_enter_packet();
+	} break;
 	case static_cast<int>(packet_type::cs_car_direction):
 	{
 		using namespace std;
-		
+
 		cs_car_direction_packet* pack = reinterpret_cast<cs_car_direction_packet*>(packet);
+
+		std::cout << client_id << "push? " << pack->direction << std::endl;
+
 		if (pack->direction) {
 			clients[client_id].move_car = true;
 
 			TIMER_EVENT timer_event;
 			timer_event.event_type = event_type::move_car;
-			timer_event.execute_time = std::chrono::system_clock::now() + 5ms;
+			timer_event.execute_time = std::chrono::system_clock::now() + 1ms;
 			timer_event.object_id = client_id;
 
 			timer_queue.push(timer_event);
@@ -552,7 +582,7 @@ void ServerMain::do_timer_thread()
 	{
 		TIMER_EVENT event;
 		if (!timer_queue.try_pop(event)) {
-			std::this_thread::sleep_for(std::chrono::seconds(1));
+			std::this_thread::sleep_for(1ms);
 			continue;
 		}
 
@@ -570,7 +600,7 @@ void ServerMain::do_timer_thread()
 			default: continue;
 			}
 		} else {
-			std::this_thread::sleep_for(5ms);
+			std::this_thread::sleep_for(1ms);
 		}
 	}
 }

@@ -65,6 +65,8 @@ enum class packet_type {
 
 	sc_logout,
 
+	cs_stage3_enter,
+
 	cs_car_direction,
 	sc_car_direction,
 };
@@ -226,5 +228,11 @@ struct sc_car_direction_packet
 {
 	char	size;
 	char	type;
-	int		direction;
+	float	direction;
+};
+
+struct cs_stage3_enter_packet
+{
+	char size;
+	char type;
 };

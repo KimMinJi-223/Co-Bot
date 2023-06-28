@@ -49,6 +49,8 @@ private:
 	void ProcessPacket(char* packet);
 
 private:
+	virtual void Tick(float DeltaTime) override;
+
 	class ACPP_Cobot_Car* player;
 
 	UPROPERTY(VisibleAnywhere, Category = Input)

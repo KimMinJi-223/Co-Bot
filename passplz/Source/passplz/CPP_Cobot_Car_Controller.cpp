@@ -43,6 +43,14 @@ void ACPP_Cobot_Car_Controller::BeginPlay()
 	instance = Cast<UCPP_CobotGameInstance>(GetWorld()->GetGameInstance());
 	sock = instance->GetSocketMgr()->GetSocket();
 
+	cs_stage3_enter_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::cs_stage3_enter);
+
+	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+
+	UE_LOG(LogTemp, Warning, TEXT("car controller enter!"));
+
 	if (UEnhancedInputLocalPlayerSubsystem* SubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
 		SubSystem->AddMappingContext(DefaultContext, 0);
 
@@ -121,13 +129,32 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
     {
 	case static_cast<int>(packet_type::sc_car_direction):
 	{
+		//UE_LOG(LogTemp, Warning, TEXT("recv sc_car_direction"));
+
 		sc_car_direction_packet* pack = reinterpret_cast<sc_car_direction_packet*>(packet);
-		pack->direction; // 여기에 방향 정보가 담겨 있음.
 		// 일단은 0이 직진
-		// 좌는 5ms마다 -1
-		// 우는 5ms마다 +1
+		// 좌는 5ms마다 -0.1
+		// 우는 5ms마다 +0.1
+
+		// 클라: 여기 자동차 돌리는 함수 호출
+		//CarForward();
+		UE_LOG(LogTemp, Warning, TEXT("direction: %lf"), pack->direction);
+
+		// 근데 이거 너무 뚝뚝 끊김 부드럽게 안되나?
+		if (0.0 == pack->direction)
+			CarForward();
+		else 
+			CarRotation(pack->direction);
+
 	} break;
     }
+}
+
+void ACPP_Cobot_Car_Controller::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	RecvPacket();
 }
 
 void ACPP_Cobot_Car_Controller::CarInput(const FInputActionValue& Value)

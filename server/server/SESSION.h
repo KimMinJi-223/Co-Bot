@@ -64,7 +64,7 @@ public:
 	void send_cobot_button(packet_type type);
 	void send_board_color(int color, int client_id);
 	void send_logout_packet();
-	void send_move_car_packet(int direction);
+	void send_move_car_packet(float direction);
 	//void send_move_packet(int client_id);
 	//void send_rotate_packet(int client_id);
 
