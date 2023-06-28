@@ -42,10 +42,10 @@ void ACPP_Lava::BeginPlay()
 	Super::BeginPlay();
 	lavaBall->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	explosionDecal->SetDecalMaterial(LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/K_Test/lava/circle_2.circle_2")));
+	explosionDecal->SetDecalMaterial(LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/K_Test/lava/m_MeltLava.m_MeltLava")));
 	explosionDecalDynamicMaterial = explosionDecal->CreateDynamicMaterialInstance();
 	//머티리얼 설정
-	UMaterialInterface* BaseMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/K_Test/lava/brush.brush"));
+	UMaterialInterface* BaseMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/K_Test/lava/m_brush.m_brush"));
 	DynamicMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, nullptr);
 
 	RenderTargetTexture = Cast<UTextureRenderTarget2D>(StaticLoadObject(UTextureRenderTarget2D::StaticClass(), nullptr, TEXT("/Game/K_Test/lava/rendertaget.rendertaget")));
