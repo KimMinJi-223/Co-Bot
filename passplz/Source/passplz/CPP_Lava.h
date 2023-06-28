@@ -1,0 +1,58 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "passplz.h"
+#include "GameFramework/Actor.h"
+#include "Components/DecalComponent.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+#include "CPP_Lava.generated.h"
+
+UCLASS()
+class PASSPLZ_API ACPP_Lava : public AActor
+{
+	GENERATED_BODY()
+	
+public:	
+	// Sets default values for this actor's properties
+	ACPP_Lava();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+	void PostInitializeComponents() override;
+
+public:	
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(BlueprintCallable)
+		void MeltLavaFloor();
+	UFUNCTION(BlueprintCallable)
+		void MeltLavaFloorLocation();
+
+	UPROPERTY(VisibleAnywhere)
+	UProjectileMovementComponent* ProjectileMovementComponent;
+
+	UPROPERTY(BlueprintReadWrite)
+		bool isExplosion;
+
+private:
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* lavaBall;
+
+	UPROPERTY(VisibleAnywhere)
+		USphereComponent* CollisionComponent;
+	UPROPERTY(VisibleAnywhere)
+	UMaterialInstanceDynamic* DynamicMaterial;
+	UPROPERTY(VisibleAnywhere)
+	UTextureRenderTarget2D* RenderTargetTexture;
+
+	UPROPERTY(VisibleAnywhere)
+		UDecalComponent* explosionDecal;
+	UPROPERTY(VisibleAnywhere)
+		UMaterialInstanceDynamic* explosionDecalDynamicMaterial;
+
+	float opacityValue;
+	FVector crashLocation;
+};
