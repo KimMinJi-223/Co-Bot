@@ -11,20 +11,16 @@ ACPP_Cobot_Car::ACPP_Cobot_Car()
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SPRINGARM"));
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("CAMERA"));
-	Sphere = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Sphere"));
-	Decal = CreateDefaultSubobject<UDecalComponent>("Decal");
+	lavaCapsule = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("lavaCapsule"));
 
 	SpringArm->SetupAttachment(GetCapsuleComponent());
 	Camera->SetupAttachment(SpringArm);
-	Sphere->SetupAttachment(GetCapsuleComponent());
-	Decal->SetupAttachment(Sphere);
-
+	lavaCapsule->SetupAttachment(GetCapsuleComponent());
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -80.0f), FRotator(0.0f, -90.0f, 0.0f));
 	SpringArm->TargetArmLength = 1000.0f;
-
-	Decal->SetRelativeRotation(FRotator(90.f, 0.f, 0.f));
-
+	lavaCapsule->SetRelativeLocation(FVector(27.f, 0.0f, 94.f));
+	lavaCapsule->SetRelativeRotation(FRotator(80.f, 0.0f, 0.0f));
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_COBOT(TEXT("/Game/K_Test/input/stage4_car_run.stage4_car_run"));
 	if (SK_COBOT.Succeeded()) {
@@ -33,16 +29,11 @@ ACPP_Cobot_Car::ACPP_Cobot_Car()
 		GetMesh()->SetSkeletalMesh(SK_COBOT.Object);
 	}
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_SPHERE(TEXT("/Game/K_Test/input/Sphere.Sphere"));
-	if (SM_SPHERE.Succeeded()) {
-		Sphere->SetStaticMesh(SM_SPHERE.Object);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LAVACAPSULE(TEXT("/Game/K_Test/input/SM_MERGED_StaticMeshActor_11.SM_MERGED_StaticMeshActor_11"));
+	if (SM_LAVACAPSULE.Succeeded()) {
+		lavaCapsule->SetStaticMesh(SM_LAVACAPSULE.Object);
 	}
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> DecalMaterialAsset(TEXT("/Game/K_Test/lava/circle.circle"));
-	if (DecalMaterialAsset.Succeeded())
-	{
-		Decal->SetDecalMaterial(DecalMaterialAsset.Object);
-	}
 }
 
 // Called when the game starts or when spawned

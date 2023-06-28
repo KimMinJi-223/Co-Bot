@@ -27,16 +27,15 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		USpringArmComponent* SpringArm;
+private:
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		UCameraComponent* Camera;
 
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* Sphere;
+		UStaticMeshComponent* lavaCapsule;
 
-	UPROPERTY(VisibleAnywhere)
-		UDecalComponent* Decal;
+	int mode;
 };
