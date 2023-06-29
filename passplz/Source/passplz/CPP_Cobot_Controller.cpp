@@ -185,14 +185,6 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
     {
         sc_login_packet* pack = reinterpret_cast<sc_login_packet*>(packet);
         id = pack->id;
-        //x = pack->x;
-        //y = pack->y;
-        //z = pack->z;
-        //yaw = pack->yaw;
-        //tm_x = pack->tm_x;
-        //tm_y = pack->tm_y;
-        //tm_z = pack->tm_z;
-        //tm_yaw = pack->tm_yaw;
 
         UE_LOG(LogTemp, Warning, TEXT("recv login packet"));
     } break;

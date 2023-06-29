@@ -13,6 +13,7 @@ SESSION::SESSION()
 	, tm_location(-1.f, -1.f, -1.f)
 	, tm_yaw(0.f)
 	, prev_remain(0)
+	, mouse_left_click(false)
 
 {
 	//ZeroMemory(&recv_over.over, sizeof(recv_over.over));
@@ -207,6 +208,62 @@ void SESSION::send_move_car_packet(float direction)
 	pack.size = sizeof(pack);
 	pack.type = static_cast<char>(packet_type::sc_car_direction);
 	pack.direction = direction;
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_stage3_enter_packet(int id, int tm_id)
+{
+	sc_stage3_enter_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_stage3_enter);
+
+	if (id < tm_id) {
+		stage3_player_number = 1;
+		pack.player_number = 1;
+	} else {
+		stage3_player_number = 2;
+		pack.player_number = 2;
+	}
+	
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_cannon_yaw_packet(double value)
+{
+	sc_cannon_yaw_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_cannon_yaw);
+	pack.yaw = value;
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_cannon_pitch_packet(double value)
+{
+	sc_cannon_pitch_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_cannon_pitch);
+	pack.pitch = value;
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_cannon_click_packet(int click_id)
+{
+	sc_cannon_click_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_cannon_click);
+	pack.click_id = click_id;
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_cannon_fire_packet()
+{
+	sc_cannon_fire_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_cannon_fire);
 
 	send_packet(reinterpret_cast<char*>(&pack));
 }

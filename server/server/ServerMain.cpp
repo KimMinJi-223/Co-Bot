@@ -267,7 +267,7 @@ void ServerMain::worker_thread()
 						direction = 0.1;
 				}
 
-				std::cout << key << " client is push? " << clients[key].move_car << ", " << clients[key].tm_id << " client is push? " << clients[clients[key].tm_id].move_car << std::endl;
+				// std::cout << key << " client is push? " << clients[key].move_car << ", " << clients[key].tm_id << " client is push? " << clients[clients[key].tm_id].move_car << std::endl;
 
 				clients[key].send_move_car_packet(direction);
 				clients[clients[key].tm_id].send_move_car_packet(direction);
@@ -511,7 +511,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 
 		set_team_position(client_id);
 
-		clients[client_id].send_enter_packet();
+		clients[client_id].send_stage3_enter_packet(client_id, clients[client_id].tm_id);
 	} break;
 	case static_cast<int>(packet_type::cs_car_direction):
 	{
@@ -519,7 +519,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 
 		cs_car_direction_packet* pack = reinterpret_cast<cs_car_direction_packet*>(packet);
 
-		std::cout << client_id << "push? " << pack->direction << std::endl;
+		//std::cout << client_id << "push? " << pack->direction << std::endl;
 
 		if (pack->direction) {
 			clients[client_id].move_car = true;
@@ -533,6 +533,56 @@ void ServerMain::process_packet(char* packet, int client_id)
 		} else {
 			clients[client_id].move_car = false;
 		}
+	} break;
+	case static_cast<int>(packet_type::cs_cannon):
+	{
+		cs_cannon_packet* pack = reinterpret_cast<cs_cannon_packet*>(packet);
+
+		clients[client_id].mouse_left_click = false;
+
+		if (1 == clients[client_id].stage3_player_number) {
+			static double yaw = 0.0;
+			if (1 == pack->cannon_value)
+				yaw += 5.0;
+			else if (-1 == pack->cannon_value)
+				yaw -= 5.0;
+			else
+				std::cout << "cannon yaw error\n";
+
+			std::cout << "yaw: " << yaw << std::endl;
+			clients[client_id].send_cannon_yaw_packet(yaw);
+			clients[clients[client_id].tm_id].send_cannon_yaw_packet(yaw);
+		} else if (2 == clients[client_id].stage3_player_number) {
+			static double pitch = 0.0;
+			if (1 == pack->cannon_value)
+				pitch += 5.0;
+			else if (-1 == pack->cannon_value)
+				pitch -= 5.0;
+			else
+				std::cout << "cannon pitch error\n";
+
+			std::cout << "pitch: " << pack->cannon_value << std::endl;
+			clients[client_id].send_cannon_pitch_packet(pitch);
+			clients[clients[client_id].tm_id].send_cannon_pitch_packet(pitch);
+		} else {
+			std::cout << "cannon player number err\n";
+		}
+	} break;
+	case static_cast<int>(packet_type::cs_cannon_click):
+	{
+		clients[client_id].mouse_left_click = true;
+
+		if (clients[client_id].mouse_left_click && clients[clients[client_id].tm_id].mouse_left_click) {
+			
+			clients[client_id].send_cannon_fire_packet();
+			clients[clients[client_id].tm_id].send_cannon_fire_packet();
+
+			clients[client_id].mouse_left_click = false;
+			clients[clients[client_id].tm_id].mouse_left_click = false;
+		} else {
+			clients[client_id].send_cannon_click_packet(clients[client_id].stage3_player_number);
+			clients[clients[client_id].tm_id].send_cannon_click_packet(clients[client_id].stage3_player_number);
+		}		
 	} break;
 	}
 }

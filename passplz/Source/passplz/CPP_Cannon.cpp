@@ -70,10 +70,20 @@ void ACPP_Cannon::Tick(float DeltaTime)
 
 }
 
-void ACPP_Cannon::SetBombDropLocation(FRotator rotationValue)
+void ACPP_Cannon::SetBombDropLocation(int player_number, double value)
 {
+	static FRotator rotate = FRotator(0.0, 0.0, 0.0);
+	
+	if (1 == player_number)
+		rotate.Yaw = value;
+	else if (2 == player_number)
+		rotate.Pitch = value;
+	else
+		UE_LOG(LogTemp, Warning, TEXT("rotate err!"));
 
-	cannon->SetRelativeRotation(rotationValue);
+	UE_LOG(LogTemp, Warning, TEXT("yaw, pitch, roll: %lf, %lf, %lf"), rotate.Yaw, rotate.Pitch, rotate.Roll);
+
+	cannon->SetRelativeRotation(rotate);
 }
 
 void ACPP_Cannon::FireLava()

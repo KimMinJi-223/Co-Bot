@@ -73,6 +73,7 @@ void ACPP_Cobot_Car_Controller::BeginPlay()
 	if(cannon)
 		UE_LOG(LogTemp, Warning, TEXT("cannon OK"));
 
+	
 }
 
 void ACPP_Cobot_Car_Controller::PostInitializeComponents()
@@ -150,25 +151,53 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 {
     switch (packet[1])
     {
+	case static_cast<int>(packet_type::sc_stage3_enter):
+	{
+		sc_stage3_enter_packet* pack = reinterpret_cast<sc_stage3_enter_packet*>(packet);
+		player_number = pack->player_number;
+	} break;
 	case static_cast<int>(packet_type::sc_car_direction):
 	{
 		//UE_LOG(LogTemp, Warning, TEXT("recv sc_car_direction"));
 
 		sc_car_direction_packet* pack = reinterpret_cast<sc_car_direction_packet*>(packet);
-		// 일단은 0이 직진
-		// 좌는 5ms마다 -0.1
-		// 우는 5ms마다 +0.1
 
-		// 클라: 여기 자동차 돌리는 함수 호출
-		//CarForward();
 		UE_LOG(LogTemp, Warning, TEXT("direction: %lf"), pack->direction);
 
-		// 근데 이거 너무 뚝뚝 끊김 부드럽게 안되나?
 		if (0.0 == pack->direction)
 			CarForward();
 		else 
 			CarRotation(pack->direction);
 
+	} break;
+	case static_cast<int>(packet_type::sc_cannon_yaw):
+	{
+		sc_cannon_yaw_packet* pack = reinterpret_cast<sc_cannon_yaw_packet*>(packet);
+	
+		Cast<ACPP_Cannon>(cannon)->SetBombDropLocation(1, pack->yaw);
+	} break;
+	case static_cast<int>(packet_type::sc_cannon_pitch):
+	{
+		sc_cannon_pitch_packet* pack = reinterpret_cast<sc_cannon_pitch_packet*>(packet);
+
+		Cast<ACPP_Cannon>(cannon)->SetBombDropLocation(2, pack->pitch);
+	} break;
+	case static_cast<int>(packet_type::sc_cannon_click):
+	{
+		sc_cannon_click_packet* pack = reinterpret_cast<sc_cannon_click_packet*>(packet);
+
+		if (player_number == pack->click_id) {
+			// 자기가 누른거
+			Cast<ACPP_Cannon>(cannon)->FireLava();
+		} else {
+			// 상대방이 누른거
+			Cast<ACPP_Cannon>(cannon)->FireLava();
+		}
+	} break;
+	case static_cast<int>(packet_type::sc_cannon_fire):
+	{
+		// 대포 발사하는 함수 호출
+		Cast<ACPP_Cannon>(cannon)->FireLava();
 	} break;
     }
 }
@@ -182,8 +211,6 @@ void ACPP_Cobot_Car_Controller::Tick(float DeltaTime)
 
 void ACPP_Cobot_Car_Controller::CarInput(const FInputActionValue& Value)
 {
-	//서버 : 여기서 키를 누르거나 떼면 여길 들어오는데 이때 서버에 패킷 보내야함
-	//서버에는 각 클라 키에 대한 bool값을 가진다.
 	UE_LOG(LogTemp, Warning, TEXT("%f"), Value.Get<float>());
 
 	cs_car_direction_packet pack;
@@ -196,6 +223,7 @@ void ACPP_Cobot_Car_Controller::CarInput(const FInputActionValue& Value)
 		pack.direction = false;
 
 	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+
 	if (mode == 0) {
 		UE_LOG(LogTemp, Warning, TEXT("CarInput %f"), Value.Get<float>());
 	}
@@ -208,23 +236,12 @@ void ACPP_Cobot_Car_Controller::CannonInput(const FInputActionValue& Value)
 		UE_LOG(LogTemp, Warning, TEXT("CannonInput %f"), Value.Get<float>());
 	}
 
-	//서버 : 1번 클라는 조준점을 앞뒤로, 2번클라는 양옆으로 움직이기 해야함
-	//서버에 패킷 보낼때 Value.Get<float>() 이 값 가져가야함 이 값은 마우스 휠 움직인 방향에 따라 음수, 양수 값인데 이걸로 조준점 위치 계산해서 보내주셈
-	//서버는 이를 위해 대포의 회전값을 가지는 FRotator가 필요 yaw는 1번클라, pitch는 2번클라가 보내준 값을 더해서 최종 대포의 회전 값을 다시 클라에게 보내줘야함
-	//cpp_cannon에 있는 SetBombDropLocation함수 호출하면 됨
+	cs_cannon_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::cs_cannon);
+	pack.cannon_value = Value.Get<float>();
 
-	//서버에는 이런식으로 게산해서 밑에 코드 어딘가에 추가해서 호출하면 됨
-	//FRotator rota;
-	//rota.Roll = 서버에서 넘겨준값;
-	//rota.Yaw = 서버에서 넘겨준값;
-	//rota.Pitch = 서버에서 넘겨준값;
-	//Cast<ACPP_Cannon>(cannon)->SetBombDropLocation(rota);
-	// 이를 위해 Rotator 구조체 하나 선언해서 하는게...
-	// struct Rotator{
-	// float Roll
-	// ...
-	// ...
-	// } 이거 //코드 짜고 이제 필요없는 주석 설명은 지워주세요
+	send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 }
 
 void ACPP_Cobot_Car_Controller::FireCannonInput(const FInputActionValue& Value)
@@ -232,6 +249,16 @@ void ACPP_Cobot_Car_Controller::FireCannonInput(const FInputActionValue& Value)
 	if (mode == 1) {
 		UE_LOG(LogTemp, Warning, TEXT("FireCannonInput %s"), Value.Get<bool>() ? TEXT("true") : TEXT("false"));
 		Cast<ACPP_Cannon>(cannon)->FireLava();
+	}
+
+	if (1.f == Value.Get<float>()) {
+		cs_cannon_click_packet pack;
+		pack.size = sizeof(pack);
+		pack.type = static_cast<char>(packet_type::cs_cannon_click);
+
+		send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+	} else {
+		UE_LOG(LogTemp, Warning, TEXT("FireCannonInput"));
 	}
 }
 
@@ -250,7 +277,7 @@ void ACPP_Cobot_Car_Controller::CarForward()
 	FRotator rotator_forward = UKismetMathLibrary::MakeRotator(0.0f, 0.0f, rotator_controller.Yaw);
 	FVector forward_vector = UKismetMathLibrary::GetForwardVector(rotator_forward);
 
-	player->AddMovementInput(forward_vector, 1.0);
+	player->AddMovementInput(forward_vector, 5.0);
 }
 
 void ACPP_Cobot_Car_Controller::CarRotation(float rotationValue)

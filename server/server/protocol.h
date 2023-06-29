@@ -11,7 +11,7 @@ enum class packet_type {
 	cs_enter,
 	cs_move,
 	cs_logout,
-	
+
 	cs_push_button_Forklift_red,
 	cs_push_button_Forklift_green,
 	cs_push_button_Forklift_blue,
@@ -42,7 +42,7 @@ enum class packet_type {
 	cs_push_button_gear_left,
 	cs_push_button_gear_right,
 
-	sc_login, 
+	sc_login,
 	sc_add_player,
 	sc_move,
 	sc_next_light,
@@ -66,9 +66,18 @@ enum class packet_type {
 	sc_logout,
 
 	cs_stage3_enter,
+	sc_stage3_enter,
 
 	cs_car_direction,
 	sc_car_direction,
+
+	cs_cannon,
+	sc_cannon_yaw,
+	sc_cannon_pitch,
+
+	cs_cannon_click,
+	sc_cannon_click,
+	sc_cannon_fire,
 };
 enum class direction { forward, back, left, right };
 enum class color { red, green, blue, black };
@@ -232,6 +241,53 @@ struct sc_car_direction_packet
 };
 
 struct cs_stage3_enter_packet
+{
+	char size;
+	char type;
+};
+
+struct sc_stage3_enter_packet
+{
+	char	size;
+	char	type;
+	int		player_number;
+};
+
+struct cs_cannon_packet
+{
+	char	size;
+	char	type;
+	double	cannon_value;
+};
+
+struct sc_cannon_yaw_packet 
+{
+	char	size;
+	char	type;
+	float	yaw;
+};
+
+struct sc_cannon_pitch_packet
+{
+	char	size;
+	char	type;
+	float	pitch;
+};
+
+struct cs_cannon_click_packet
+{
+	char size;
+	char type;
+};
+
+struct sc_cannon_click_packet
+{
+	char	size;
+	char	type;
+	int		click_id;
+};
+
+struct sc_cannon_fire_packet
 {
 	char size;
 	char type;

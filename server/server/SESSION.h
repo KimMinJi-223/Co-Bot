@@ -24,11 +24,15 @@ public:
 	double		yaw;
 	RingBuffer	ring_buff;
 	
+	int			stage3_player_number;
+	bool		mouse_left_click;
+
 	bool		move_car;
 
 	std::mutex	state_lock;
 	std::mutex	match_lock;
 	std::mutex	sock_lock;
+	std::mutex	mouse_lock;
 
 	OVER_EX		recv_over;
 
@@ -65,8 +69,11 @@ public:
 	void send_board_color(int color, int client_id);
 	void send_logout_packet();
 	void send_move_car_packet(float direction);
-	//void send_move_packet(int client_id);
-	//void send_rotate_packet(int client_id);
+	void send_stage3_enter_packet(int id, int tm_id);
+	void send_cannon_yaw_packet(double value);
+	void send_cannon_pitch_packet(double value);
+	void send_cannon_click_packet(int click_id);
+	void send_cannon_fire_packet();
 
 public:
 	SESSION();

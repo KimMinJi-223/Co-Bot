@@ -40,10 +40,14 @@ private:
 
 	SOCKET* sock;
 
+	TArray<AActor*> cannon_actor;
+
 	// 패킷 재조립을 위한 부분 나중에 무조건 수정
 	int		prev_remain;
 	int		prev_packet_size;
 	char	prev_packet_buff[10000];
+
+	int		player_number;
 
 	void RecvPacket();
 	void ProcessPacket(char* packet);
