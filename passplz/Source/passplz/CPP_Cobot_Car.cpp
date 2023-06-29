@@ -19,8 +19,8 @@ ACPP_Cobot_Car::ACPP_Cobot_Car()
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -80.0f), FRotator(0.0f, -90.0f, 0.0f));
 	SpringArm->TargetArmLength = 1000.0f;
-	lavaCapsule->SetRelativeLocation(FVector(27.f, 0.0f, 94.f));
-	lavaCapsule->SetRelativeRotation(FRotator(80.f, 0.0f, 0.0f));
+	lavaCapsule->SetRelativeLocation(FVector(27.f, 0.0f, 90.f));
+	lavaCapsule->SetRelativeRotation(FRotator(75.f, 0.0f, 0.0f));
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_COBOT(TEXT("/Game/K_Test/input/stage4_car_run.stage4_car_run"));
 	if (SK_COBOT.Succeeded()) {
@@ -29,7 +29,7 @@ ACPP_Cobot_Car::ACPP_Cobot_Car()
 		GetMesh()->SetSkeletalMesh(SK_COBOT.Object);
 	}
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LAVACAPSULE(TEXT("/Game/K_Test/input/SM_MERGED_StaticMeshActor_11.SM_MERGED_StaticMeshActor_11"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LAVACAPSULE(TEXT("/Game/K_Test/input/lavaCapsule.lavaCapsule"));
 	if (SM_LAVACAPSULE.Succeeded()) {
 		lavaCapsule->SetStaticMesh(SM_LAVACAPSULE.Object);
 	}

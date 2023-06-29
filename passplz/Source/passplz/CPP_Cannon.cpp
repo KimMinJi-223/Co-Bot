@@ -84,6 +84,9 @@ void ACPP_Cannon::SetBombDropLocation(int player_number, double value)
 	UE_LOG(LogTemp, Warning, TEXT("yaw, pitch, roll: %lf, %lf, %lf"), rotate.Yaw, rotate.Pitch, rotate.Roll);
 
 	cannon->SetRelativeRotation(rotate);
+	targetRotation = rotate;
+
+
 }
 
 void ACPP_Cannon::FireLava()
