@@ -165,7 +165,8 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 
 		// 근데 이거 너무 뚝뚝 끊김 부드럽게 안되나?
 		if (0.0 == pack->direction)
-			CarForward();
+			//CarForward(서버에서 받는 값이 필요);
+			;
 		else 
 			CarRotation(pack->direction);
 
@@ -184,6 +185,7 @@ void ACPP_Cobot_Car_Controller::CarInput(const FInputActionValue& Value)
 {
 	//서버 : 여기서 키를 누르거나 떼면 여길 들어오는데 이때 서버에 패킷 보내야함
 	//서버에는 각 클라 키에 대한 bool값을 가진다.
+	//서버에서 가속과 관련된 계산이 필요합니다. -> 점점 커지는 값 그리고 뗐을때는 점점 작아지는 값 필요 그 값을 넘겨주세요
 	UE_LOG(LogTemp, Warning, TEXT("%f"), Value.Get<float>());
 
 	cs_car_direction_packet pack;
@@ -242,15 +244,10 @@ void ACPP_Cobot_Car_Controller::RotateInput(const FInputActionValue& Value)
 	player->SpringArm->AddRelativeRotation(FRotator(Value.Get<FVector2D>().Y, Value.Get<FVector2D>().X, 0.0f));
 }
 
-void ACPP_Cobot_Car_Controller::CarForward()
+void ACPP_Cobot_Car_Controller::CarForward(float acceleration)
 {
 	UE_LOG(LogTemp, Warning, TEXT("CarForward"));
-
-	FRotator rotator_controller = GetControlRotation();
-	FRotator rotator_forward = UKismetMathLibrary::MakeRotator(0.0f, 0.0f, rotator_controller.Yaw);
-	FVector forward_vector = UKismetMathLibrary::GetForwardVector(rotator_forward);
-
-	player->AddMovementInput(forward_vector, 1.0);
+	player->AddActorWorldOffset(player->GetActorForwardVector()* acceleration);
 }
 
 void ACPP_Cobot_Car_Controller::CarRotation(float rotationValue)

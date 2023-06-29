@@ -48,6 +48,9 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 		FVector projectileVelocity;
 
+	UPROPERTY(BlueprintReadWrite)
+		FRotator targetRotation;
+
 public:
 	//서버 : 조준점 위치 정해주는 거
 	void SetBombDropLocation(FRotator rotationValue);

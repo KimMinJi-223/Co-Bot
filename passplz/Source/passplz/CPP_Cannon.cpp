@@ -72,7 +72,7 @@ void ACPP_Cannon::Tick(float DeltaTime)
 
 void ACPP_Cannon::SetBombDropLocation(FRotator rotationValue)
 {
-
+	targetRotation = rotationValue;
 	cannon->SetRelativeRotation(rotationValue);
 }
 

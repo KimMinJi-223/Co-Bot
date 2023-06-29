@@ -89,7 +89,7 @@ public:
 	void RotateInput(const FInputActionValue& Value);
 
 	//서버 : 앞으로 가라는 함수 이 함수 호출하면 됨
-	void CarForward();
+	void CarForward(float acceleration);
 	//서버 : 회전 하라는 함수 이 함수 호출하면 됨
 	void CarRotation(float rotationValue);
 	
