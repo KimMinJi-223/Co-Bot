@@ -36,6 +36,17 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* lavaCapsule;
+	
+	UPROPERTY(VisibleAnywhere)
+		USkeletalMeshComponent* Player1;
 
+	UPROPERTY(VisibleAnywhere)
+		USkeletalMeshComponent* Player2;
+
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* Player1CarFoot;
+
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* Player2CarFoot;
 	int mode;
 };
