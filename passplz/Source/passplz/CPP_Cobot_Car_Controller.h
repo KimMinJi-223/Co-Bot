@@ -13,6 +13,8 @@
 #include "Windows/PostWindowsApi.h"
 #include "Windows/HideWindowsPlatformTypes.h"
 
+#include "../../../server/server/RingBuffer.h"
+
 #include "passplz.h"
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
@@ -39,6 +41,8 @@ private:
 	UCPP_CobotGameInstance* instance;
 
 	SOCKET* sock;
+
+	RingBuffer ring_buff;
 
 	TArray<AActor*> cannon_actor;
 

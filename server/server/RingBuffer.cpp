@@ -1,150 +1,54 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include "RingBuffer.h"
-
-RingBuffer::RingBuffer()
-    : write_point(0)
-    , read_point(0)
-{
-}
-
-RingBuffer::~RingBuffer()
-{
-}
 
 int RingBuffer::enqueue(char* data, int data_size)
 {
-    if (data_size > BUFFER_SIZE) // 링버퍼의 크기보다 더 큰 데이터가 들어옴
-    {
-        return -1;
-    }
+	if (number_of_copies == 0)
+		return static_cast<int>(error::full_buffer);
 
-    int w_p = write_point;
-    for (int i{}; i < data_size; ++i)
-    {
-        if ((w_p == read_point) && !empty()) // 읽지도 않은 데이터가 있어서 더 못 씀. 에러 표시
-        {
-            return -2; 
-        }
+	if (number_of_copies < data_size)
+		return static_cast<int>(error::in_data_is_too_big);
 
-        ++w_p;
+	if (BUFFER_SIZE < write_pos + data_size)
+		write_pos = 0;
 
-        if (w_p == BUFFER_SIZE)
-        {
-            w_p = 0;
-        }
-    }
+	memcpy(buffer + write_pos, data, data_size);
 
-    memcpy(buffer + write_point, data, data_size);
+	write_pos += data_size;
+	number_of_copies -= data_size;
 
-    write_point = w_p;
-
-    return data_size;
-
-    //int write_num = 0;
-
-    //// 현재 버퍼를 넘어선다면 계속 채우다가 오래된 데이터부터 덮어쓰기 하기
-    //if (BUFFER_SIZE <= write_point + data_size)
-    //{
-    //    int remain1 = BUFFER_SIZE - write_point;
-    //    memcpy(buffer + write_point, data, remain1);
-    //    write_num += remain1;
-    //    write_point = 0;
-
-    //    int remain2 = data_size - remain1;
-    //    memcpy(buffer + write_point, data + remain1, remain2);
-    //    write_num += remain2;
-    //    write_point += remain2;
-
-    //    return write_num;
-    //}
-
-    //memcpy(buffer + write_point, data, data_size);
-
-    //write_point += data_size;
-
-    //return data_size;
+	return data_size;
 }
 
-int RingBuffer::dequeue(char* dest, int data_size)
+int RingBuffer::dequeue(char* destination, int data_size)
 {
-    if (data_size > BUFFER_SIZE) // 버퍼 크기보다 더 큰 크기를 읽으려고 할 때
-    {
-        return -1;
-    }
+	if (number_of_copies == BUFFER_SIZE)
+		return static_cast<int>(error::no_data_in_buffer);
 
-    int r_p = read_point;
-    for (int i{}; i < data_size; ++i)
-    {
-        if (r_p == write_point) // 더 읽을게 없는데 읽는 다는 것이므로 오류
-        {
-            return -2;
-        }
+	if (BUFFER_SIZE - number_of_copies < data_size)
+		return static_cast<int>(error::out_data_is_too_big);
+	           
+	if (BUFFER_SIZE < read_pos + data_size) 
+		read_pos = 0;
 
-        ++r_p;
+	memcpy(destination, buffer + read_pos, data_size);
 
-        if (r_p == BUFFER_SIZE)
-        {
-            r_p = 0;
-        }
-    }
+	read_pos += data_size;
+	number_of_copies += data_size;
 
-    memcpy(dest, buffer + read_point, data_size);
-    read_point = r_p;
-
-    return data_size;
-
-    //int read_num = 0;
-
-    //// n + 1 로 간다면?
-    //if (BUFFER_SIZE <= read_point + data_size)
-    //{
-    //    int remain1 = BUFFER_SIZE - read_point;
-    //    memcpy(dest, buffer + read_point, remain1);
-    //    read_num += remain1;
-    //    read_point = 0;
-
-    //    int remain2 = data_size - remain1;
-    //    memcpy(dest + remain1, buffer + read_point, remain2);
-    //    read_num += remain2;
-    //    read_point += remain2;
-
-    //    return read_num;
-    //}
-
-    //memcpy(dest, buffer + read_point, data_size);
-    //read_num += data_size;
-    //read_point += data_size;
-
-    //return read_num;
+	return data_size;
 }
 
-int RingBuffer::diff()
+int RingBuffer::remain_data()
 {
-    int diff;
-
-    if (read_point > write_point)
-    {
-        diff = (BUFFER_SIZE - read_point) + write_point;
-    }
-    else
-    {
-        diff = write_point - read_point;
-    }
-    return diff;
+	return abs(read_pos - write_pos);
 }
 
-bool RingBuffer::empty()
+bool RingBuffer::is_empty()
 {
-    return (write_point == read_point);
-}
-
-void RingBuffer::move_read_pos(char move)
-{
-    if (BUFFER_SIZE <= read_point + move)
-    {
-        read_point = move - (BUFFER_SIZE - read_point);
-    }
-    else
-    {
-        read_point += move;
-    }
+	if (number_of_copies == BUFFER_SIZE)
+		return true;
+	else
+		return false;
 }

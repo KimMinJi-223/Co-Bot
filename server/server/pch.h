@@ -23,12 +23,14 @@ public:
 	{
 		ZeroMemory(&over, sizeof(over));
 		wsabuf.buf = buffer;
+		object_id = -1;
 	}
 
 	OVER_EX(OVER_EX& over_ex)
 	{
 		ZeroMemory(&over, sizeof(over));
 		over_ex.wsabuf.buf = buffer;
+		object_id = -1;
 	}
 };
 

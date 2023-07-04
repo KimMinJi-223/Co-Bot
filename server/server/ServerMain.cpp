@@ -10,6 +10,7 @@
 #include <memory>
 #include <time.h>
 #include <concurrent_priority_queue.h>
+#include <sqlext.h>
 
 #pragma comment(lib, "mswsock.lib")
 
@@ -27,6 +28,7 @@ ServerMain::ServerMain()
 
 ServerMain::~ServerMain()
 {
+	DB_disconnect();
 	closesocket(server_sock);
 	WSACleanup();
 }
@@ -69,6 +71,33 @@ bool ServerMain::init()
 		return false;
 	}
 	
+	setlocale(LC_ALL, "korean");
+
+	// DB 연동
+	sqlret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &sqlenv); // 환경 핸들 할당
+
+	if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
+		// ODBC 버전 환경 속성 설정
+		sqlret = SQLSetEnvAttr(sqlenv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER*)SQL_OV_ODBC3, 0); 
+		
+		if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
+			// 연결 핸들 할당
+			sqlret = SQLAllocHandle(SQL_HANDLE_DBC, sqlenv, &sqldbc); 
+			
+			if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
+				// login timeout 5초로 설정
+				SQLSetConnectAttr(sqldbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER)5, 0); 
+				
+				// 연결할 데이터 소스
+				sqlret = SQLConnect(sqldbc, (SQLWCHAR*)L"COBOT_2023", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0); 
+				
+				if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO)
+					sqlret = SQLAllocHandle(SQL_HANDLE_STMT, sqldbc, &sqlstmt); // 상태 핸들 할당
+			}
+		}
+	}
+	// --------------------
+
 	std::cout << "서버가 활성화 되었습니다. 접속을 기다립니다..." << std::endl;
 	
 	return true;
@@ -194,58 +223,50 @@ void ServerMain::worker_thread()
 		} break;
 		case IO_RECV:
 		{
-			int remain_data = num_bytes + clients[key].prev_remain;
+			RingBuffer* ring_buff = &clients[key].ring_buff;
 			char* p = over_ex->buffer;
 
-			while (remain_data > 0)
-			{
-				int packet_size = p[0];
-				if (packet_size <= remain_data) {
-					process_packet(p, static_cast<int>(key));
-					p = p + packet_size;
-					remain_data = remain_data - packet_size;
-				}
-				else break;
+			int ret = ring_buff->enqueue(p, num_bytes);
+			if (static_cast<int>(error::full_buffer) == ret) {
+				std::cout << "err: ring buffer is full\n";
+				return;
+			} else if (static_cast<int>(error::in_data_is_too_big) == ret) {
+				std::cout << "err: in data is too big\n";
+				return;
 			}
 
-			clients[key].prev_remain = remain_data;
+			while (ring_buff->remain_data() > 0)
+			{
+				char pack_size = p[0];
+				if (pack_size <= ring_buff->remain_data()) {
+					char dequeue_data[BUFFER_SIZE];
 
-			if (remain_data > 0)
-				memcpy(over_ex->buffer, p, remain_data);
+					ret = ring_buff->dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
+					if (static_cast<int>(error::no_data_in_buffer) == ret) {
+						std::cout << "err: no data in buffer\n";
+						break;
+					} else if (static_cast<int>(error::out_data_is_too_big) == ret) {
+						std::cout << "ret: " << ret << ", pack size: " << pack_size << std::endl;
+						std::cout << "p[0]: " << p[0] << std::endl;
+						std::cout << "err: out data is too big\n";
+						break;
+					}
+
+					process_packet(dequeue_data, static_cast<int>(key));
+
+					p += pack_size;
+				} else break;
+			}
+			
+
+			if (0 < ring_buff->remain_data())
+				memcpy(over_ex->buffer, p, ring_buff->remain_data());
 
 			clients[key].recv_packet();
-
-			// ring buffer
-   //         RingBuffer* ring_buff = &clients[key].ring_buff;
-   //         char* p = over_ex->buffer;
-
-   //         ring_buff->lock.lock();
-   //         ring_buff->enqueue(p, num_bytes);
-   //         ring_buff->lock.unlock();
-
-			//while (p[0] <= ring_buff->diff() && !ring_buff->empty())
-			//{
-   //             char ring_pack[BUF_SIZE];
-
-   //             ring_buff->lock.lock();
-   //             ring_buff->dequeue(reinterpret_cast<char*>(&ring_pack), p[0]);
-   //             ring_buff->lock.unlock();
-
-			//	process_packet(ring_pack, static_cast<int>(key));
-			//	ring_buff->move_read_pos(p[0]);
-			//	p += p[0];
-			//} 
-
-   //         if (0 < ring_buff->diff())
-   //         {
-   //             memcpy(over_ex->buffer, p, num_bytes);
-   //         }
-
-   //         clients[key].recv_packet();
 		} break;
 		case IO_SEND:
 		{
-			//delete over_ex;
+			delete over_ex;
 		} break;
 		case MOVE_CAR:
 		{
@@ -253,14 +274,18 @@ void ServerMain::worker_thread()
 			using namespace std;
 
 			static float direction = 0.0;
-			// 일단 0이 직진
-			// 오른쪽으로는 +1
-			// 왼쪽으로는 -1
+			static float acceleration = 0.0;
 
 			if (clients[key].move_car) {
 				if (clients[clients[key].tm_id].move_car) {
 					direction = 0.0;
+					acceleration += 0.3;
+
+					if (acceleration >= 50.f)
+						acceleration = 50.f;
 				} else {
+					acceleration = 0.0;
+
 					if (key < clients[key].tm_id)
 						direction = -0.1;
 					else
@@ -269,8 +294,8 @@ void ServerMain::worker_thread()
 
 				// std::cout << key << " client is push? " << clients[key].move_car << ", " << clients[key].tm_id << " client is push? " << clients[clients[key].tm_id].move_car << std::endl;
 
-				clients[key].send_move_car_packet(direction);
-				clients[clients[key].tm_id].send_move_car_packet(direction);
+				clients[key].send_move_car_packet(direction, acceleration);
+				clients[clients[key].tm_id].send_move_car_packet(direction, acceleration);
 
 				TIMER_EVENT event;
 				event.object_id = key;
@@ -300,6 +325,37 @@ void ServerMain::process_packet(char* packet, int client_id)
 {
 	switch (packet[1])
 	{
+	case static_cast<int>(packet_type::cs_signup):
+	{
+		cs_signup_packet* pack = reinterpret_cast<cs_signup_packet*>(packet);
+		
+		// 회원가입
+		wchar_t query_str[256];
+		wsprintf(query_str, L"SELECT * FROM user_table WHERE ID='%s'", pack->id);
+		sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
+		if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
+			// 중복되는 아이디이므로 회원가입 실패 패킷 보내기
+			clients[client_id].send_signup_fail_packet();
+			return;
+		}
+
+		if (wcscmp(pack->pw, pack->pw2) != 0) {
+			// 입력한 비번들이 서로 다르므로 실패 패킷 보내기
+			clients[client_id].send_signup_fail_packet();
+			return;
+		}
+
+		wsprintf(query_str, L"INSERT INTO user_table(ID, PW, stage) VALUES('%s', '%s', 1)", pack->id, pack->pw);
+		sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
+		if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO)
+			std::cout << clients[client_id].name << " user id, pw insert to database" << std::endl;
+		else
+			show_error(sqlstmt, SQL_HANDLE_STMT, sqlret);
+		SQLCloseCursor(sqlstmt);
+
+		clients[client_id].send_signup_success_packet();
+
+	} break;
 	case static_cast<int>(packet_type::cs_login):
 	{
 		cs_login_packet* pack = reinterpret_cast<cs_login_packet*>(packet);
@@ -311,15 +367,50 @@ void ServerMain::process_packet(char* packet, int client_id)
 		{
 			std::lock_guard<std::mutex> lock{ clients[client_id].state_lock };
 			clients[client_id].state = state::ingame;
-		}
+		}	
+
+		// --- 로그인 ---
+		//wchar_t query_str[256];
+		//wsprintf(query_str, L"SELECT * FROM user_table WHERE ID='%s'", pack->id);
+		//sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
+		//if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
+		//	SQLWCHAR user_id[MAX_LOGIN_LEN], user_pw[MAX_LOGIN_LEN];
+		//	SQLINTEGER user_stage;
+		//	SQLLEN cb_id = 0, cb_pw = 0, cb_stage;
+
+		//	sqlret = SQLBindCol(sqlstmt, 1, SQL_C_WCHAR, user_id, MAX_LOGIN_LEN, &cb_id);
+		//	sqlret = SQLBindCol(sqlstmt, 2, SQL_C_WCHAR, user_pw, MAX_LOGIN_LEN, &cb_pw);
+		//	sqlret = SQLBindCol(sqlstmt, 3, SQL_C_LONG, &user_stage, 4, &cb_stage);
+
+		//	for (int i = 0; ; ++i) { // 실제로 데이터를 꺼낸다.
+		//		sqlret = SQLFetch(sqlstmt);
+		//		if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
+		//			char temp_pw_str[MAX_LOGIN_LEN];
+		//			strcpy_s(temp_pw_str, ConvertWCtoC(user_pw));
+		//			for (int i{}; i < strlen(temp_pw_str); ++i) {
+		//				if (temp_pw_str[i] == ' ') {
+		//					temp_pw_str[i] = '\0';
+		//					break;
+		//				}
+		//			}
+
+		//			if (strcmp(ConvertWCtoC(pack->passward), temp_pw_str) == 0)
+		//				clients[client_id].send_login_success_packet();
+		//			else 
+		//				clients[client_id].send_login_fail_packet(); return;
+
+		//			SQLCloseCursor(sqlstmt);
+		//		} else break;
+		//	}
+		//} else 
+		//	clients[client_id].send_login_fail_packet(); return;
+		// ------------------------------
 
 		bool is_matching = matching(client_id);
 		if (!is_matching)
 			std::cout << "이미 다른 팀원이 있습니다." << std::endl;
 
 		set_team_position(client_id);
-
-		clients[client_id].send_enter_packet();
 	} break;
 	case static_cast<int>(packet_type::cs_enter):
 	{
@@ -328,7 +419,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 
 		set_team_position(client_id);
 
-		clients[client_id].send_enter_packet();
+		clients[client_id].send_login_success_packet();
 	} break;
 	case static_cast<int>(packet_type::cs_move):
 	{
@@ -554,12 +645,17 @@ void ServerMain::process_packet(char* packet, int client_id)
 			clients[clients[client_id].tm_id].send_cannon_yaw_packet(yaw);
 		} else if (2 == clients[client_id].stage3_player_number) {
 			static double pitch = 0.0;
-			if (1 == pack->cannon_value)
+			if (1 == pack->cannon_value) {
 				pitch += 5.0;
-			else if (-1 == pack->cannon_value)
+				if (pitch >= 50.0)
+					pitch = 50.0;
+			} else if (-1 == pack->cannon_value) {
 				pitch -= 5.0;
-			else
+				if (pitch <= 0.0)
+					pitch = 0.0;
+			} else {
 				std::cout << "cannon pitch error\n";
+			}
 
 			std::cout << "pitch: " << pack->cannon_value << std::endl;
 			clients[client_id].send_cannon_pitch_packet(pitch);
@@ -653,4 +749,49 @@ void ServerMain::do_timer_thread()
 			std::this_thread::sleep_for(1ms);
 		}
 	}
+}
+
+void ServerMain::DB_disconnect()
+{
+	SQLCancel(sqlstmt);
+	SQLFreeHandle(SQL_HANDLE_STMT, sqlstmt);
+	SQLDisconnect(sqldbc);
+	SQLFreeHandle(SQL_HANDLE_DBC, sqldbc);
+	SQLFreeHandle(SQL_HANDLE_ENV, sqlenv);
+}
+
+void ServerMain::show_error(SQLHANDLE hHandle, SQLSMALLINT hType, RETCODE RetCode)
+{
+	// 핸들을 넣어준다. 핸들의 타입을 넣어준다. 
+	SQLSMALLINT iRec = 0;
+	SQLINTEGER iError;
+	WCHAR wszMessage[1000];
+	WCHAR wszState[SQL_SQLSTATE_SIZE + 1];
+
+	if (RetCode == SQL_INVALID_HANDLE) {
+		fwprintf(stderr, L"Invalid handle!\n");
+		return;
+	}
+	while (SQLGetDiagRec(hType, hHandle, ++iRec, wszState, &iError, wszMessage,
+		(SQLSMALLINT)(sizeof(wszMessage) / sizeof(WCHAR)), (SQLSMALLINT*)NULL) == SQL_SUCCESS) {
+		// Hide data truncated..
+		if (wcsncmp(wszState, L"01004", 5)) {
+			fwprintf(stderr, L"[%5.5s] %s (%d)\n", wszState, wszMessage, iError); // wszMessage: 여기에 에러 메시지가 들어가 있다.
+		}
+	}
+}
+
+char* ServerMain::ConvertWCtoC(wchar_t* str)
+{
+	//반환할 char* 변수 선언
+	char* pStr;
+
+	//입력받은 wchar_t 변수의 길이를 구함
+	int strSize = WideCharToMultiByte(CP_ACP, 0, str, -1, NULL, 0, NULL, NULL);
+	//char* 메모리 할당
+	pStr = new char[strSize];
+
+	//형 변환 
+	WideCharToMultiByte(CP_ACP, 0, str, -1, pStr, strSize, 0, 0);
+	return pStr;
 }
