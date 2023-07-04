@@ -27,7 +27,10 @@ public:
 
 private:
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* cannon;
+		UStaticMeshComponent* cannonMuzzle;
+
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* cannonStand;
 
 protected:
 	//목표 범위

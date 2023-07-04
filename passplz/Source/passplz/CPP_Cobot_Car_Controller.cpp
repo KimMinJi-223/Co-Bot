@@ -7,6 +7,7 @@
 #include "CPP_Cobot_Car_Controller.h"
 #include "CPP_Cobot_Car.h"
 //#include "Engine/World.h"
+#include "CPP_Stage3Cobot.h"
 #include "CPP_Cannon.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "EnhancedInputComponent.h"
@@ -73,7 +74,10 @@ void ACPP_Cobot_Car_Controller::BeginPlay()
 	if(cannon)
 		UE_LOG(LogTemp, Warning, TEXT("cannon OK"));
 
-	
+
+
+
+
 }
 
 void ACPP_Cobot_Car_Controller::PostInitializeComponents()
@@ -149,8 +153,8 @@ void ACPP_Cobot_Car_Controller::RecvPacket()
 
 void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 {
-    switch (packet[1])
-    {
+	switch (packet[1])
+	{
 	case static_cast<int>(packet_type::sc_stage3_enter):
 	{
 		sc_stage3_enter_packet* pack = reinterpret_cast<sc_stage3_enter_packet*>(packet);
@@ -164,17 +168,29 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 
 		UE_LOG(LogTemp, Warning, TEXT("direction: %lf"), pack->direction);
 
-		if (0.0 == pack->direction)
+		if (0.0 == pack->direction) {
+
 			//CarForward(서버에서 받는 값이 필요);
+			player->ChangAim(true, true);
 			;
-		else 
+		}
+		else {
+			if (pack->direction > 0.0) {
+
+				player->ChangAim(false, true);
+			}
+		
+			else
+				player->ChangAim(true, false);
+
 			CarRotation(pack->direction);
+		}
 
 	} break;
 	case static_cast<int>(packet_type::sc_cannon_yaw):
 	{
 		sc_cannon_yaw_packet* pack = reinterpret_cast<sc_cannon_yaw_packet*>(packet);
-	
+
 		Cast<ACPP_Cannon>(cannon)->SetBombDropLocation(1, pack->yaw);
 	} break;
 	case static_cast<int>(packet_type::sc_cannon_pitch):
@@ -190,7 +206,8 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 		if (player_number == pack->click_id) {
 			// 자기가 누른거
 			Cast<ACPP_Cannon>(cannon)->FireLava();
-		} else {
+		}
+		else {
 			// 상대방이 누른거
 			Cast<ACPP_Cannon>(cannon)->FireLava();
 		}
@@ -200,7 +217,7 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 		// 대포 발사하는 함수 호출
 		Cast<ACPP_Cannon>(cannon)->FireLava();
 	} break;
-    }
+	}
 }
 
 void ACPP_Cobot_Car_Controller::Tick(float DeltaTime)
@@ -261,7 +278,8 @@ void ACPP_Cobot_Car_Controller::FireCannonInput(const FInputActionValue& Value)
 		pack.type = static_cast<char>(packet_type::cs_cannon_click);
 
 		send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
-	} else {
+	}
+	else {
 		UE_LOG(LogTemp, Warning, TEXT("FireCannonInput"));
 	}
 }
@@ -276,7 +294,7 @@ void ACPP_Cobot_Car_Controller::RotateInput(const FInputActionValue& Value)
 void ACPP_Cobot_Car_Controller::CarForward(float acceleration)
 {
 	UE_LOG(LogTemp, Warning, TEXT("CarForward"));
-	player->AddActorWorldOffset(player->GetActorForwardVector()* acceleration);
+	player->AddActorWorldOffset(player->GetActorForwardVector() * acceleration);
 }
 
 void ACPP_Cobot_Car_Controller::CarRotation(float rotationValue)

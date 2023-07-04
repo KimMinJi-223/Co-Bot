@@ -3,6 +3,7 @@
 #pragma once
 
 #include "passplz.h"
+#include "CPP_Stage3Cobot.h"
 #include "GameFramework/Character.h"
 #include "Components/DecalComponent.h"
 #include "CPP_Cobot_Car.generated.h"
@@ -27,8 +28,18 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+	void ChangAim(bool P1, bool P2);
+
+	void CreatePlayer(ACPP_Stage3Cobot* P1, ACPP_Stage3Cobot* P2);
+
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		USpringArmComponent* SpringArm;
+
+		ACPP_Stage3Cobot* Player1;
+
+
+		ACPP_Stage3Cobot* Player2;
+
 private:
 
 	UPROPERTY(VisibleAnywhere, Category = Camera)
@@ -36,17 +47,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* lavaCapsule;
-	
-	UPROPERTY(VisibleAnywhere)
-		USkeletalMeshComponent* Player1;
-
-	UPROPERTY(VisibleAnywhere)
-		USkeletalMeshComponent* Player2;
 
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* Player1CarFoot;
 
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* Player2CarFoot;
+
 	int mode;
 };

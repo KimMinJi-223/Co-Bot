@@ -13,22 +13,30 @@ ACPP_Cannon::ACPP_Cannon()
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
-	cannon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("cannon"));
+	cannonMuzzle = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("cannonMuzzle"));
+	cannonStand = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("cannonStand"));
 	damageRadius = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("damageRadius"));
 	targetLocation = CreateDefaultSubobject<UDecalComponent>("targetLocation");
 	lavaCollision = CreateDefaultSubobject<UBoxComponent>(TEXT("lavaCollision"));
 
 	RootComponent = lavaCollision;
-	cannon->SetupAttachment(RootComponent);
+	cannonStand->SetupAttachment(RootComponent);
+	cannonMuzzle->SetupAttachment(cannonStand);
 	damageRadius->SetupAttachment(RootComponent);
 	targetLocation->SetupAttachment(damageRadius);
 
-	
-	targetLocation->SetRelativeRotation(FRotator(90.f, 0.f, 0.f));
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CANNON(TEXT("/Game/K_Test/input/cannon_sub.cannon_sub"));
-	if (SM_CANNON.Succeeded()) {
-		cannon->SetStaticMesh(SM_CANNON.Object);
+	targetLocation->SetRelativeRotation(FRotator(90.f, 0.f, 0.f));
+	damageRadius->SetRelativeScale3D(FVector(2.f, 2.f, 2.f));
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CANNONMUZZLE(TEXT("/Game/K_Test/input/SM_cannon_Muzzle.SM_cannon_Muzzle"));
+	if (SM_CANNONMUZZLE.Succeeded()) {
+		cannonMuzzle->SetStaticMesh(SM_CANNONMUZZLE.Object);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_CANNONSTAND(TEXT("/Game/K_Test/input/SM_cannon_Stand.SM_cannon_Stand"));
+	if (SM_CANNONSTAND.Succeeded()) {
+		cannonStand->SetStaticMesh(SM_CANNONSTAND.Object);
 	}
 
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_SPHERE(TEXT("/Game/K_Test/input/Sphere.Sphere"));
@@ -64,7 +72,7 @@ void ACPP_Cannon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	
+
 
 
 
@@ -73,7 +81,7 @@ void ACPP_Cannon::Tick(float DeltaTime)
 void ACPP_Cannon::SetBombDropLocation(int player_number, double value)
 {
 	static FRotator rotate = FRotator(0.0, 0.0, 0.0);
-	
+
 	if (1 == player_number)
 		rotate.Yaw = value;
 	else if (2 == player_number)
@@ -82,8 +90,9 @@ void ACPP_Cannon::SetBombDropLocation(int player_number, double value)
 		UE_LOG(LogTemp, Warning, TEXT("rotate err!"));
 
 	UE_LOG(LogTemp, Warning, TEXT("yaw, pitch, roll: %lf, %lf, %lf"), rotate.Yaw, rotate.Pitch, rotate.Roll);
-
-	cannon->SetRelativeRotation(rotate);
+	
+	cannonStand->SetRelativeRotation(FRotator(0.f, rotate.Yaw, 0.f));
+	cannonMuzzle->SetRelativeRotation(FRotator(rotate.Pitch, 0.f, 0.f));
 	targetRotation = rotate;
 
 
