@@ -127,63 +127,52 @@ void ACPP_Cobot_Controller::Tick(float DeltaTime)
 
 void ACPP_Cobot_Controller::RecvPacket()
 {
-    char buff[BUF_SIZE];
+    char recv_buff[BUF_SIZE];
 
-    int ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
-    if (ret <= 0)
+    int recv_ret = recv(*sock, reinterpret_cast<char*>(&recv_buff), BUF_SIZE, 0);
+    if (recv_ret <= 0)
     {
-        GetLastError();
-        std::cout << "recv() fail!" << std::endl;
+        //GetLastError();
+        //std::cout << "recv() fail!" << std::endl;
         return;
     }
 
-    if (prev_remain > 0) // 만약 전에 남아있는 데이터가 있다면
-    {
-        strcat(prev_packet_buff, buff);
-    } else
-    {
-        memcpy(prev_packet_buff, buff, ret);
+    int ring_ret = ring_buff.enqueue(recv_buff, recv_ret);
+    if (static_cast<int>(error::full_buffer) == ring_ret) {
+        //std::cout << "err: ring buffer is full\n";
+        return;
+    } else if (static_cast<int>(error::in_data_is_too_big) == ring_ret) {
+        //std::cout << "err: in data is too big\n";
+        return;
     }
 
-    int remain_data = ret + prev_remain;
-    char* p = prev_packet_buff;
-
-    while (remain_data > 0)
+    int buffer_start = 0;
+    while (ring_buff.remain_data() > 0)
     {
-        int packet_size = p[0];
-        if (packet_size <= remain_data)
-        {
-            ProcessPacket(p);
-            p = p + packet_size;
-            remain_data -= packet_size;
+        char pack_size = recv_buff[buffer_start];
+        if (pack_size <= ring_buff.remain_data()) {
+            char dequeue_data[BUFFER_SIZE];
+
+            ring_ret = ring_buff.dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
+            if (static_cast<int>(error::no_data_in_buffer) == ring_ret)
+                break;
+            else if (static_cast<int>(error::out_data_is_too_big) == ring_ret)
+                break;
+
+            ProcessPacket(dequeue_data);
+
+            buffer_start += pack_size;
         } else break;
     }
-
-    prev_remain = remain_data;
-
-    if (remain_data > 0)
-    {
-        memcpy(prev_packet_buff, p, remain_data);
-    }
-
-    //ring_buff.enqueue(buff, ret);
-
-    //int read_point = 0;
-    //while (buff[read_point] <= ring_buff.diff() && !ring_buff.empty())
-    //{
-    //    ProcessPacket(buff);
-    //    ring_buff.move_read_pos(buff[0]);
-    //    read_point = buff[read_point];
-    //}
 }
 
 void ACPP_Cobot_Controller::ProcessPacket(char* packet)
 {
     switch (packet[1])
     {
-    case static_cast<int>(packet_type::sc_login):
+    case static_cast<int>(packet_type::sc_login_success):
     {
-        sc_login_packet* pack = reinterpret_cast<sc_login_packet*>(packet);
+        sc_login_success_packet* pack = reinterpret_cast<sc_login_success_packet*>(packet);
         id = pack->id;
 
         UE_LOG(LogTemp, Warning, TEXT("recv login packet"));
@@ -217,6 +206,10 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
             //auto delay = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count() - pack->move_time;
             //UE_LOG(LogTemp, Warning, TEXT("Delay: %d"), delay);
         }
+    } break;
+    case static_cast<int>(packet_type::sc_login_fail):
+    {
+        // id나 pw가 다르다는 메시지 띄우기
     } break;
     case static_cast<int>(packet_type::sc_push_button_maze_forward):
     {
@@ -603,26 +596,19 @@ bool ACPP_Cobot_Controller::Is_Set_IDPW(FString I, FString p)
     ////ID = I;
     ////Passward = p;
 
-    //wchar_t* input_id = TCHAR_TO_WCHAR(*I);
-    //wchar_t* input_pw = TCHAR_TO_WCHAR(*p);
+    wchar_t* input_id = TCHAR_TO_WCHAR(*I);
+    wchar_t* input_pw = TCHAR_TO_WCHAR(*p);
 
-    //if (!instance->is_connect)
-    //{
-    //    instance->socket_mgr.ConnectServer(input_id);
-    //    sock = instance->socket_mgr.socket;
-    //    instance->is_connect = true;
-    //}
+    // 서버한테 들어왔다고 알려주는 거
+    cs_login_packet login_pack;
+    login_pack.size = sizeof(login_pack);
+    login_pack.type = static_cast<char>(packet_type::cs_login);
+    wcscpy_s(login_pack.id, MAX_LOGIN_LEN, input_id);
+    wcscpy_s(login_pack.passward, MAX_LOGIN_LEN, input_pw);
 
-    //// 서버한테 들어왔다고 알려주는 거
-    //cs_login_packet login_pack;
-    //login_pack.size = sizeof(login_pack);
-    //login_pack.type = static_cast<char>(type::cs_login);
-    ////wcscpy_s(login_pack.id, MAX_LOGIN_LEN, input_id);
-    ////wcscpy_s(login_pack.passward, MAX_LOGIN_LEN, input_pw);
+    int ret = send(*sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
 
-    //int ret = send(sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
+     UE_LOG(LogTemp, Warning, TEXT("ID: %s, PW: %s"), input_id, input_pw);
 
-
-     //UE_LOG(LogTemp, Warning, TEXT("ID: %s, PW: %s"), input_id, input_pw);
     return true;
 }

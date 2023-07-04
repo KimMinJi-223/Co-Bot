@@ -71,7 +71,7 @@ private:
 	int		prev_packet_size;
 	char	prev_packet_buff[10000];
 
-	std::chrono::high_resolution_clock::time_point last_move_time;
+//	std::chrono::high_resolution_clock::time_point last_move_time;
 
 protected:
 	virtual void PostInitializeComponents() override;

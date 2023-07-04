@@ -7,7 +7,16 @@ constexpr int MAX_USER = 10;
 constexpr int MAX_LOGIN_LEN = 15;
 
 enum class packet_type {
+	cs_signup,
+
+	sc_signup_success,
+	sc_signup_fail,
+
 	cs_login,
+
+	sc_login_success,
+	sc_login_fail,
+
 	cs_enter,
 	cs_move,
 	cs_logout,
@@ -102,6 +111,24 @@ public:
 	}
 };
 
+struct cs_signup_packet {
+	char	size;
+	char	type;
+	wchar_t id[MAX_LOGIN_LEN];
+	wchar_t pw[MAX_LOGIN_LEN];
+	wchar_t pw2[MAX_LOGIN_LEN];
+};
+
+struct sc_signup_success_packet {
+	char size;
+	char type;
+};
+
+struct sc_signup_fail_packet {
+	char size;
+	char type;
+};
+
 struct cs_login_packet {
 	char	size;
 	char	type;
@@ -109,7 +136,7 @@ struct cs_login_packet {
 	wchar_t passward[MAX_LOGIN_LEN];
 };
 
-struct sc_login_packet {
+struct sc_login_success_packet {
 	char	size;
 	char	type;
 	int		id;
@@ -121,6 +148,11 @@ struct sc_login_packet {
 	double	tm_y;
 	double	tm_z;
 	double	tm_yaw;
+};
+
+struct sc_login_fail_packet {
+	char size;
+	char type;
 };
 
 struct cs_enter_packet {
@@ -138,18 +170,6 @@ struct cs_move_packet {
 	vector_d3	current;
 };
 
-//struct cs_left_move_packet {
-//	char size;
-//	char type;
-//	double current_left_x;
-//	double current_left_y;
-//	double current_left_z;
-//	double location_x;
-//	double location_y;
-//	double location_z;
-//	float time_left;
-//};
-
 struct sc_move_packet {
 	char		size;
 	char		type;
@@ -160,17 +180,6 @@ struct sc_move_packet {
 	vector_d3	location;
 	vector_d3	current;
 };
-
-//struct sc_move_packet {
-//	char	size;
-//	char	type;
-//	int		client_id;
-//	double	x;
-//	double	y;
-//	double	z;
-//	double	yaw;
-//	unsigned int move_time;
-//};
 
 struct sc_synch_packet {
 	char	size;
@@ -238,6 +247,7 @@ struct sc_car_direction_packet
 	char	size;
 	char	type;
 	float	direction;
+	float	acceleration;
 };
 
 struct cs_stage3_enter_packet

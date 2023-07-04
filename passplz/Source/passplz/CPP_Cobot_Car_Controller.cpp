@@ -107,43 +107,42 @@ void ACPP_Cobot_Car_Controller::SetupInputComponent()
 
 void ACPP_Cobot_Car_Controller::RecvPacket()
 {
-	char buff[BUF_SIZE];
+	char recv_buff[BUF_SIZE];
 
-	int ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
-	if (ret <= 0)
+	int recv_ret = recv(*sock, reinterpret_cast<char*>(&recv_buff), BUF_SIZE, 0);
+	if (recv_ret <= 0)
 	{
-		GetLastError();
-		std::cout << "recv() fail!" << std::endl;
+		//GetLastError();
+		//std::cout << "recv() fail!" << std::endl;
 		return;
 	}
 
-	if (prev_remain > 0) // 만약 전에 남아있는 데이터가 있다면
-	{
-		strcat(prev_packet_buff, buff);
-	} else
-	{
-		memcpy(prev_packet_buff, buff, ret);
+	int ring_ret = ring_buff.enqueue(recv_buff, recv_ret);
+	if (static_cast<int>(error::full_buffer) == ring_ret) {
+		//std::cout << "err: ring buffer is full\n";
+		return;
+	} else if (static_cast<int>(error::in_data_is_too_big) == ring_ret) {
+		//std::cout << "err: in data is too big\n";
+		return;
 	}
 
-	int remain_data = ret + prev_remain;
-	char* p = prev_packet_buff;
-
-	while (remain_data > 0)
+	int buffer_start = 0;
+	while (ring_buff.remain_data() > 0)
 	{
-		int packet_size = p[0];
-		if (packet_size <= remain_data)
-		{
-			ProcessPacket(p);
-			p = p + packet_size;
-			remain_data -= packet_size;
+		char pack_size = recv_buff[buffer_start];
+		if (pack_size <= ring_buff.remain_data()) {
+			char dequeue_data[BUFFER_SIZE];
+
+			ring_ret = ring_buff.dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
+			if (static_cast<int>(error::no_data_in_buffer) == ring_ret)
+				break;
+			else if (static_cast<int>(error::out_data_is_too_big) == ring_ret)
+				break;
+
+			ProcessPacket(dequeue_data);
+
+			buffer_start += pack_size;
 		} else break;
-	}
-
-	prev_remain = remain_data;
-
-	if (remain_data > 0)
-	{
-		memcpy(prev_packet_buff, p, remain_data);
 	}
 }
 
@@ -165,8 +164,7 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 		UE_LOG(LogTemp, Warning, TEXT("direction: %lf"), pack->direction);
 
 		if (0.0 == pack->direction)
-			//CarForward(서버에서 받는 값이 필요);
-			;
+			CarForward(pack->acceleration);
 		else 
 			CarRotation(pack->direction);
 

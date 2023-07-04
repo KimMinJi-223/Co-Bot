@@ -30,8 +30,8 @@ void SESSION::recv_packet()
 {
 	DWORD recv_flag = 0;
 	ZeroMemory(&recv_over.over, sizeof(recv_over.over));
-	recv_over.wsabuf.buf = recv_over.buffer + ring_buff.diff();
-	recv_over.wsabuf.len = BUF_SIZE - ring_buff.diff();
+	recv_over.wsabuf.buf = recv_over.buffer;// +ring_buff.remain_data();
+	recv_over.wsabuf.len = BUF_SIZE - ring_buff.remain_data();
 	recv_over.mode = IO_RECV;
 	WSARecv(sock, &recv_over.wsabuf, 1, 0, &recv_flag, &recv_over.over, 0);
 }
@@ -57,11 +57,29 @@ void SESSION::send_packet(char* packet)
 	}
 }
 
-void SESSION::send_enter_packet()
+void SESSION::send_signup_success_packet()
 {
-	sc_login_packet pack;
+	sc_signup_success_packet pack;
 	pack.size = sizeof(pack);
-	pack.type = static_cast<char>(packet_type::sc_login);
+	pack.type = static_cast<char>(packet_type::sc_signup_success);
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_signup_fail_packet()
+{
+	sc_signup_fail_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_signup_fail);
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_login_success_packet()
+{
+	sc_login_success_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_login_success);
 	pack.id = id;
 	//pack.x = x;
 	//pack.y = y;
@@ -75,6 +93,15 @@ void SESSION::send_enter_packet()
 	send_packet(reinterpret_cast<char*>(&pack));
 
 	printf("%d에게 enter packet을 보냈습니다.\n", id);
+}
+
+void SESSION::send_login_fail_packet()
+{
+	sc_login_fail_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_login_fail);
+
+	send_packet(reinterpret_cast<char*>(&pack));
 }
 
 void SESSION::send_left_move_packet(int client_id)
@@ -202,12 +229,13 @@ void SESSION::send_logout_packet()
 	send_packet(reinterpret_cast<char*>(&pack));
 }
 
-void SESSION::send_move_car_packet(float direction)
+void SESSION::send_move_car_packet(float direction, float acceleration)
 {
 	sc_car_direction_packet pack;
 	pack.size = sizeof(pack);
 	pack.type = static_cast<char>(packet_type::sc_car_direction);
 	pack.direction = direction;
+	pack.acceleration = acceleration;
 
 	send_packet(reinterpret_cast<char*>(&pack));
 }
