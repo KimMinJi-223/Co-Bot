@@ -18,7 +18,7 @@ public:
 	{
 		for (int i{}; i < BUFFER_SIZE; ++i)
 		{
-			buffer[i] = 0;
+			buffer[i] = NULL;
 		}
 	};
 
@@ -26,5 +26,5 @@ public:
 	int enqueue(char* data, int data_size);
 	int dequeue(char* destination, int data_size);
 	int remain_data();
-	bool is_empty();
+	char peek_front();
 };

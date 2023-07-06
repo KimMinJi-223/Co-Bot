@@ -117,31 +117,57 @@ void ACPP_Cobot_Car_Controller::RecvPacket()
 	if (recv_ret <= 0)
 	{
 		//GetLastError();
+		UE_LOG(LogTemp, Warning, TEXT("recv() fail"));
 		//std::cout << "recv() fail!" << std::endl;
 		return;
 	}
 
 	int ring_ret = ring_buff.enqueue(recv_buff, recv_ret);
 	if (static_cast<int>(error::full_buffer) == ring_ret) {
+		UE_LOG(LogTemp, Warning, TEXT("full buffer"));
 		//std::cout << "err: ring buffer is full\n";
 		return;
 	} else if (static_cast<int>(error::in_data_is_too_big) == ring_ret) {
+		UE_LOG(LogTemp, Warning, TEXT("in data is too big"));
 		//std::cout << "err: in data is too big\n";
 		return;
 	}
+
+	//while (ring_buff.peek_front() <= ring_buff.remain_data())
+	//{
+	//	char pack_size = ring_buff.peek_front();
+	//	char dequeue_data[BUFFER_SIZE];
+
+	//	ring_ret = ring_buff.dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
+	//	if (static_cast<int>(error::no_data_in_buffer) == ring_ret) {
+	//		UE_LOG(LogTemp, Warning, TEXT("dequeue err: no data in buffer"));
+	//		break;
+	//	} else if (static_cast<int>(error::out_data_is_too_big) == ring_ret) {
+	//		UE_LOG(LogTemp, Warning, TEXT("dequeue err: out data is too big"));
+	//		break;
+	//	}
+
+	//	ProcessPacket(dequeue_data);
+	//}
 
 	int buffer_start = 0;
 	while (ring_buff.remain_data() > 0)
 	{
 		char pack_size = recv_buff[buffer_start];
+		//if (pack_size < recv_ret) break;
+
 		if (pack_size <= ring_buff.remain_data()) {
 			char dequeue_data[BUFFER_SIZE];
 
 			ring_ret = ring_buff.dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
-			if (static_cast<int>(error::no_data_in_buffer) == ring_ret)
+			if (static_cast<int>(error::no_data_in_buffer) == ring_ret) {
+				UE_LOG(LogTemp, Warning, TEXT("dequeue err: no data in buffer"));
 				break;
-			else if (static_cast<int>(error::out_data_is_too_big) == ring_ret)
+			}
+			else if (static_cast<int>(error::out_data_is_too_big) == ring_ret) {
+				UE_LOG(LogTemp, Warning, TEXT("dequeue err: out data is too big"));
 				break;
+			}
 
 			ProcessPacket(dequeue_data);
 
@@ -169,7 +195,7 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 
 		if (0.0 == pack->direction) {
 
-			//CarForward(서버에서 받는 값이 필요);
+			CarForward(pack->acceleration);
 			player->ChangAim(true, true);
 			;
 		}

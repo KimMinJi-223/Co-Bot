@@ -176,7 +176,7 @@ void ServerMain::worker_thread()
 			std::cout << "num bytes: " << num_bytes << "over_ex mode: IO_RECV" << "over_ex mode: IO_SEND" << std::endl;
 
 			if (IO_SEND == over_ex->mode)
-				//delete over_ex;
+				delete over_ex;
 
 				continue;
 		}
@@ -187,7 +187,7 @@ void ServerMain::worker_thread()
 		{
 			int client_id = get_client_id();
 
-			std::cout << client_id << "번째 ID를 가진 클라가 입장하였습니다." << std::endl;
+			printf("%d번 ID를 가진 클라가 입장했습니다.\n", client_id);
 
 			if (client_id != -1) {
 				{
@@ -223,8 +223,26 @@ void ServerMain::worker_thread()
 		} break;
 		case IO_RECV:
 		{
+			/*int remain_data = num_bytes + clients[key].prev_remain;
+			char* p = over_ex->buffer;
+			while (remain_data > 0)
+			{
+				int packet_size = p[0];
+				if (packet_size <= remain_data) {
+					process_packet(p, static_cast<int>(key));
+					p = p + packet_size;
+					remain_data = remain_data - packet_size;
+				} else break;
+			}
+			clients[key].prev_remain = remain_data;
+			if (remain_data > 0)
+				memcpy(over_ex->buffer, p, remain_data);
+			clients[key].recv_packet();*/
+
 			RingBuffer* ring_buff = &clients[key].ring_buff;
 			char* p = over_ex->buffer;
+
+			std::cout << "num_bytes: " << num_bytes << std::endl;
 
 			int ret = ring_buff->enqueue(p, num_bytes);
 			if (static_cast<int>(error::full_buffer) == ret) {
@@ -235,29 +253,31 @@ void ServerMain::worker_thread()
 				return;
 			}
 
-			while (ring_buff->remain_data() > 0)
+			while (ring_buff->remain_data() != 0 && ring_buff->peek_front() <= ring_buff->remain_data())
 			{
-				char pack_size = p[0];
-				if (pack_size <= ring_buff->remain_data()) {
-					char dequeue_data[BUFFER_SIZE];
+				std::cout << "remain data size: " << ring_buff->remain_data() << std::endl;
+				char pack_size = ring_buff->peek_front();
+				char dequeue_data[BUFFER_SIZE];
 
-					ret = ring_buff->dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
-					if (static_cast<int>(error::no_data_in_buffer) == ret) {
-						std::cout << "err: no data in buffer\n";
-						break;
-					} else if (static_cast<int>(error::out_data_is_too_big) == ret) {
-						std::cout << "ret: " << ret << ", pack size: " << pack_size << std::endl;
-						std::cout << "p[0]: " << p[0] << std::endl;
-						std::cout << "err: out data is too big\n";
-						break;
-					}
+				std::cout << "pack size: " << (int)pack_size << std::endl;
 
-					process_packet(dequeue_data, static_cast<int>(key));
+				ret = ring_buff->dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
+				std::cout << "dequeue size: " << ret << std::endl;
 
-					p += pack_size;
-				} else break;
+				if (static_cast<int>(error::no_data_in_buffer) == ret) {
+					std::cout << "err: no data in buffer\n";
+					break;
+				} else if (static_cast<int>(error::out_data_is_too_big) == ret) {
+					std::cout << "ret: " << ret << ", pack size: " << pack_size << std::endl;
+					std::cout << "p[0]: " << p[0] << std::endl;
+					std::cout << "err: out data is too big\n";
+					break;
+				}
+
+				process_packet(dequeue_data, static_cast<int>(key));
+
+				p += pack_size;
 			}
-			
 
 			if (0 < ring_buff->remain_data())
 				memcpy(over_ex->buffer, p, ring_buff->remain_data());
@@ -368,6 +388,8 @@ void ServerMain::process_packet(char* packet, int client_id)
 			std::lock_guard<std::mutex> lock{ clients[client_id].state_lock };
 			clients[client_id].state = state::ingame;
 		}	
+
+		clients[client_id].send_login_success_packet();
 
 		// --- 로그인 ---
 		//wchar_t query_str[256];
@@ -633,9 +655,9 @@ void ServerMain::process_packet(char* packet, int client_id)
 
 		if (1 == clients[client_id].stage3_player_number) {
 			static double yaw = 0.0;
-			if (1 == pack->cannon_value)
+			if (0 < pack->cannon_value)
 				yaw += 5.0;
-			else if (-1 == pack->cannon_value)
+			else if (0 > pack->cannon_value)
 				yaw -= 5.0;
 			else
 				std::cout << "cannon yaw error\n";
@@ -645,11 +667,11 @@ void ServerMain::process_packet(char* packet, int client_id)
 			clients[clients[client_id].tm_id].send_cannon_yaw_packet(yaw);
 		} else if (2 == clients[client_id].stage3_player_number) {
 			static double pitch = 0.0;
-			if (1 == pack->cannon_value) {
+			if (0 < pack->cannon_value) {
 				pitch += 5.0;
 				if (pitch >= 50.0)
 					pitch = 50.0;
-			} else if (-1 == pack->cannon_value) {
+			} else if (0 > pack->cannon_value) {
 				pitch -= 5.0;
 				if (pitch <= 0.0)
 					pitch = 0.0;
@@ -688,7 +710,9 @@ bool ServerMain::matching(int client_id)
 	for (int i{}; ; ++i)
 	{
 		if (MAX_USER == i) i = 0;
+		clients[i].state_lock.lock();
 		if (state::ingame != clients[i].state || clients[i].id == client_id) continue;
+		clients[i].state_lock.unlock();
 
 		clients[client_id].match_lock.lock();
 		if (-1 == clients[client_id].tm_id) {
