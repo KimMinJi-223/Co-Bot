@@ -22,12 +22,13 @@ public:
 	
 protected:
 	UFUNCTION(BlueprintCallable)
-		bool Is_Set_IDPW_Controller();
+		void SendLoginIDPW();
+	void CallEventSuccessLogin(bool loginResult);
 
 	UFUNCTION(BlueprintCallable)
-		void Send_Singup_IDPW();
+		void SendSingupIDPW();
+	void CallEventSuccessSignup(bool signupResult);
 
-	void CallEventSuccess_Signup(bool signupResult);
 
 protected:
 	UPROPERTY(BlueprintReadWrite)
@@ -37,6 +38,8 @@ protected:
 		FString ID;
 	UPROPERTY(BlueprintReadWrite)
 		FString Passward;
+	UPROPERTY(BlueprintReadWrite)
+		bool isSuccessLogin;
 
 	UPROPERTY(BlueprintReadWrite)
 		FString signupID;
