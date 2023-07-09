@@ -49,6 +49,8 @@ private:
 	TArray<AActor*> forklift_actor;
 	TArray<AActor*> board_actor;
 
+	UUserWidget* current_widget; //현재 서버와 통신중인 widget;
+
 	bool is_maze_button_push_forward;
 	bool is_maze_button_push_back;
 	bool is_maze_button_push_left;
@@ -89,6 +91,7 @@ private:
 
 public: //장애물과 서버 데이터 통신을 위해 필요한 API
 	SOCKET* GetSocket() { return sock; };
+	void SetWidget(UUserWidget* widget) { current_widget = widget; }
 
 private:
 	class ACPP_Cobot* player;
