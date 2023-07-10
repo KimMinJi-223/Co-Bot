@@ -40,3 +40,19 @@ void UCPP_StartWidget::CallEventSuccessSignup(bool signupResult)
 	CallFunctionByNameWithArguments(TEXT("Success_Signup"), pAR, nullptr, true);
 }
 
+void UCPP_StartWidget::CreateRoom()
+{
+	CallEventSuccessAddRoom(roomName, roomMode, 0);
+}
+
+void UCPP_StartWidget::CallEventSuccessAddRoom(FString name, int mode, int id)
+{
+	roomName = name;
+	roomMode = mode;
+	roomID = id;
+
+	FOutputDeviceNull pAR;
+	CallFunctionByNameWithArguments(TEXT("add_Room"), pAR, nullptr, true);
+
+}
+

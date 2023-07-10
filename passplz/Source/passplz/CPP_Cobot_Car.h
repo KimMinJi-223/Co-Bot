@@ -40,10 +40,10 @@ public:
 
 		ACPP_Stage3Cobot* Player2;
 
-private:
 
-	UPROPERTY(VisibleAnywhere, Category = Camera)
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = Camera)
 		UCameraComponent* Camera;
+private:
 
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* lavaCapsule;

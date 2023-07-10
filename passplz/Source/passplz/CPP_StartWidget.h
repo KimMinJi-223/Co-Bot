@@ -20,7 +20,6 @@ public:
 		UE_LOG(LogTemp, Warning, TEXT("%s, %s"), *ID, *Passward );
 	};*/
 	
-protected:
 	UFUNCTION(BlueprintCallable)
 		void SendLoginIDPW();
 	void CallEventSuccessLogin(bool loginResult);
@@ -29,11 +28,16 @@ protected:
 		void SendSingupIDPW();
 	void CallEventSuccessSignup(bool signupResult);
 
+	UFUNCTION(BlueprintCallable)
+		void CreateRoom();
+	void CallEventSuccessAddRoom(FString name, int mode, int id);
+
 
 protected:
 	UPROPERTY(BlueprintReadWrite)
 		bool Is_start; //서버에게 이제 시작해도 되는 받는 불 변수이다.
 
+	//로그인 관련
 	UPROPERTY(BlueprintReadWrite)
 		FString ID;
 	UPROPERTY(BlueprintReadWrite)
@@ -41,10 +45,20 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 		bool isSuccessLogin;
 
+	//회원가입 관련
 	UPROPERTY(BlueprintReadWrite)
 		FString signupID;
 	UPROPERTY(BlueprintReadWrite)
 		FString signupPassward;
 	UPROPERTY(BlueprintReadWrite)
 		bool isSuccessSignup;
+
+	//방 관련(동시에 내가 있는 방이기도 하다)
+	UPROPERTY(BlueprintReadWrite)
+		FString roomName;
+	UPROPERTY(BlueprintReadWrite)
+		int roomMode;
+	UPROPERTY(BlueprintReadWrite)
+		int roomID;
+
 };
