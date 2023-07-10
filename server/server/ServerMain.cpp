@@ -255,14 +255,14 @@ void ServerMain::worker_thread()
 
 			while (ring_buff->remain_data() != 0 && ring_buff->peek_front() <= ring_buff->remain_data())
 			{
-				std::cout << "remain data size: " << ring_buff->remain_data() << std::endl;
+				//std::cout << "remain data size: " << ring_buff->remain_data() << std::endl;
 				char pack_size = ring_buff->peek_front();
 				char dequeue_data[BUFFER_SIZE];
 
-				std::cout << "pack size: " << (int)pack_size << std::endl;
+				//std::cout << "pack size: " << (int)pack_size << std::endl;
 
 				ret = ring_buff->dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
-				std::cout << "dequeue size: " << ret << std::endl;
+				//std::cout << "dequeue size: " << ret << std::endl;
 
 				if (static_cast<int>(error::no_data_in_buffer) == ret) {
 					std::cout << "err: no data in buffer\n";
@@ -710,29 +710,29 @@ bool ServerMain::matching(int client_id)
 	for (int i{}; ; ++i)
 	{
 		if (MAX_USER == i) i = 0;
-		clients[i].state_lock.lock();
-		if (state::ingame != clients[i].state || clients[i].id == client_id) continue;
-		clients[i].state_lock.unlock();
+		//clients[i].state_lock.lock();
+		if (state::ingame != clients[i].state || i == client_id) continue;
+		//clients[i].state_lock.unlock();
 
-		clients[client_id].match_lock.lock();
+		//clients[client_id].match_lock.lock();
 		if (-1 == clients[client_id].tm_id) {
-			clients[i].match_lock.lock();
+			//clients[i].match_lock.lock();
 			if (-1 == clients[i].tm_id) {
-				clients[client_id].tm_id = clients[i].id;
+			 	clients[client_id].tm_id = clients[i].id;
 				clients[i].tm_id = client_id;
-				clients[i].match_lock.unlock();
-				clients[client_id].match_lock.unlock();
+				//clients[i].match_lock.unlock();
+				//clients[client_id].match_lock.unlock();
 
 				std::cout << i << ", " << client_id << "matching!" << std::endl;
 
 				return true;
 			}
 			else {
-				clients[i].match_lock.unlock();
+				//clients[i].match_lock.unlock();
 			}
 		}
 		else { // 이미 팀원이 있다는 소리
-			clients[client_id].match_lock.unlock();
+			//clients[client_id].match_lock.unlock();
 
 			return false;
 		}
