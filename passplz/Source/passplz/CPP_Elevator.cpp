@@ -180,12 +180,13 @@ void ACPP_Elevator::DoorCloseFloorUpTimer()
 			UGameplayStatics::OpenLevel(GetWorld(), FName(*levelName), true);
 		}
 		else if (2 == checkMyStage) {
+			levelName = "STAGE_3";
+			UGameplayStatics::OpenLevel(GetWorld(), FName(*levelName), true);
+		}
+		else if (3 == checkMyStage) {
 			levelName = "STAGE_5";
 			UGameplayStatics::OpenLevel(GetWorld(), FName(*levelName), true);
 		}
-		/*else if (3 == checkMyStage) {
-			
-		}*/
 	}
 	break;
 	default:
