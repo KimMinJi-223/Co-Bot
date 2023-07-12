@@ -46,15 +46,15 @@ int RingBuffer::remain_data()
 	if (read_pos > write_pos) {
 		if (buffer[read_pos] != NULL) {
 			if (read_pos + buffer[read_pos] >= BUFFER_SIZE) {
-				return 0;
+				return static_cast<int>(error::remain_err1);
 			} else {
 				buffer[read_pos + buffer[read_pos] + 1];
-				return 0;
+				return static_cast<int>(error::remain_err2);
 			}
 		} else
 			return write_pos;
 	} else
-		return abs(write_pos - read_pos);
+		return write_pos - read_pos;
 }
 
 char RingBuffer::peek_front()

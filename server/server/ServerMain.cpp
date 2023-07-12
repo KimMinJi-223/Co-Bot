@@ -223,8 +223,9 @@ void ServerMain::worker_thread()
 		} break;
 		case IO_RECV:
 		{
-			/*int remain_data = num_bytes + clients[key].prev_remain;
+			int remain_data = num_bytes + clients[key].prev_remain;
 			char* p = over_ex->buffer;
+
 			while (remain_data > 0)
 			{
 				int packet_size = p[0];
@@ -234,55 +235,58 @@ void ServerMain::worker_thread()
 					remain_data = remain_data - packet_size;
 				} else break;
 			}
+
 			clients[key].prev_remain = remain_data;
+
 			if (remain_data > 0)
 				memcpy(over_ex->buffer, p, remain_data);
-			clients[key].recv_packet();*/
-
-			RingBuffer* ring_buff = &clients[key].ring_buff;
-			char* p = over_ex->buffer;
-
-			std::cout << "num_bytes: " << num_bytes << std::endl;
-
-			int ret = ring_buff->enqueue(p, num_bytes);
-			if (static_cast<int>(error::full_buffer) == ret) {
-				std::cout << "err: ring buffer is full\n";
-				return;
-			} else if (static_cast<int>(error::in_data_is_too_big) == ret) {
-				std::cout << "err: in data is too big\n";
-				return;
-			}
-
-			while (ring_buff->remain_data() != 0 && ring_buff->peek_front() <= ring_buff->remain_data())
-			{
-				//std::cout << "remain data size: " << ring_buff->remain_data() << std::endl;
-				char pack_size = ring_buff->peek_front();
-				char dequeue_data[BUFFER_SIZE];
-
-				//std::cout << "pack size: " << (int)pack_size << std::endl;
-
-				ret = ring_buff->dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
-				//std::cout << "dequeue size: " << ret << std::endl;
-
-				if (static_cast<int>(error::no_data_in_buffer) == ret) {
-					std::cout << "err: no data in buffer\n";
-					break;
-				} else if (static_cast<int>(error::out_data_is_too_big) == ret) {
-					std::cout << "ret: " << ret << ", pack size: " << pack_size << std::endl;
-					std::cout << "p[0]: " << p[0] << std::endl;
-					std::cout << "err: out data is too big\n";
-					break;
-				}
-
-				process_packet(dequeue_data, static_cast<int>(key));
-
-				p += pack_size;
-			}
-
-			if (0 < ring_buff->remain_data())
-				memcpy(over_ex->buffer, p, ring_buff->remain_data());
 
 			clients[key].recv_packet();
+
+			//RingBuffer* ring_buff = &clients[key].ring_buff;
+			//char* p = over_ex->buffer;
+
+			//// std::cout << "num_bytes: " << num_bytes << std::endl;
+
+			//int ret = ring_buff->enqueue(p, num_bytes);
+			//if (static_cast<int>(error::full_buffer) == ret) {
+			//	std::cout << "err: ring buffer is full\n";
+			//	return;
+			//} else if (static_cast<int>(error::in_data_is_too_big) == ret) {
+			//	std::cout << "err: in data is too big\n";
+			//	return;
+			//}
+
+			//while (ring_buff->remain_data() != 0 && ring_buff->peek_front() <= ring_buff->remain_data())
+			//{
+			//	//std::cout << "remain data size: " << ring_buff->remain_data() << std::endl;
+			//	char pack_size = ring_buff->peek_front();
+			//	char dequeue_data[BUFFER_SIZE];
+
+			//	//std::cout << "pack size: " << (int)pack_size << std::endl;
+
+			//	ret = ring_buff->dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
+			//	//std::cout << "dequeue size: " << ret << std::endl;
+
+			//	if (static_cast<int>(error::no_data_in_buffer) == ret) {
+			//		std::cout << "err: no data in buffer\n";
+			//		break;
+			//	} else if (static_cast<int>(error::out_data_is_too_big) == ret) {
+			//		std::cout << "ret: " << ret << ", pack size: " << pack_size << std::endl;
+			//		std::cout << "p[0]: " << p[0] << std::endl;
+			//		std::cout << "err: out data is too big\n";
+			//		break;
+			//	}
+
+			//	process_packet(dequeue_data, static_cast<int>(key));
+
+			//	p += pack_size;
+			//}
+
+			//if (0 < ring_buff->remain_data())
+			//	memcpy(over_ex->buffer, p, ring_buff->remain_data());
+
+			//clients[key].recv_packet();
 		} break;
 		case IO_SEND:
 		{
@@ -547,21 +551,25 @@ void ServerMain::process_packet(char* packet, int client_id)
 	} break;
 	case static_cast<int>(packet_type::cs_push_button_Forklift_red):
 	{
+		std::cout << "push red button\n";
 		clients[client_id].send_forklift_button(packet_type::sc_push_button_Forklift_red);
 		clients[clients[client_id].tm_id].send_forklift_button(packet_type::sc_push_button_Forklift_red);
 	} break;
 	case static_cast<int>(packet_type::cs_push_button_Forklift_green):
 	{
+		std::cout << "push green button\n";
 		clients[client_id].send_forklift_button(packet_type::sc_push_button_Forklift_green);
 		clients[clients[client_id].tm_id].send_forklift_button(packet_type::sc_push_button_Forklift_green);
 	} break;
 	case static_cast<int>(packet_type::cs_push_button_Forklift_blue):
 	{
+		std::cout << "push blue button\n";
 		clients[client_id].send_forklift_button(packet_type::sc_push_button_Forklift_blue);
 		clients[clients[client_id].tm_id].send_forklift_button(packet_type::sc_push_button_Forklift_blue);
 	} break;
 	case static_cast<int>(packet_type::cs_push_button_Forklift_black):
 	{
+		std::cout << "push black button\n";
 		clients[client_id].send_forklift_button(packet_type::sc_push_button_Forklift_black);
 		clients[clients[client_id].tm_id].send_forklift_button(packet_type::sc_push_button_Forklift_black);
 	} break;
