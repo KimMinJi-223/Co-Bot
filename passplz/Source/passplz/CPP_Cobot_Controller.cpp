@@ -128,40 +128,42 @@ void ACPP_Cobot_Controller::Tick(float DeltaTime)
 
 void ACPP_Cobot_Controller::RecvPacket()
 {
-    //char buff[BUF_SIZE];
-    //int ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
-    //if (ret <= 0)
-    //{
-    //    GetLastError();
-    //    std::cout << "recv() fail!" << std::endl;
-    //    return;
-    //}
-    //if (prev_remain > 0) // 만약 전에 남아있는 데이터가 있다면
-    //{
-    //    strcat(prev_packet_buff, buff);
-    //} else
-    //{
-    //    memcpy(prev_packet_buff, buff, ret);
-    //}
-    //int remain_data = ret + prev_remain;
-    //char* p = prev_packet_buff;
-    //while (remain_data > 0)
-    //{
-    //    int packet_size = p[0];
-    //    if (packet_size <= remain_data)
-    //    {
-    //        ProcessPacket(p);
-    //        p = p + packet_size;
-    //        remain_data -= packet_size;
-    //    } else break;
-    //}
-    //prev_remain = remain_data;
-    //if (remain_data > 0)
-    //{
-    //    memcpy(prev_packet_buff, p, remain_data);
-    //}
+    char buff[BUF_SIZE];
+    int ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
+    if (ret <= 0)
+    {
+        GetLastError();
+        std::cout << "recv() fail!" << std::endl;
+        return;
+    }
+    if (prev_remain > 0) // 만약 전에 남아있는 데이터가 있다면
+    {
+        strcat(prev_packet_buff, buff);
+    } else
+    {
+        memcpy(prev_packet_buff, buff, ret);
+    }
+    int remain_data = ret + prev_remain;
+    char* p = prev_packet_buff;
+    while (remain_data > 0)
+    {
+        int packet_size = p[0];
+        if (packet_size <= remain_data)
+        {
+            ProcessPacket(p);
+            p = p + packet_size;
+            remain_data -= packet_size;
+        } else break;
+    }
+    prev_remain = remain_data;
+    if (remain_data > 0)
+    {
+        memcpy(prev_packet_buff, p, remain_data);
+    }
 
-    char recv_buff[BUF_SIZE];
+
+
+  /*  char recv_buff[BUF_SIZE];
 
     int recv_ret = recv(*sock, reinterpret_cast<char*>(&recv_buff), BUF_SIZE, 0);
     if (recv_ret <= 0)
@@ -196,7 +198,7 @@ void ACPP_Cobot_Controller::RecvPacket()
     	}
 
     	ProcessPacket(dequeue_data);
-    }
+    }*/
 }
 
 void ACPP_Cobot_Controller::ProcessPacket(char* packet)
@@ -500,9 +502,10 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
     player->Foot_left_Zone->SetWorldLocation(player->GetMesh()->GetSocketLocation("left"));
     player->Foot_right_Zone->SetWorldLocation(player->GetMesh()->GetSocketLocation("right"));
 
-
-    if (player->IsUnion_Jump_anim)
+    if (player->IsUnion_Jump_anim) {
+        //위치를 계속 보내는거 필요(pawn위치만)
         return;
+    }
 
     // 이동하기 전에 캐릭터의 상태를 계산해서 보폭과 걸음 속도를 설정한다.
     float distance_two_feet = 50.f;
