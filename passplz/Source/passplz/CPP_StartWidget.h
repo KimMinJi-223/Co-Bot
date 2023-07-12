@@ -21,12 +21,12 @@ public:
 	};*/
 	
 	UFUNCTION(BlueprintCallable)
-		void SendLoginIDPW();
-	void CallEventSuccessLogin(bool loginResult);
+		bool SendLoginIDPW();
+	//void CallEventSuccessLogin(bool loginResult);
 
 	UFUNCTION(BlueprintCallable)
-		void SendSingupIDPW();
-	void CallEventSuccessSignup(bool signupResult);
+		bool SendSingupIDPW();
+	//void CallEventSuccessSignup(bool signupResult);
 
 	UFUNCTION(BlueprintCallable)
 		void CreateRoom();

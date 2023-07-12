@@ -48,7 +48,7 @@ void ACPP_Lava::BeginPlay()
 	UMaterialInterface* BaseMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/K_Test/lava/m_brush.m_brush"));
 	DynamicMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, nullptr);
 
-	RenderTargetTexture = Cast<UTextureRenderTarget2D>(StaticLoadObject(UTextureRenderTarget2D::StaticClass(), nullptr, TEXT("/Game/K_Test/lava/rendertaget.rendertaget")));
+	//RenderTargetTexture = Cast<UTextureRenderTarget2D>(StaticLoadObject(UTextureRenderTarget2D::StaticClass(), nullptr, TEXT("/Game/K_Test/lava/rendertaget.rendertaget")));
 }
 
 // Called every frame

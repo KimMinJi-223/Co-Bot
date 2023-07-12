@@ -63,8 +63,6 @@ void ACPP_Cannon::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 	lavaCollision->OnComponentBeginOverlap.AddDynamic(this, &ACPP_Cannon::OnComponentBeginOverlap_lavaCollision);
-	lavaCollision->OnComponentEndOverlap.AddDynamic(this, &ACPP_Cannon::OnComponentEndOverlap_lavaCollision);
-
 }
 
 // Called every frame
@@ -109,17 +107,17 @@ void ACPP_Cannon::OnComponentBeginOverlap_lavaCollision(UPrimitiveComponent* Ove
 {
 	ACPP_Cobot_Car* car = Cast<ACPP_Cobot_Car>(OtherActor);
 
+	if (!car)
+		return;
+
+	if (!car->isHaveCapsule)
+		return;
+
 	if (car != nullptr) {
 		Cast<ACPP_Cobot_Car_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->ChangeMode(1);
+		car->isHaveCapsule = false;
+		car->lavaCapsule->SetVisibility(false);
+		FOutputDeviceNull pAR;
+		CallFunctionByNameWithArguments(TEXT("Switch_Camera"), pAR, nullptr, true);
 	}
 }
-
-void ACPP_Cannon::OnComponentEndOverlap_lavaCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
-{
-	ACPP_Cobot_Car* car = Cast<ACPP_Cobot_Car>(OtherActor);
-
-	if (car != nullptr) {
-		Cast<ACPP_Cobot_Car_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->ChangeMode(0);
-	}
-}
-

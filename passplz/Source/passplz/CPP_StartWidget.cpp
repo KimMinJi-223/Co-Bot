@@ -4,41 +4,38 @@
 #include "CPP_StartWidget.h"
 #include "CPP_Cobot_Controller.h"
 
-void UCPP_StartWidget::SendLoginIDPW()
+bool UCPP_StartWidget::SendLoginIDPW()
 {
-
-	Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->SetWidget(Cast<UUserWidget>(this));
-	//Send필요 id랑 passward
-	CallEventSuccessLogin(true);
+	//서버! ID, Passward->이거 서버로 보내서 로그인 여부확인
+	//서버에서 받은거를 리턴값으로 넘겨준다.
+	return true;
 }
 
-void UCPP_StartWidget::CallEventSuccessLogin(bool loginResult)
+//bool UCPP_StartWidget::CallEventSuccessLogin(bool loginResult)
+//{
+//	isSuccessLogin = loginResult;
+//
+//	if(isSuccessLogin)
+//		Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->SetWidget(nullptr); //로그인이 성공하면 현재 위젯을 nullptr로 바꾼다.
+//
+//	FOutputDeviceNull pAR;
+//	CallFunctionByNameWithArguments(TEXT("Success_Login"), pAR, nullptr, true);
+//}
+
+bool UCPP_StartWidget::SendSingupIDPW()
 {
-	isSuccessLogin = loginResult;
-
-	if(isSuccessLogin)
-		Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->SetWidget(nullptr); //로그인이 성공하면 현재 위젯을 nullptr로 바꾼다.
-
-	FOutputDeviceNull pAR;
-	CallFunctionByNameWithArguments(TEXT("Success_Login"), pAR, nullptr, true);
+	//서버! signupID, signupPassward->이거 서버로 보내서 로그인 여부확인
+	//서버에서 받은거를 리턴값으로 넘겨준다.
+	return true;
 }
 
-void UCPP_StartWidget::SendSingupIDPW()
-{
-	Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->SetWidget(Cast<UUserWidget>(this));
-		//ignupID, signupPassward 이 두개 서버에 보내서 있는 아이디 인지 확인하는 작업 필요 없다면 계정 생성
-	//자신의 포인터도 같이 넘겨주자
-	// send해주고 CallEventSuccessSignup 여기에 성공 여부 bool값으로 보내주기
-	CallEventSuccessSignup(true);
-}
-
-void UCPP_StartWidget::CallEventSuccessSignup(bool signupResult)
-{
-	isSuccessSignup = signupResult; //bool값 설정하고 커스텀이벤트 호출
-
-	FOutputDeviceNull pAR;
-	CallFunctionByNameWithArguments(TEXT("Success_Signup"), pAR, nullptr, true);
-}
+//void UCPP_StartWidget::CallEventSuccessSignup(bool signupResult)
+//{
+//	isSuccessSignup = signupResult; //bool값 설정하고 커스텀이벤트 호출
+//
+//	FOutputDeviceNull pAR;
+//	CallFunctionByNameWithArguments(TEXT("Success_Signup"), pAR, nullptr, true);
+//}
 
 void UCPP_StartWidget::CreateRoom()
 {
