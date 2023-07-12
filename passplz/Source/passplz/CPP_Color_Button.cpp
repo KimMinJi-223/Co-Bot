@@ -143,12 +143,13 @@ void ACPP_Color_Button::OnComponentBeginOverlap_redFootholdCollision(UPrimitiveC
 			//같지 않으면 콜리전을 없앤다.
 			redFoothold->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			redFootholdCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
+			redFoothold->SetVisibility(false);
 			GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
 				{
 
 					redFoothold->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 					redFootholdCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+					redFoothold->SetVisibility(true);
 
 
 				}), WaitTime, false);
@@ -184,9 +185,14 @@ void ACPP_Color_Button::OnComponentBeginOverlap_cyanCollisionCollision(UPrimitiv
 //리스폰
 void ACPP_Color_Button::OnComponentBeginOverlap_respawnCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	UE_LOG(LogTemp, Warning, TEXT("OnComponentBeginOverlap_respawnCollision"));
+
 	ACPP_Cobot* cobot = Cast<ACPP_Cobot>(OtherActor);
 	if (cobot) {
 		cobot->SetActorLocation(GetActorLocation());
+		cobot->AnimatiomChange(1);
+		cobot->AnimatiomChange(0);
+
 	}
 }
 
