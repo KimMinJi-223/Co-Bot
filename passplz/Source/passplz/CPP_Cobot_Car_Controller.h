@@ -27,7 +27,7 @@ UCLASS()
 class PASSPLZ_API ACPP_Cobot_Car_Controller : public APlayerController
 {
 	GENERATED_BODY()
-	ACPP_Cobot_Car_Controller();
+		ACPP_Cobot_Car_Controller();
 	~ACPP_Cobot_Car_Controller();
 
 
@@ -100,8 +100,11 @@ public:
 	void CarForward(float acceleration);
 	//서버 : 회전 하라는 함수 이 함수 호출하면 됨
 	void CarRotation(float rotationValue);
-	
-	void ChangeMode(int Mode);
 
+	UFUNCTION(BlueprintCallable)
+		void ChangeMode(int Mode);
+
+	UPROPERTY(BlueprintReadWrite)
+		int fireNum;
 
 };

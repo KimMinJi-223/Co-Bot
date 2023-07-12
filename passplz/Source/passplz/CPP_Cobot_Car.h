@@ -35,18 +35,20 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		USpringArmComponent* SpringArm;
 
-		ACPP_Stage3Cobot* Player1;
-
-
-		ACPP_Stage3Cobot* Player2;
-
-
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere, Category = Camera)
 		UCameraComponent* Camera;
-private:
+
+		ACPP_Stage3Cobot* Player1;
+		ACPP_Stage3Cobot* Player2;
+
+	UPROPERTY(BlueprintReadWrite)
+		bool isHaveCapsule;
 
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* lavaCapsule;
+
+private:
+
 
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* Player1CarFoot;

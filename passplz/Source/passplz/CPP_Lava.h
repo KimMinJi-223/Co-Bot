@@ -37,6 +37,8 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		bool isExplosion;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UTextureRenderTarget2D* RenderTargetTexture;
 private:
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* lavaBall;
@@ -45,13 +47,11 @@ private:
 		USphereComponent* CollisionComponent;
 	UPROPERTY(VisibleAnywhere)
 	UMaterialInstanceDynamic* DynamicMaterial;
-	UPROPERTY(VisibleAnywhere)
-	UTextureRenderTarget2D* RenderTargetTexture;
 
 	UPROPERTY(VisibleAnywhere)
-		UDecalComponent* explosionDecal;
-	UPROPERTY(VisibleAnywhere)
 		UMaterialInstanceDynamic* explosionDecalDynamicMaterial;
+	UPROPERTY(VisibleAnywhere)
+		UDecalComponent* explosionDecal;
 
 	float opacityValue;
 	FVector crashLocation;

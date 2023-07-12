@@ -74,7 +74,7 @@ void ACPP_Cobot_Car_Controller::BeginPlay()
 	if(cannon)
 		UE_LOG(LogTemp, Warning, TEXT("cannon OK"));
 
-
+	fireNum = 0;
 
 
 
@@ -292,12 +292,12 @@ void ACPP_Cobot_Car_Controller::CannonInput(const FInputActionValue& Value)
 
 void ACPP_Cobot_Car_Controller::FireCannonInput(const FInputActionValue& Value)
 {
-	if (mode == 1) {
-		UE_LOG(LogTemp, Warning, TEXT("FireCannonInput %s"), Value.Get<bool>() ? TEXT("true") : TEXT("false"));
-		Cast<ACPP_Cannon>(cannon)->FireLava();
-	}
+	//if (mode == 1) {
+	//	UE_LOG(LogTemp, Warning, TEXT("FireCannonInput %s"), Value.Get<bool>() ? TEXT("true") : TEXT("false"));
+	//	Cast<ACPP_Cannon>(cannon)->FireLava();
+	//}
 
-	if (1.f == Value.Get<float>()) {
+	if (1.f == Value.Get<float>() /*&& mode == 1 && fireNum != 0*/) {
 		cs_cannon_click_packet pack;
 		pack.size = sizeof(pack);
 		pack.type = static_cast<char>(packet_type::cs_cannon_click);
