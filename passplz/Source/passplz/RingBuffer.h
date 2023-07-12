@@ -3,7 +3,8 @@
 
 #define BUFFER_SIZE 2048
 
-enum class error { full_buffer = -10, no_data_in_buffer, in_data_is_too_big, out_data_is_too_big };
+enum class error { full_buffer = -10, no_data_in_buffer, in_data_is_too_big, out_data_is_too_big, remain_err1, remain_err2
+};
 
 class RingBuffer
 {
@@ -18,7 +19,7 @@ public:
 	{
 		for (int i{}; i < BUFFER_SIZE; ++i)
 		{
-			buffer[i] = 0;
+			buffer[i] = NULL;
 		}
 	};
 

@@ -14,12 +14,31 @@ int RingBuffer::enqueue(char* data, int data_size)
 		return static_cast<int>(error::in_data_is_too_big);
 	}	
 
-	if (BUFFER_SIZE < write_pos + data_size)
+	if (write_pos + data_size > BUFFER_SIZE) {
+		std::cout << "enqueue buffer end\n";
+		int temp = BUFFER_SIZE - write_pos;
+		std::cout << "temp: " << temp << std::endl;
+		std::cout << "write pos: " << write_pos << std::endl;
+		memcpy(buffer + write_pos, data, temp);
+		//for (int i{}; i < temp; ++i)
+		//	printf("buffer[%d]: %d\n", write_pos + i, buffer[write_pos + i]);
+
 		write_pos = 0;
+		memcpy(buffer + write_pos, data + temp, data_size - temp);
+		//for (int i{}; i < data_size - temp; ++i)
+		//	printf("buffer[%d]: %d\n", write_pos + i, buffer[write_pos + i]);
 
-	memcpy(buffer + write_pos, data, data_size);
+		write_pos += data_size - temp;
 
-	write_pos += data_size;
+		//std::cout << "write pos: " << write_pos << std::endl;
+	} else {
+		memcpy(buffer + write_pos, data, data_size);
+
+		write_pos += data_size;
+		if (BUFFER_SIZE == write_pos)
+			write_pos = 0;
+	}
+
 	number_of_copies -= data_size;
 
 	return data_size;
@@ -36,14 +55,23 @@ int RingBuffer::dequeue(char* destination, int data_size)
 		std::cout << "dequeue out data is too big\n";
 		return static_cast<int>(error::out_data_is_too_big);
 	}
-	           
-	if (BUFFER_SIZE < read_pos + data_size) 
+	
+	if (read_pos + data_size > BUFFER_SIZE) {
+		int temp = BUFFER_SIZE - read_pos;
+		memcpy(destination, buffer + read_pos, temp);
+		memset(buffer + read_pos, NULL, temp);
 		read_pos = 0;
+		memcpy(destination + temp, buffer + read_pos, data_size - temp);
+		memset(buffer + read_pos, NULL, data_size - temp);
+		read_pos += data_size - temp;
+	} else {
+		memcpy(destination, buffer + read_pos, data_size);
+		memset(buffer + read_pos, NULL, data_size);
+		read_pos += data_size;
+		if (BUFFER_SIZE == read_pos)
+			read_pos = 0;
+	}
 
-	memcpy(destination, buffer + read_pos, data_size);
-	memset(buffer + read_pos, NULL, data_size);
-
-	read_pos += data_size;
 	number_of_copies += data_size;
 
 	return data_size;
@@ -51,38 +79,16 @@ int RingBuffer::dequeue(char* destination, int data_size)
 
 int RingBuffer::remain_data()
 {
-	if (read_pos > write_pos) {
-		if (buffer[read_pos] != NULL) {
-			if (read_pos + buffer[read_pos] >= BUFFER_SIZE) { // 이 문제와 
-				return 0;
-			} else { // 이 문제를 아직 잘 해결하지 못 함
-				buffer[read_pos + buffer[read_pos] + 1];
-				return 0;
-			}
-		} else
-			return write_pos;
-	} else
-		return abs(write_pos - read_pos);
+	if (write_pos >= read_pos)
+		return write_pos - read_pos;
 
-	//if (read_pos > write_pos) {
-	//	int gap = 0, count = 0;
-	//	while (buffer[read_pos + gap] != NULL) {
-	//		if (read_pos + buffer[read_pos] > BUFFER_SIZE) {
-	//			for (; buffer[read_pos + gap] == NULL; ++gap)
-	//				++count;
-	//			return count + write_pos;
-	//		} else {
-	//			if (buffer[buffer[read_pos + gap]])
-	//			return buffer[read_pos] + write_pos;
-	//		}
-	//	}
-	//}
+	return BUFFER_SIZE - read_pos + write_pos;
 }
 
 char RingBuffer::peek_front()
 {
-	if (buffer[read_pos] == NULL)
+	if (BUFFER_SIZE == read_pos)
 		return buffer[0];
-	else
-		return buffer[read_pos];
+
+	return buffer[read_pos];
 }

@@ -3,11 +3,19 @@
 
 #define BUFFER_SIZE 2048
 
-enum class error { full_buffer = -10, no_data_in_buffer, in_data_is_too_big, out_data_is_too_big };
+enum class error { 
+	full_buffer = -10, 
+	no_data_in_buffer, 
+	in_data_is_too_big, 
+	out_data_is_too_big, 
+	remain_err1, 
+	remain_err2,
+	no_seat_in_buffer,
+};
 
 class RingBuffer
 {
-private:
+public:
 	int read_pos;
 	int write_pos;
 	int number_of_copies;

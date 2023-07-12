@@ -128,75 +128,80 @@ void ACPP_Cobot_Controller::Tick(float DeltaTime)
 
 void ACPP_Cobot_Controller::RecvPacket()
 {
-    //char buff[BUF_SIZE];
-    //int ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
-    //if (ret <= 0)
-    //{
-    //    GetLastError();
-    //    std::cout << "recv() fail!" << std::endl;
-    //    return;
-    //}
-    //if (prev_remain > 0) // 만약 전에 남아있는 데이터가 있다면
-    //{
-    //    strcat(prev_packet_buff, buff);
-    //} else
-    //{
-    //    memcpy(prev_packet_buff, buff, ret);
-    //}
-    //int remain_data = ret + prev_remain;
-    //char* p = prev_packet_buff;
-    //while (remain_data > 0)
-    //{
-    //    int packet_size = p[0];
-    //    if (packet_size <= remain_data)
-    //    {
-    //        ProcessPacket(p);
-    //        p = p + packet_size;
-    //        remain_data -= packet_size;
-    //    } else break;
-    //}
-    //prev_remain = remain_data;
-    //if (remain_data > 0)
-    //{
-    //    memcpy(prev_packet_buff, p, remain_data);
-    //}
+    char buff[BUF_SIZE];
+    int ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
+    if (ret <= 0)
+    {
+        GetLastError();
+        std::cout << "recv() fail!" << std::endl;
+        return;
+    }
+    if (prev_remain > 0) // 만약 전에 남아있는 데이터가 있다면
+    {
+        strcat(prev_packet_buff, buff);
+    } else
+    {
+        memcpy(prev_packet_buff, buff, ret);
+    }
+    int remain_data = ret + prev_remain;
+    char* p = prev_packet_buff;
+    while (remain_data > 0)
+    {
+        int packet_size = p[0];
+        if (packet_size <= remain_data)
+        {
+            ProcessPacket(p);
+            p = p + packet_size;
+            remain_data -= packet_size;
+        } else break;
+    }
+    prev_remain = remain_data;
+    if (remain_data > 0)
+    {
+        memcpy(prev_packet_buff, p, remain_data);
+    }
 
-    char recv_buff[BUF_SIZE];
+    /*char recv_buff[BUF_SIZE];
 
     int recv_ret = recv(*sock, reinterpret_cast<char*>(&recv_buff), BUF_SIZE, 0);
     if (recv_ret <= 0)
         return;
 
-    UE_LOG(LogTemp, Warning, TEXT("recv size: %d"), recv_ret);
-
-    int ring_ret = ring_buff.enqueue(recv_buff, recv_ret);
-    if (static_cast<int>(error::full_buffer) == ring_ret) {
-        UE_LOG(LogTemp, Warning, TEXT("full buffer")); 
+    UE_LOG(LogTemp, Warning, TEXT("number of copies: %d"), ring_buff.number_of_copies);
+    UE_LOG(LogTemp, Warning, TEXT("write pos: %d"), ring_buff.write_pos);
+    UE_LOG(LogTemp, Warning, TEXT("read pos: %d"), ring_buff.read_pos);
+    int enqueue_ret = ring_buff.enqueue(recv_buff, recv_ret);
+    if (static_cast<int>(error::full_buffer) == enqueue_ret) {
+        UE_LOG(LogTemp, Warning, TEXT("full buffer"));
         return;
-    } else if (static_cast<int>(error::in_data_is_too_big) == ring_ret) {
-        UE_LOG(LogTemp, Warning, TEXT("in data is too big")); 
+    } else if (static_cast<int>(error::in_data_is_too_big) == enqueue_ret) {
+        UE_LOG(LogTemp, Warning, TEXT("in data is too big"));
+        return;
+    } else if(static_cast<int>(error::no_seat_in_buffer) == enqueue_ret) {
+        UE_LOG(LogTemp, Warning, TEXT("no seat in buffer"));
         return;
     }
 
-    while (ring_buff.remain_data() != 0 && ring_buff.peek_front() != 0 && ring_buff.peek_front() <= ring_buff.remain_data())
+    while ((ring_buff.remain_data() != 0 && ring_buff.peek_front() != 0) && (ring_buff.peek_front() <= ring_buff.remain_data()))
     {
     	char pack_size = ring_buff.peek_front();
-    	char dequeue_data[BUFFER_SIZE];
+        char dequeue_data[BUFFER_SIZE] = {};
 
-        UE_LOG(LogTemp, Warning, TEXT("pack size: %d"), pack_size);
+        UE_LOG(LogTemp, Warning, TEXT("enqueue ret: %d"), enqueue_ret);
         UE_LOG(LogTemp, Warning, TEXT("remain data: %d"), ring_buff.remain_data());
-
-    	ring_ret = ring_buff.dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
-    	if (static_cast<int>(error::no_data_in_buffer) == ring_ret) {
-    		UE_LOG(LogTemp, Warning, TEXT("dequeue err: no data in buffer"));
+        UE_LOG(LogTemp, Warning, TEXT("pack size: %d"), pack_size);
+    	int dequeue_ret = ring_buff.dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
+    	if (static_cast<int>(error::no_data_in_buffer) == dequeue_ret) {
+            UE_LOG(LogTemp, Warning, TEXT("no data in buffer"));
     		break;
-    	} else if (static_cast<int>(error::out_data_is_too_big) == ring_ret) {
-    		UE_LOG(LogTemp, Warning, TEXT("dequeue err: out data is too big"));
+    	} else if (static_cast<int>(error::out_data_is_too_big) == dequeue_ret) {
+            UE_LOG(LogTemp, Warning, TEXT("out data is too buffer"));
     		break;
     	}
+        UE_LOG(LogTemp, Warning, TEXT("dequeue ret: %d"), dequeue_ret);
 
     	ProcessPacket(dequeue_data);
-    }
+    }*/
 }
 
 void ACPP_Cobot_Controller::ProcessPacket(char* packet)
