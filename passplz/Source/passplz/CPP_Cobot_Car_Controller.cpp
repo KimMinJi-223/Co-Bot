@@ -75,7 +75,7 @@ void ACPP_Cobot_Car_Controller::BeginPlay()
 		UE_LOG(LogTemp, Warning, TEXT("cannon OK"));
 
 	fireNum = 0;
-
+	isFire = false;
 
 
 }
@@ -117,7 +117,7 @@ void ACPP_Cobot_Car_Controller::RecvPacket()
 	if (recv_ret <= 0)
 	{
 		//GetLastError();
-		UE_LOG(LogTemp, Warning, TEXT("recv() fail"));
+		//UE_LOG(LogTemp, Warning, TEXT("recv() fail"));
 		//std::cout << "recv() fail!" << std::endl;
 		return;
 	}
@@ -297,7 +297,8 @@ void ACPP_Cobot_Car_Controller::FireCannonInput(const FInputActionValue& Value)
 	//	Cast<ACPP_Cannon>(cannon)->FireLava();
 	//}
 
-	if (1.f == Value.Get<float>() /*&& mode == 1 && fireNum != 0*/) {
+	if (1.f == Value.Get<float>() && fireNum != 0 && isFire) {
+		isFire = false;
 		cs_cannon_click_packet pack;
 		pack.size = sizeof(pack);
 		pack.type = static_cast<char>(packet_type::cs_cannon_click);

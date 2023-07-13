@@ -44,7 +44,7 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		bool isHaveCapsule;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 		UStaticMeshComponent* lavaCapsule;
 
 private:

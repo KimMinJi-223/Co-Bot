@@ -49,7 +49,6 @@ ACPP_Cannon::ACPP_Cannon()
 	{
 		targetLocation->SetDecalMaterial(DecalMaterialAsset.Object);
 	}
-
 }
 
 // Called when the game starts or when spawned
@@ -110,11 +109,14 @@ void ACPP_Cannon::OnComponentBeginOverlap_lavaCollision(UPrimitiveComponent* Ove
 	if (!car)
 		return;
 
-	if (!car->isHaveCapsule)
+	if (car->isHaveCapsule)
 		return;
 
 	if (car != nullptr) {
-		Cast<ACPP_Cobot_Car_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->ChangeMode(1);
+		ACPP_Cobot_Car_Controller* controller = Cast<ACPP_Cobot_Car_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+		controller->ChangeMode(1);
+		controller->isFire = true;
+		controller->fireNum = 3;
 		car->isHaveCapsule = false;
 		car->lavaCapsule->SetVisibility(false);
 		FOutputDeviceNull pAR;
