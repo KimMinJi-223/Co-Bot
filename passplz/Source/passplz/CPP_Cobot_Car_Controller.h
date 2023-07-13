@@ -107,4 +107,7 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		int fireNum;
 
+	UPROPERTY(BlueprintReadWrite)
+		bool isFire; //한번 쏘고 타이밍 기다리는거
+
 };

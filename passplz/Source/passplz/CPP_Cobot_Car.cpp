@@ -69,6 +69,8 @@ void ACPP_Cobot_Car::BeginPlay()
 	UE_LOG(LogTemp, Warning, TEXT("SpawnActor"));
 
 
+	isHaveCapsule = false;
+	lavaCapsule->SetVisibility(false);
 
 	/*Player1->SetChildActorClass(ACPP_Stage3Cobot::StaticClass());
 	Player2->SetChildActorClass(ACPP_Stage3Cobot::StaticClass());
