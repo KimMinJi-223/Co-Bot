@@ -274,8 +274,8 @@ void ACPP_Cobot_Car_Controller::FireCannonInput(const FInputActionValue& Value)
 	//	UE_LOG(LogTemp, Warning, TEXT("FireCannonInput %s"), Value.Get<bool>() ? TEXT("true") : TEXT("false"));
 	//	Cast<ACPP_Cannon>(cannon)->FireLava();
 	//}
-
-	if (1.f == Value.Get<float>() && fireNum != 0 && isFire) {
+	
+	if (0.5f < Value.Get<float>() && fireNum != 0 && isFire) {
 		isFire = false;
 		cs_cannon_click_packet pack;
 		pack.size = sizeof(pack);
