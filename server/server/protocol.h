@@ -4,7 +4,7 @@ constexpr int PORT_NUM = 7000;
 constexpr int BUF_SIZE = 2048;
 
 constexpr int MAX_USER = 10;
-constexpr int MAX_LOGIN_LEN = 15;
+constexpr int MAX_NAME = 15;
 
 enum class packet_type {
 	cs_signup,
@@ -16,6 +16,9 @@ enum class packet_type {
 
 	sc_login_success,
 	sc_login_fail,
+
+	cs_create_room,
+	sc_create_room_ok,
 
 	cs_enter,
 	cs_move,
@@ -114,9 +117,8 @@ public:
 struct cs_signup_packet {
 	char	size;
 	char	type;
-	wchar_t id[MAX_LOGIN_LEN];
-	wchar_t pw[MAX_LOGIN_LEN];
-	wchar_t pw2[MAX_LOGIN_LEN];
+	wchar_t id[MAX_NAME];
+	wchar_t pw[MAX_NAME];\
 };
 
 struct sc_signup_success_packet {
@@ -132,8 +134,8 @@ struct sc_signup_fail_packet {
 struct cs_login_packet {
 	char	size;
 	char	type;
-	wchar_t id[MAX_LOGIN_LEN];
-	wchar_t passward[MAX_LOGIN_LEN];
+	wchar_t id[MAX_NAME];
+	wchar_t passward[MAX_NAME];
 };
 
 struct sc_login_success_packet {
@@ -153,6 +155,21 @@ struct sc_login_success_packet {
 struct sc_login_fail_packet {
 	char size;
 	char type;
+};
+
+struct cs_create_room_packet {
+	char	size;
+	char	type;
+	int		room_mode;
+	wchar_t room_name[MAX_NAME];
+};
+
+struct sc_create_room_ok_packet {
+	char	size;
+	char	type;
+	int		host_id;
+	int		room_mode;
+	wchar_t room_name[MAX_NAME];
 };
 
 struct cs_enter_packet {

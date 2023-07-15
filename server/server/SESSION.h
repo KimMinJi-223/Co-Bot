@@ -14,7 +14,7 @@ public:
 	state		state;
 	SOCKET		sock;
 	int			id;				// ∞Ì¿Ø id
-	wchar_t		name[MAX_LOGIN_LEN];
+	wchar_t		name[MAX_NAME];
 	vector_d3	location;
 	vector_d3	current_left;
 	vector_d3	current_right;
@@ -62,6 +62,7 @@ public:
 	void send_signup_fail_packet();
 	void send_login_success_packet();
 	void send_login_fail_packet();
+	void send_create_room_ok(wchar_t* room_name, int room_mode);
 	void send_left_move_packet(int client_id);
 	void send_right_move_packet(int client_id);
 	void send_push_maze_button_packet(direction direction);

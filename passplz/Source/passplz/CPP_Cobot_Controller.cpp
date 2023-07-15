@@ -10,8 +10,6 @@
 #include "CPP_Cobot.h"
 #include "CPP_Time_Color_Button.h"
 
-#include "../../../server/server/protocol.h"
-
 #include <chrono>
 
 ACPP_Cobot_Controller::ACPP_Cobot_Controller()
@@ -29,6 +27,8 @@ ACPP_Cobot_Controller::ACPP_Cobot_Controller()
 
 ACPP_Cobot_Controller::~ACPP_Cobot_Controller()
 {
+    UE_LOG(LogTemp, Warning, TEXT("~ACPP_Cobot_Controller()"));
+
     //cs_logout_packet pack;
     //pack.size = sizeof(pack);
     //pack.type = static_cast<int>(type::cs_logout);
@@ -48,7 +48,7 @@ void ACPP_Cobot_Controller::BeginPlay()
 
     sock = instance->GetSocketMgr()->GetSocket();
 
-    SendEnterPacket();
+    //SendEnterPacket();
 
     Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(-7500.f, 3470.f, 500.f), FRotator(0.0f, 0.0f, 0.0f));
     Player_2->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), FVector(0.0f, 1.0f, 0.0f));
@@ -398,8 +398,8 @@ void ACPP_Cobot_Controller::SendEnterPacket()
     cs_login_packet enter_pack;
     enter_pack.size = sizeof(enter_pack);
     enter_pack.type = static_cast<char>(packet_type::cs_login);
-    wcscpy_s(enter_pack.id, MAX_LOGIN_LEN, L"ex_id");
-    wcscpy_s(enter_pack.passward, MAX_LOGIN_LEN, L"ex_pw");
+    wcscpy_s(enter_pack.id, MAX_NAME, L"ex_id");
+    wcscpy_s(enter_pack.passward, MAX_NAME, L"ex_pw");
 
     int ret = send(*sock, reinterpret_cast<char*>(&enter_pack), sizeof(enter_pack), 0);
 }
@@ -635,19 +635,19 @@ bool ACPP_Cobot_Controller::Is_Set_IDPW(FString I, FString p)
     ////ID = I;
     ////Passward = p;
 
-    wchar_t* input_id = TCHAR_TO_WCHAR(*I);
-    wchar_t* input_pw = TCHAR_TO_WCHAR(*p);
+    //wchar_t* input_id = TCHAR_TO_WCHAR(*I);
+    //wchar_t* input_pw = TCHAR_TO_WCHAR(*p);
 
-    // 서버한테 들어왔다고 알려주는 거
-    cs_login_packet login_pack;
-    login_pack.size = sizeof(login_pack);
-    login_pack.type = static_cast<char>(packet_type::cs_login);
-    wcscpy_s(login_pack.id, MAX_LOGIN_LEN, input_id);
-    wcscpy_s(login_pack.passward, MAX_LOGIN_LEN, input_pw);
+    //// 서버한테 들어왔다고 알려주는 거
+    //cs_login_packet login_pack;
+    //login_pack.size = sizeof(login_pack);
+    //login_pack.type = static_cast<char>(packet_type::cs_login);
+    //wcscpy_s(login_pack.id, MAX_NAME, input_id);
+    //wcscpy_s(login_pack.passward, MAX_NAME, input_pw);
 
-    int ret = send(*sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
+    //int ret = send(*sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
 
-     UE_LOG(LogTemp, Warning, TEXT("ID: %s, PW: %s"), input_id, input_pw);
+    // UE_LOG(LogTemp, Warning, TEXT("ID: %s, PW: %s"), input_id, input_pw);
 
     return true;
 }

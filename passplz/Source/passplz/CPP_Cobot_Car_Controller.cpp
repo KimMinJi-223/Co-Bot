@@ -111,68 +111,38 @@ void ACPP_Cobot_Car_Controller::SetupInputComponent()
 
 void ACPP_Cobot_Car_Controller::RecvPacket()
 {
-	char recv_buff[BUF_SIZE];
-
-	int recv_ret = recv(*sock, reinterpret_cast<char*>(&recv_buff), BUF_SIZE, 0);
-	if (recv_ret <= 0)
+	char buff[BUF_SIZE];
+	int ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
+	if (ret <= 0)
 	{
 		//GetLastError();
 		//UE_LOG(LogTemp, Warning, TEXT("recv() fail"));
 		//std::cout << "recv() fail!" << std::endl;
 		return;
 	}
-
-	int ring_ret = ring_buff.enqueue(recv_buff, recv_ret);
-	if (static_cast<int>(error::full_buffer) == ring_ret) {
-		UE_LOG(LogTemp, Warning, TEXT("full buffer"));
-		//std::cout << "err: ring buffer is full\n";
-		return;
-	} else if (static_cast<int>(error::in_data_is_too_big) == ring_ret) {
-		UE_LOG(LogTemp, Warning, TEXT("in data is too big"));
-		//std::cout << "err: in data is too big\n";
-		return;
-	}
-
-	//while (ring_buff.peek_front() <= ring_buff.remain_data())
-	//{
-	//	char pack_size = ring_buff.peek_front();
-	//	char dequeue_data[BUFFER_SIZE];
-
-	//	ring_ret = ring_buff.dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
-	//	if (static_cast<int>(error::no_data_in_buffer) == ring_ret) {
-	//		UE_LOG(LogTemp, Warning, TEXT("dequeue err: no data in buffer"));
-	//		break;
-	//	} else if (static_cast<int>(error::out_data_is_too_big) == ring_ret) {
-	//		UE_LOG(LogTemp, Warning, TEXT("dequeue err: out data is too big"));
-	//		break;
-	//	}
-
-	//	ProcessPacket(dequeue_data);
-	//}
-
-	int buffer_start = 0;
-	while (ring_buff.remain_data() > 0)
+	if (prev_remain > 0) // 만약 전에 남아있는 데이터가 있다면
 	{
-		char pack_size = recv_buff[buffer_start];
-		//if (pack_size < recv_ret) break;
-
-		if (pack_size <= ring_buff.remain_data()) {
-			char dequeue_data[BUFFER_SIZE];
-
-			ring_ret = ring_buff.dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
-			if (static_cast<int>(error::no_data_in_buffer) == ring_ret) {
-				UE_LOG(LogTemp, Warning, TEXT("dequeue err: no data in buffer"));
-				break;
-			}
-			else if (static_cast<int>(error::out_data_is_too_big) == ring_ret) {
-				UE_LOG(LogTemp, Warning, TEXT("dequeue err: out data is too big"));
-				break;
-			}
-
-			ProcessPacket(dequeue_data);
-
-			buffer_start += pack_size;
+		strcat(prev_packet_buff, buff);
+	} else
+	{
+		memcpy(prev_packet_buff, buff, ret);
+	}
+	int remain_data = ret + prev_remain;
+	char* p = prev_packet_buff;
+	while (remain_data > 0)
+	{
+		int packet_size = p[0];
+		if (packet_size <= remain_data)
+		{
+			ProcessPacket(p);
+			p = p + packet_size;
+			remain_data -= packet_size;
 		} else break;
+	}
+	prev_remain = remain_data;
+	if (remain_data > 0)
+	{
+		memcpy(prev_packet_buff, p, remain_data);
 	}
 }
 
@@ -230,11 +200,14 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 
 		if (player_number == pack->click_id) {
 			// 자기가 누른거
-			Cast<ACPP_Cannon>(cannon)->FireLava();
+			// 여기서는 아무 행동을 안해도 되고 아니면
+			// 상대방한테 발사 요청을 보냈다는 메시지를 생성해도 됨
+			//Cast<ACPP_Cannon>(cannon)->FireLava(); // 이건 임시 원래 없어야 함
 		}
 		else {
 			// 상대방이 누른거
-			Cast<ACPP_Cannon>(cannon)->FireLava();
+			// 여기는 상대방으로부터 발사요청이 왔다는 메시지를 생성해줘야 함
+			//Cast<ACPP_Cannon>(cannon)->FireLava(); // 이건 임시 원래 없어야 함
 		}
 	} break;
 	case static_cast<int>(packet_type::sc_cannon_fire):
