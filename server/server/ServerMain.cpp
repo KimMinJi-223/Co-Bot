@@ -351,41 +351,61 @@ void ServerMain::process_packet(char* packet, int client_id)
 	{
 	case static_cast<int>(packet_type::cs_signup):
 	{
+		std::cout << "recv cs signup packet: " << client_id << " client\n";
+
 		cs_signup_packet* pack = reinterpret_cast<cs_signup_packet*>(packet);
 		
+		wprintf(L"id: %s, pw: %s\n", pack->id, pack->pw);
+
 		// 회원가입
 		wchar_t query_str[256];
-		wsprintf(query_str, L"SELECT * FROM user_table WHERE ID='%s'", pack->id);
+		//wsprintf(query_str, L"SELECT * FROM user_table WHERE EXISTS id='%s'", pack->id);
+		//wsprintf(query_str, L"SELECT id FROM user_table WHERE id='%s'", pack->id);
+		wsprintf(query_str, L"EXEC select_user_by_name '%s'", pack->id);
 		sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
 		if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
 			// 중복되는 아이디이므로 회원가입 실패 패킷 보내기
-			clients[client_id].send_signup_fail_packet();
-			return;
+			std::cout << "sql문은 성공적\n";
+			SQLWCHAR sz_id[MAX_NAME];
+			SQLLEN cb_id = 0;
+
+			sqlret = SQLBindCol(sqlstmt, 1, SQL_C_WCHAR, sz_id, MAX_NAME, &cb_id);
+
+			for (int i = 0; ; ++i) { // 실제로 데이터를 꺼낸다.
+				sqlret = SQLFetch(sqlstmt);
+				if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) { // 회원가입 실패
+					clients[client_id].send_signup_fail_packet();
+					SQLCloseCursor(sqlstmt);
+					SQLFreeStmt(sqlstmt, SQL_UNBIND);
+					return;
+				} else { // 회원가입 성공
+					SQLCloseCursor(sqlstmt);
+					SQLFreeStmt(sqlstmt, SQL_UNBIND);
+					std::cout << "회원가입 성공으로 들어옴\n";
+					//wsprintf(query_str, L"INSERT INTO user_table(id, pw, stage) VALUES('%s', '%s', 1)", pack->id, pack->pw);
+					wsprintf(query_str, L"EXEC insert_user_info '%s', '%s', 1", pack->id, pack->pw);
+					sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
+					if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO)
+						clients[client_id].send_signup_success_packet();
+					else
+						show_error(sqlstmt, SQL_HANDLE_STMT, sqlret);					
+
+					SQLCloseCursor(sqlstmt);
+					SQLFreeStmt(sqlstmt, SQL_UNBIND);
+					return;
+				}
+			}
+
+		} else {
+			std::cout << "DB err\n";
 		}
-
-		if (wcscmp(pack->pw, pack->pw2) != 0) {
-			// 입력한 비번들이 서로 다르므로 실패 패킷 보내기
-			clients[client_id].send_signup_fail_packet();
-			return;
-		}
-
-		wsprintf(query_str, L"INSERT INTO user_table(ID, PW, stage) VALUES('%s', '%s', 1)", pack->id, pack->pw);
-		sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
-		if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO)
-			std::cout << clients[client_id].name << " user id, pw insert to database" << std::endl;
-		else
-			show_error(sqlstmt, SQL_HANDLE_STMT, sqlret);
-		SQLCloseCursor(sqlstmt);
-
-		clients[client_id].send_signup_success_packet();
-
 	} break;
 	case static_cast<int>(packet_type::cs_login):
 	{
 		cs_login_packet* pack = reinterpret_cast<cs_login_packet*>(packet);
 		printf("%d client로부터 login packet을 받았습니다.\n", client_id);
 
-		wcscpy_s(clients[client_id].name, MAX_LOGIN_LEN, pack->id);
+		wcscpy_s(clients[client_id].name, MAX_NAME, pack->id);
 		wprintf(L"%d client의 name: %s,\n", client_id, clients[client_id].name);
 
 		{
@@ -397,21 +417,21 @@ void ServerMain::process_packet(char* packet, int client_id)
 
 		// --- 로그인 ---
 		//wchar_t query_str[256];
-		//wsprintf(query_str, L"SELECT * FROM user_table WHERE ID='%s'", pack->id);
+		//wsprintf(query_str, L"EXEC select_user_by_name '%s'", pack->id);
 		//sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
 		//if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
-		//	SQLWCHAR user_id[MAX_LOGIN_LEN], user_pw[MAX_LOGIN_LEN];
+		//	SQLWCHAR user_id[MAX_NAME], user_pw[MAX_NAME];
 		//	SQLINTEGER user_stage;
 		//	SQLLEN cb_id = 0, cb_pw = 0, cb_stage;
 
-		//	sqlret = SQLBindCol(sqlstmt, 1, SQL_C_WCHAR, user_id, MAX_LOGIN_LEN, &cb_id);
-		//	sqlret = SQLBindCol(sqlstmt, 2, SQL_C_WCHAR, user_pw, MAX_LOGIN_LEN, &cb_pw);
+		//	sqlret = SQLBindCol(sqlstmt, 1, SQL_C_WCHAR, user_id, MAX_NAME, &cb_id);
+		//	sqlret = SQLBindCol(sqlstmt, 2, SQL_C_WCHAR, user_pw, MAX_NAME, &cb_pw);
 		//	sqlret = SQLBindCol(sqlstmt, 3, SQL_C_LONG, &user_stage, 4, &cb_stage);
 
 		//	for (int i = 0; ; ++i) { // 실제로 데이터를 꺼낸다.
 		//		sqlret = SQLFetch(sqlstmt);
 		//		if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
-		//			char temp_pw_str[MAX_LOGIN_LEN];
+		//			char temp_pw_str[MAX_NAME];
 		//			strcpy_s(temp_pw_str, ConvertWCtoC(user_pw));
 		//			for (int i{}; i < strlen(temp_pw_str); ++i) {
 		//				if (temp_pw_str[i] == ' ') {
@@ -420,16 +440,32 @@ void ServerMain::process_packet(char* packet, int client_id)
 		//				}
 		//			}
 
-		//			if (strcmp(ConvertWCtoC(pack->passward), temp_pw_str) == 0)
+		//			if (strcmp(ConvertWCtoC(pack->passward), temp_pw_str) == 0) {
 		//				clients[client_id].send_login_success_packet();
-		//			else 
-		//				clients[client_id].send_login_fail_packet(); return;
+
+		//				SQLCloseCursor(sqlstmt);
+		//				SQLFreeStmt(sqlstmt, SQL_UNBIND);
+		//				break;
+		//			} else {
+		//				clients[client_id].send_login_fail_packet();
+
+		//				SQLCloseCursor(sqlstmt);
+		//				SQLFreeStmt(sqlstmt, SQL_UNBIND);
+		//				return;
+		//			}
+		//		} else {
+		//			clients[client_id].send_login_fail_packet();
 
 		//			SQLCloseCursor(sqlstmt);
-		//		} else break;
+		//			SQLFreeStmt(sqlstmt, SQL_UNBIND);
+		//			return;
+		//		}
 		//	}
-		//} else 
-		//	clients[client_id].send_login_fail_packet(); return;
+		//} else {
+		//	SQLCloseCursor(sqlstmt);
+		//	SQLFreeStmt(sqlstmt, SQL_UNBIND);
+		//	return;
+		//}
 		// ------------------------------
 
 		bool is_matching = matching(client_id);
@@ -437,6 +473,20 @@ void ServerMain::process_packet(char* packet, int client_id)
 			std::cout << "이미 다른 팀원이 있습니다." << std::endl;
 
 		set_team_position(client_id);
+	} break;
+	case static_cast<int>(packet_type::cs_create_room):
+	{
+		std::cout << "cs_create_room\n";
+
+		cs_create_room_packet* pack = reinterpret_cast<cs_create_room_packet*>(packet);
+
+		wchar_t query_str[256];
+		wsprintf(query_str, L"EXEC create_normal_room '%s', %d", pack->room_name, client_id);
+		sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
+		if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO)
+			clients[client_id].send_create_room_ok(pack->room_name, pack->room_mode);
+		else
+			show_error(sqlstmt, SQL_HANDLE_STMT, sqlret);
 	} break;
 	case static_cast<int>(packet_type::cs_enter):
 	{
@@ -677,8 +727,8 @@ void ServerMain::process_packet(char* packet, int client_id)
 			static double pitch = 0.0;
 			if (0 < pack->cannon_value) {
 				pitch += 5.0;
-				if (pitch >= 50.0)
-					pitch = 50.0;
+				if (pitch >= 20.0)
+					pitch = 20.0;
 			} else if (0 > pack->cannon_value) {
 				pitch -= 5.0;
 				if (pitch <= 0.0)
@@ -827,3 +877,11 @@ char* ServerMain::ConvertWCtoC(wchar_t* str)
 	WideCharToMultiByte(CP_ACP, 0, str, -1, pStr, strSize, 0, 0);
 	return pStr;
 }
+
+// 해야 할 것
+// 1. controller를 들어갈 때 매칭하고 있는데 이걸 바꿔야 한다.
+// - 게임 시작 전에 방에 들어온 사람과 매칭이 되도록 하는 것으로 만들어야 한다.
+// 
+// 근데 생각해보니 굳이 방만들기 리스트를 DB로 하지 않아도 될 것 같다.
+// - 게임이 시작되거나 만든 클라이언트가 게임을 종료하면 없어질 정보이기 때문이다.
+// - 그리고 수시로 만들어지고 삭제되는 방 만들기에서 비효율적일 것 같다.

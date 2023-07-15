@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "../../../server/server/protocol.h"
 #include "../../../server/server/RingBuffer.h"
 
 #include "CPP_CobotGameInstance.h"

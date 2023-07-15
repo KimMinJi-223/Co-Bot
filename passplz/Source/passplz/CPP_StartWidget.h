@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "CPP_Cobot_Controller.h"
+
 #include "passplz.h"
 #include "Blueprint/UserWidget.h"
 #include "CPP_StartWidget.generated.h"
@@ -13,6 +15,15 @@ UCLASS()
 class PASSPLZ_API UCPP_StartWidget : public UUserWidget
 {
 	GENERATED_BODY()
+
+		//UCPP_StartWidget();
+
+protected:
+	virtual void NativeOnInitialized();
+
+private:
+	SOCKET* sock;
+	UCPP_CobotGameInstance* instance;
 
 public:
 	/*UFUNCTION(BlueprintCallable, Category = "print")

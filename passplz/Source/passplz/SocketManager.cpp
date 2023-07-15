@@ -61,6 +61,7 @@ bool SocketManager::ConnectServer()
     nRet = connect(socket, (sockaddr*)&server_addr, sizeof(sockaddr));
     if (nRet == SOCKET_ERROR) return false;
 
+    // 비동기를 위한 코드
     u_long nonBlockingMode = 1;
     ioctlsocket(socket, FIONBIO, &nonBlockingMode); // sock을 논블로킹 모드로 설정
 
