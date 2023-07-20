@@ -87,7 +87,7 @@ void ACPP_Lava::MeltLavaFloor()
 		ECollisionChannel::ECC_Visibility,
 		TraceParams
 	);
-	DrawDebugLine(GetWorld(), StartTraceLocation, EndTraceLocation, FColor::Green, true); // 디버그라인 생성
+	
 	FVector2D collisionUV(0.f, 0.f);
 	UGameplayStatics::FindCollisionUV(HitResult, 0, collisionUV);
 

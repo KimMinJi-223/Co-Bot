@@ -311,9 +311,9 @@ void ServerMain::worker_thread()
 					acceleration = 0.0;
 
 					if (key < clients[key].tm_id)
-						direction = -0.1;
+						direction = -0.5;
 					else
-						direction = 0.1;
+						direction = 0.5;
 				}
 
 				// std::cout << key << " client is push? " << clients[key].move_car << ", " << clients[key].tm_id << " client is push? " << clients[clients[key].tm_id].move_car << std::endl;

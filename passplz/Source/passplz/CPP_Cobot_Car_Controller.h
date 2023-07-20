@@ -80,6 +80,7 @@ private:
 
 	int mode;
 
+	bool carMove;
 public:
 
 	//a나 d를 누름

@@ -39,12 +39,14 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	UTextureRenderTarget2D* RenderTargetTexture;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		USphereComponent* CollisionComponent;
+
 private:
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* lavaBall;
 
-	UPROPERTY(VisibleAnywhere)
-		USphereComponent* CollisionComponent;
 	UPROPERTY(VisibleAnywhere)
 	UMaterialInstanceDynamic* DynamicMaterial;
 

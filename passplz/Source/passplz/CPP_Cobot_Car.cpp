@@ -17,6 +17,8 @@ ACPP_Cobot_Car::ACPP_Cobot_Car()
 	Player1CarFoot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Player1CarFoot"));
 	Player2CarFoot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Player2CarFoot"));
 
+	GetCapsuleComponent()->SetCapsuleSize(260.f, 260.f);
+
 	SpringArm->SetupAttachment(GetCapsuleComponent());
 	Camera->SetupAttachment(SpringArm);
 	lavaCapsule->SetupAttachment(GetCapsuleComponent());
@@ -28,15 +30,15 @@ ACPP_Cobot_Car::ACPP_Cobot_Car()
 	Player1CarFoot->SetupAttachment(GetCapsuleComponent());
 	Player2CarFoot->SetupAttachment(GetCapsuleComponent());
 
-	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -80.0f), FRotator(0.0f, -90.0f, 0.0f));
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -240.0f), FRotator(0.0f, -90.0f, 0.0f));
 	SpringArm->TargetArmLength = 1000.0f;
-	lavaCapsule->SetRelativeLocation(FVector(27.f, 0.0f, 90.f));
+	lavaCapsule->SetRelativeLocation(FVector(27.f, 0.0f, -70.f));
 	lavaCapsule->SetRelativeRotation(FRotator(75.f, 0.0f, 0.0f));
 
 	//Player1->SetRelativeLocation(FVector(90.f, 165.f, 20.0f));
 	//Player2->SetRelativeLocation(FVector(90.f, -165.f, 20.0f));
-	Player1CarFoot->SetRelativeLocation(FVector(90.f, 165.f, -33.f));
-	Player2CarFoot->SetRelativeLocation(FVector(90.f, -165.f, -33.f));
+	Player1CarFoot->SetRelativeLocation(FVector(90.f, 165.f, -193.f));
+	Player2CarFoot->SetRelativeLocation(FVector(90.f, -165.f, -193.f));
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_CAR(TEXT("/Game/K_Test/input/stage4_car.stage4_car"));
 	if (SK_CAR.Succeeded()) {

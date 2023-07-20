@@ -105,6 +105,7 @@ private:
 public:
 	bool Is_Set_IDPW(FString I, FString p);
 
+
 protected:
 	UPROPERTY(BlueprintReadWrite)
 		FString ID; //¾ÆÀÌµð

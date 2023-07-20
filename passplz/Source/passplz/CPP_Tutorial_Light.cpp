@@ -1,5 +1,6 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 #include "CPP_Tutorial_Light.h"
+#include "CPP_Cobot_Controller.h"
 
 // Sets default values
 ACPP_Tutorial_Light::ACPP_Tutorial_Light()
@@ -58,6 +59,8 @@ void ACPP_Tutorial_Light::OnComponentBeginOverlap_boxCollision(UPrimitiveCompone
 	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
+	UE_LOG(LogTemp, Warning, TEXT("OnComponentBeginOverlap_boxCollision()"));
+
 	boxCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 	lightIndex++;
@@ -69,6 +72,11 @@ void ACPP_Tutorial_Light::OnComponentBeginOverlap_boxCollision(UPrimitiveCompone
 		spotLight->SetIntensity(0.f);
 
 		Cast<ACPP_Elevator>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Elevator::StaticClass()))->LightOnEvDoorOpen();
+
+		FOutputDeviceNull pAR;
+		clearActor->CallFunctionByNameWithArguments(TEXT("Clear"), pAR, nullptr, true);
+		
+		return;
 	}
 
 	FTimerHandle waitTimer;
