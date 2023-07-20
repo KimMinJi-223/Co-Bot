@@ -163,7 +163,7 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 
 		UE_LOG(LogTemp, Warning, TEXT("direction: %lf"), pack->direction);
 
-		if (0.0 == pack->direction) {
+		/*if (0.0 == pack->direction) {
 
 			CarForward(1);
 			player->ChangAim(true, true);
@@ -181,9 +181,9 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 			CarRotation(pack->direction * 5.f);
 			}
 
-		}
+		}*/
 
-		/*if (0.0 == pack->direction) {
+		if (0.0 == pack->direction) {
 
 			CarForward(pack->acceleration);
 			player->ChangAim(true, true);
@@ -200,7 +200,7 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 			}
 
 			CarRotation(pack->direction);
-		}*/
+		}
 
 	} break;
 	case static_cast<int>(packet_type::sc_cannon_yaw):
@@ -208,7 +208,7 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 		sc_cannon_yaw_packet* pack = reinterpret_cast<sc_cannon_yaw_packet*>(packet);
 
 		Cast<ACPP_Cannon>(cannon)->SetBombDropLocation(1, pack->yaw);
-
+		isFire = true;
 		FOutputDeviceNull pAR;
 		Cast<ACPP_Cannon>(cannon)->CallFunctionByNameWithArguments(TEXT("Cannon_UnCheck"), pAR, nullptr, true);
 
@@ -218,7 +218,7 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 		sc_cannon_pitch_packet* pack = reinterpret_cast<sc_cannon_pitch_packet*>(packet);
 
 		Cast<ACPP_Cannon>(cannon)->SetBombDropLocation(2, pack->pitch);
-
+		isFire = true;
 		FOutputDeviceNull pAR;
 		Cast<ACPP_Cannon>(cannon)->CallFunctionByNameWithArguments(TEXT("Cannon_UnCheck"), pAR, nullptr, true);
 
