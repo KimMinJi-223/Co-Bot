@@ -47,4 +47,24 @@ int RoomManager::get_team_id()
 	return team_id;
 }
 
+void RoomManager::set_number_of_people(int number)
+{
+	number_of_people = number;
+}
+
+int RoomManager::get_number_of_people()
+{
+	return number_of_people;
+}
+
+void RoomManager::set_stage(int stage)
+{
+	this->stage = stage;
+}
+
+int RoomManager::get_stage()
+{
+	return stage;
+}
+
 

@@ -436,9 +436,11 @@ void ServerMain::process_packet(char* packet, int client_id)
 			clients[client_id].state = state::ingame;
 		}	
 
+		// --- 로그인 사용 X 버전 ---
 		clients[client_id].send_login_success_packet();
-
-		// --- 로그인 ---
+		// ------------------------
+		
+		// --- 로그인 사용 O 버전 ---
 		//wchar_t query_str[256];
 		//wsprintf(query_str, L"EXEC select_user_by_name '%s'", pack->id);
 		//sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
@@ -462,6 +464,8 @@ void ServerMain::process_packet(char* packet, int client_id)
 		//					break;
 		//				}
 		//			}
+
+		//			clients[client_id].stage = user_stage;
 
 		//			if (strcmp(ConvertWCtoC(pack->passward), temp_pw_str) == 0) {
 		//				clients[client_id].send_login_success_packet();
@@ -508,12 +512,16 @@ void ServerMain::process_packet(char* packet, int client_id)
 			room_id = get_normal_room_id();
 			normal_rooms[room_id].set_room_name(pack->room_name);
 			normal_rooms[room_id].set_host_id(client_id);
+			normal_rooms[room_id].set_number_of_people(1);
+			normal_rooms[room_id].set_stage(clients[client_id].stage);
 
 			clients[client_id].send_create_room_ok(normal_rooms[room_id].get_room_name(), static_cast<int>(room_mode::normal));
 		} else if (static_cast<int>(room_mode::speed) == pack->room_mode) {
 			room_id = get_speed_room_id();
 			speed_rooms[room_id].set_room_name(pack->room_name);
 			speed_rooms[room_id].set_host_id(client_id);
+			speed_rooms[room_id].set_number_of_people(1);
+			speed_rooms[room_id].set_stage(clients[client_id].stage);
 
 			clients[client_id].send_create_room_ok(speed_rooms[room_id].get_room_name(), static_cast<int>(room_mode::speed));
 		}
@@ -526,6 +534,30 @@ void ServerMain::process_packet(char* packet, int client_id)
 		else
 			show_error(sqlstmt, SQL_HANDLE_STMT, sqlret);*/
 	} break;
+	case static_cast<int>(packet_type::cs_enter_room):
+	{
+		cs_enter_room_packet* pack = reinterpret_cast<cs_enter_room_packet*>(packet);
+
+		if (static_cast<int>(room_mode::normal) == pack->room_mode) {
+			clients[client_id].room_id = pack->room_id;
+			normal_rooms[pack->room_id].set_number_of_people(normal_rooms[pack->room_id].get_number_of_people() + 1);
+
+			clients[client_id].tm_id = pack->host_id;
+			clients[pack->host_id].tm_id = client_id;
+
+			clients[client_id].send_game_start_packet(normal_rooms[pack->room_id].get_stage());
+			clients[clients[client_id].tm_id].send_game_start_packet(normal_rooms[pack->room_id].get_stage());
+		} else if (static_cast<int>(room_mode::speed) == pack->room_mode) {
+			clients[client_id].room_id = pack->room_id;
+			speed_rooms[pack->room_id].set_number_of_people(speed_rooms[pack->room_id].get_number_of_people() + 1);
+
+			clients[client_id].tm_id = pack->host_id;
+			clients[pack->host_id].tm_id = client_id;
+
+			clients[client_id].send_game_start_packet(speed_rooms[pack->room_id].get_stage());
+			clients[clients[client_id].tm_id].send_game_start_packet(speed_rooms[pack->room_id].get_stage());
+		}
+	} break;
 	case static_cast<int>(packet_type::cs_show_room_list):
 	{
 		cs_show_room_list_packet* pack = reinterpret_cast<cs_show_room_list_packet*>(packet);
@@ -533,6 +565,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 		if (static_cast<int>(room_mode::normal) == pack->room_mode) {
 			for (auto rooms : normal_rooms) {
 				// 클라 쪽에서 어떤 정보가 필요한지 알아와야 함
+
 			}
 		} else if (static_cast<int>(room_mode::speed) == pack->room_mode) {
 			for (auto rooms : normal_rooms) {
@@ -742,7 +775,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 
 		cs_car_direction_packet* pack = reinterpret_cast<cs_car_direction_packet*>(packet);
 
-		//std::cout << client_id << "push? " << pack->direction << std::endl;
+		std::cout << client_id << "push? " << pack->direction << std::endl;
 
 		if (pack->direction) {
 			clients[client_id].move_car = true;
@@ -940,3 +973,5 @@ char* ServerMain::ConvertWCtoC(wchar_t* str)
 // - 그리고 수시로 만들어지고 삭제되는 방 만들기에서 비효율적일 것 같다.
 
 // show room list 패킷을 받았을 때 처리를 해줘야 한다.
+
+// 두 명이 들어왔을 때 게임 시작할 수 있게끔 해주어야 한다.

@@ -15,6 +15,10 @@ public:
 	SOCKET		sock;
 	int			id;				// ∞Ì¿Ø id
 	wchar_t		name[MAX_NAME];
+	int			stage;
+	
+	int			room_id;
+
 	vector_d3	location;
 	vector_d3	current_left;
 	vector_d3	current_right;
@@ -63,6 +67,7 @@ public:
 	void send_login_success_packet();
 	void send_login_fail_packet();
 	void send_create_room_ok(wchar_t* room_name, int room_mode);
+	void send_game_start_packet(int stage);
 	void send_left_move_packet(int client_id);
 	void send_right_move_packet(int client_id);
 	void send_push_maze_button_packet(direction direction);

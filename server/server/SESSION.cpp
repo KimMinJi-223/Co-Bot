@@ -81,6 +81,7 @@ void SESSION::send_login_success_packet()
 	pack.size = sizeof(pack);
 	pack.type = static_cast<char>(packet_type::sc_login_success);
 	pack.id = id;
+	pack.stage = stage;
 	//pack.x = x;
 	//pack.y = y;
 	//pack.z = z;
@@ -112,6 +113,16 @@ void SESSION::send_create_room_ok(wchar_t* room_name, int room_mode)
 	pack.host_id = id;
 	pack.room_mode = room_mode;
 	wcscpy_s(pack.room_name, MAX_NAME, room_name);
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_game_start_packet(int stage)
+{
+	sc_game_start_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_game_start);
+	pack.stage = stage;
 
 	send_packet(reinterpret_cast<char*>(&pack));
 }

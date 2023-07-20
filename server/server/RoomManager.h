@@ -11,10 +11,12 @@ enum class room_mode { null, normal, speed };
 class RoomManager
 {
 private:
+	bool use;
 	wchar_t room_name[MAX_NAME] = {};
 	int host_id;
 	int team_id;
-	bool use;
+	int stage;
+	int number_of_people;
 
 public:
 	bool is_use();
@@ -27,11 +29,18 @@ public:
 	int get_host_id();
 	void set_team_id(int id);
 	int get_team_id();
-
-	void create_room();
+	void set_number_of_people(int number);
+	int get_number_of_people();
+	void set_stage(int stage);
+	int get_stage();
 
 public:
-	RoomManager() {};
+	RoomManager() 
+		: use(false)
+		, host_id(-1)
+		, team_id(-1)
+		, stage(-1) 
+		, number_of_people(0) {};
 	~RoomManager() {};
 };
 
