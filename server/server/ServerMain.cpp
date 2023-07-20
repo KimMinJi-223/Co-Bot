@@ -16,8 +16,11 @@
 
 #include "RingBuffer.h"
 #include "SESSION.h"
+#include "RoomManager.h"
 
 std::array<SESSION, MAX_USER> clients;
+std::array<RoomManager, MAX_ROOM> normal_rooms;
+std::array<RoomManager, MAX_ROOM> speed_rooms;
 
 ServerMain::ServerMain()
 	: iocp_handle(nullptr)
@@ -311,9 +314,9 @@ void ServerMain::worker_thread()
 					acceleration = 0.0;
 
 					if (key < clients[key].tm_id)
-						direction = -0.1;
+						direction = -0.2;
 					else
-						direction = 0.1;
+						direction = 0.2;
 				}
 
 				// std::cout << key << " client is push? " << clients[key].move_car << ", " << clients[key].tm_id << " client is push? " << clients[clients[key].tm_id].move_car << std::endl;
@@ -343,6 +346,26 @@ int ServerMain::get_client_id() // 고유한 client id 제공
 	}
 
 	return -1;
+}
+
+int ServerMain::get_normal_room_id()
+{
+	for (int i{}; i < MAX_ROOM; ++i) {
+		if (!normal_rooms[i].is_use()) {
+			normal_rooms[i].use_room();
+			return i;
+		}
+	}
+}
+
+int ServerMain::get_speed_room_id()
+{
+	for (int i{}; i < MAX_ROOM; ++i) {
+		if (!speed_rooms[i].is_use()) {
+			speed_rooms[i].use_room();
+			return i;
+		}
+	}
 }
 
 void ServerMain::process_packet(char* packet, int client_id)
@@ -480,13 +503,42 @@ void ServerMain::process_packet(char* packet, int client_id)
 
 		cs_create_room_packet* pack = reinterpret_cast<cs_create_room_packet*>(packet);
 
-		wchar_t query_str[256];
+		int room_id;
+		if (static_cast<int>(room_mode::normal) == pack->room_mode) {
+			room_id = get_normal_room_id();
+			normal_rooms[room_id].set_room_name(pack->room_name);
+			normal_rooms[room_id].set_host_id(client_id);
+
+			clients[client_id].send_create_room_ok(normal_rooms[room_id].get_room_name(), static_cast<int>(room_mode::normal));
+		} else if (static_cast<int>(room_mode::speed) == pack->room_mode) {
+			room_id = get_speed_room_id();
+			speed_rooms[room_id].set_room_name(pack->room_name);
+			speed_rooms[room_id].set_host_id(client_id);
+
+			clients[client_id].send_create_room_ok(speed_rooms[room_id].get_room_name(), static_cast<int>(room_mode::speed));
+		}
+
+		/*wchar_t query_str[256];
 		wsprintf(query_str, L"EXEC create_normal_room '%s', %d", pack->room_name, client_id);
 		sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
 		if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO)
 			clients[client_id].send_create_room_ok(pack->room_name, pack->room_mode);
 		else
-			show_error(sqlstmt, SQL_HANDLE_STMT, sqlret);
+			show_error(sqlstmt, SQL_HANDLE_STMT, sqlret);*/
+	} break;
+	case static_cast<int>(packet_type::cs_show_room_list):
+	{
+		cs_show_room_list_packet* pack = reinterpret_cast<cs_show_room_list_packet*>(packet);
+
+		if (static_cast<int>(room_mode::normal) == pack->room_mode) {
+			for (auto rooms : normal_rooms) {
+				// 클라 쪽에서 어떤 정보가 필요한지 알아와야 함
+			}
+		} else if (static_cast<int>(room_mode::speed) == pack->room_mode) {
+			for (auto rooms : normal_rooms) {
+				// 클라 쪽에서 어떤 정보가 필요한지 알아와야 함
+			}
+		}
 	} break;
 	case static_cast<int>(packet_type::cs_enter):
 	{
@@ -710,6 +762,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 		cs_cannon_packet* pack = reinterpret_cast<cs_cannon_packet*>(packet);
 
 		clients[client_id].mouse_left_click = false;
+		clients[clients[client_id].tm_id].mouse_left_click = false;
 
 		if (1 == clients[client_id].stage3_player_number) {
 			static double yaw = 0.0;
@@ -885,3 +938,5 @@ char* ServerMain::ConvertWCtoC(wchar_t* str)
 // 근데 생각해보니 굳이 방만들기 리스트를 DB로 하지 않아도 될 것 같다.
 // - 게임이 시작되거나 만든 클라이언트가 게임을 종료하면 없어질 정보이기 때문이다.
 // - 그리고 수시로 만들어지고 삭제되는 방 만들기에서 비효율적일 것 같다.
+
+// show room list 패킷을 받았을 때 처리를 해줘야 한다.

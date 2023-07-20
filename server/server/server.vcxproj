@@ -130,6 +130,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OBJECT.cpp" />
     <ClCompile Include="RingBuffer.cpp" />
+    <ClCompile Include="RoomManager.cpp" />
     <ClCompile Include="ServerMain.cpp" />
     <ClCompile Include="SESSION.cpp" />
   </ItemGroup>
@@ -138,6 +139,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="protocol.h" />
     <ClInclude Include="RingBuffer.h" />
+    <ClInclude Include="RoomManager.h" />
     <ClInclude Include="ServerMain.h" />
     <ClInclude Include="SESSION.h" />
   </ItemGroup>
