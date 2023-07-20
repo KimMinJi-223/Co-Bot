@@ -123,7 +123,7 @@ bool UCPP_StartWidget::SendSingupIDPW()
 
 void UCPP_StartWidget::CreateRoom()
 {
-	UE_LOG(LogTemp, Warning, TEXT("CreateRoom()"));
+	UE_LOG(LogTemp, Warning, TEXT("CreateAndWait()"));
 
 	wchar_t* room_name = TCHAR_TO_WCHAR(*roomName);
 
@@ -136,26 +136,32 @@ void UCPP_StartWidget::CreateRoom()
 	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 	if (ret <= 0) UE_LOG(LogTemp, Warning, TEXT("CreateRoom() send err"));
 
-	u_long BlockingMode = 0;
-	ioctlsocket(*sock, FIONBIO, &BlockingMode); // sock을 논블로킹 모드로 설정
+	// 여기서 방 id를 서버로 부터 받는다.
+	int roomid;
+	IsPLayGame(roomid);
 
-	char buff[BUF_SIZE];
-	ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
 
-	u_long nonBlockingMode = 1;
-	ioctlsocket(*sock, FIONBIO, &nonBlockingMode); // sock을 논블로킹 모드로 설정
 
-	if (ret != buff[0])
-		UE_LOG(LogTemp, Warning, TEXT("start widget signup recv err"));
+	//u_long BlockingMode = 0;
+	//ioctlsocket(*sock, FIONBIO, &BlockingMode); // sock을 논블로킹 모드로 설정
 
-	switch (buff[1])
-	{
-	case static_cast<int>(packet_type::sc_create_room_ok):
-	{
-		sc_create_room_ok_packet* recv_pack = reinterpret_cast<sc_create_room_ok_packet*>(&buff);
-		CallEventSuccessAddRoom(roomName, recv_pack->room_mode, recv_pack->host_id);
-	} break;
-	}
+	//char buff[BUF_SIZE];
+	//ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
+
+	//u_long nonBlockingMode = 1;
+	//ioctlsocket(*sock, FIONBIO, &nonBlockingMode); // sock을 논블로킹 모드로 설정
+
+	//if (ret != buff[0])
+	//	UE_LOG(LogTemp, Warning, TEXT("start widget signup recv err"));
+
+	//switch (buff[1])
+	//{
+	//case static_cast<int>(packet_type::sc_create_room_ok):
+	//{
+	//	sc_create_room_ok_packet* recv_pack = reinterpret_cast<sc_create_room_ok_packet*>(&buff);
+	//	CallEventSuccessAddRoom(roomName, recv_pack->room_mode, recv_pack->host_id);
+	//} break;
+	//}
 }
 
 void UCPP_StartWidget::CallEventSuccessAddRoom(FString name, int mode, int id)
@@ -166,5 +172,40 @@ void UCPP_StartWidget::CallEventSuccessAddRoom(FString name, int mode, int id)
 
 	FOutputDeviceNull pAR;
 	CallFunctionByNameWithArguments(TEXT("add_Room"), pAR, nullptr, true);
+}
+
+void UCPP_StartWidget::NormalModeRefresh()
+{
+	//서버에 데이터 요청 요청하는 패킷 보내기
+	//서버에 방이름이랑 스테이지 번호를 보낸다.
+	
+	//계속 대기
+
+	//방이 총 몇개인지 + 방이름 + 유저이름 + 방아이디 + 스테이지번호 + 방이름 + ..... 순으로 담아서 클라에 보내주기
+
+	roomCount = 10; //10에 패킷에 있는 방의 수를 넣어주세요
+
+	for (int i = 0; i < roomCount; ++i) {
+		roomName = TEXT("aaa"); //서버에서
+		userName = TEXT("aaa"); //서버에서
+		roomID = i; //서버에서 받은거
+		stageNum = i; //서버에서
+
+		FOutputDeviceNull pAR;
+		CallFunctionByNameWithArguments(TEXT("show_Room"), pAR, nullptr, true);
+
+
+		UE_LOG(LogTemp, Warning, TEXT("Wait"));
+		
+	}
+}
+
+bool UCPP_StartWidget::IsPLayGame(int roomId)
+{
+	//서버에 해당 아이디를 가지는 방 게임을 시작하라는 send한다
+	// 방장과 나머지 플레이어 모두 이곳을 지나면 서버는 게임을 시작하라는 패킷을 보낸다.
+	// 방장은 나머지 플레이어가 들어오기 전에 여기서 계속 대기한다.
+	//해당 패킷이 잘 도착하면 true를 리턴 아니면 false를 리턴
+	return false;
 }
 

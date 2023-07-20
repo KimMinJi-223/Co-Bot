@@ -39,10 +39,17 @@ public:
 		bool SendSingupIDPW();
 	//void CallEventSuccessSignup(bool signupResult);
 
+	//방만들기
 	UFUNCTION(BlueprintCallable)
 		void CreateRoom();
 	void CallEventSuccessAddRoom(FString name, int mode, int id);
 
+	//새로고침
+	UFUNCTION(BlueprintCallable)
+		void NormalModeRefresh();
+
+	UFUNCTION(BlueprintCallable)
+		bool IsPLayGame(int roomId);
 
 protected:
 	UPROPERTY(BlueprintReadWrite)
@@ -64,12 +71,21 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 		bool isSuccessSignup;
 
-	//방 관련(동시에 내가 있는 방이기도 하다)
+	//방 관련
 	UPROPERTY(BlueprintReadWrite)
 		FString roomName;
+	UPROPERTY(BlueprintReadWrite)
+		int stageNum;
+	UPROPERTY(BlueprintReadWrite)
+		FString userName;
 	UPROPERTY(BlueprintReadWrite)
 		int roomMode;
 	UPROPERTY(BlueprintReadWrite)
 		int roomID;
 
+	//방의 수
+	UPROPERTY(BlueprintReadWrite)
+		int roomCount;
+	UPROPERTY(BlueprintReadWrite)
+		bool isRoomAdd;
 };
