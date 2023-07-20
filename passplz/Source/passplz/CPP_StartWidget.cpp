@@ -133,12 +133,14 @@ void UCPP_StartWidget::CreateRoom()
 	wcscpy_s(pack.room_name, MAX_NAME, room_name);
 	pack.room_mode = roomMode;
 
+	//서버에 방이름과 스테이지 번호를 보낸다. (room_name, stageNum)
 	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 	if (ret <= 0) UE_LOG(LogTemp, Warning, TEXT("CreateRoom() send err"));
 
 	// 여기서 방 id를 서버로 부터 받는다.
-	int roomid;
-	IsPLayGame(roomid);
+	roomID = 0;
+	FOutputDeviceNull pAR;
+	CallFunctionByNameWithArguments(TEXT("wait"), pAR, nullptr, true);
 
 
 
@@ -178,7 +180,7 @@ void UCPP_StartWidget::NormalModeRefresh()
 {
 	//서버에 데이터 요청 요청하는 패킷 보내기
 	//서버에 방이름이랑 스테이지 번호를 보낸다.
-	
+
 	//계속 대기
 
 	//방이 총 몇개인지 + 방이름 + 유저이름 + 방아이디 + 스테이지번호 + 방이름 + ..... 순으로 담아서 클라에 보내주기
@@ -193,19 +195,36 @@ void UCPP_StartWidget::NormalModeRefresh()
 
 		FOutputDeviceNull pAR;
 		CallFunctionByNameWithArguments(TEXT("show_Room"), pAR, nullptr, true);
-
-
-		UE_LOG(LogTemp, Warning, TEXT("Wait"));
-		
 	}
 }
 
-bool UCPP_StartWidget::IsPLayGame(int roomId)
+void UCPP_StartWidget::PlayGame(int roomId)
 {
 	//서버에 해당 아이디를 가지는 방 게임을 시작하라는 send한다
 	// 방장과 나머지 플레이어 모두 이곳을 지나면 서버는 게임을 시작하라는 패킷을 보낸다.
 	// 방장은 나머지 플레이어가 들어오기 전에 여기서 계속 대기한다.
 	//해당 패킷이 잘 도착하면 true를 리턴 아니면 false를 리턴
-	return false;
+
+
+	char buff[BUF_SIZE];
+	int ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
+	UE_LOG(LogTemp, Warning, TEXT("recv OK"));
+
+	if (ret == -1) {
+
+		FTimerHandle waitTimer;
+		GetWorld()->GetTimerManager().SetTimer(waitTimer, FTimerDelegate::CreateLambda([&]()
+			{
+				PlayGame(roomId);
+				UE_LOG(LogTemp, Warning, TEXT("Timer"));
+
+			}), 1.f, false);
+
+	}
+	else {
+		FOutputDeviceNull pAR;
+		CallFunctionByNameWithArguments(TEXT("open_lavel"), pAR, nullptr, true);
+	}
+
 }
 

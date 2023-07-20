@@ -49,7 +49,7 @@ public:
 		void NormalModeRefresh();
 
 	UFUNCTION(BlueprintCallable)
-		bool IsPLayGame(int roomId);
+		void PlayGame(int roomId);
 
 protected:
 	UPROPERTY(BlueprintReadWrite)
