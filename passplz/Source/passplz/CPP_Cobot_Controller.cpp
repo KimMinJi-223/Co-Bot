@@ -9,7 +9,6 @@
 #include "CPP_Color_Forklift.h"
 #include "CPP_Cobot.h"
 #include "CPP_Time_Color_Button.h"
-
 #include <chrono>
 
 ACPP_Cobot_Controller::ACPP_Cobot_Controller()
@@ -48,7 +47,7 @@ void ACPP_Cobot_Controller::BeginPlay()
 
     sock = instance->GetSocketMgr()->GetSocket();
 
-    //SendEnterPacket();
+    SendEnterPacket();
 
     Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(-7500.f, 3470.f, 500.f), FRotator(0.0f, 0.0f, 0.0f));
     Player_2->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), FVector(0.0f, 1.0f, 0.0f));
@@ -62,10 +61,13 @@ void ACPP_Cobot_Controller::BeginPlay()
     previous_input = 0;
     current_input = 0;
 
+
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Maze_2S::StaticClass(), maze_actor);
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_GearKey_2S::StaticClass(), gear_actor);
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Color_Forklift::StaticClass(), forklift_actor);
     UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Time_Color_Button::StaticClass(), board_actor);
+
+ 
 }
 
 void ACPP_Cobot_Controller::Tick(float DeltaTime)
@@ -651,3 +653,4 @@ bool ACPP_Cobot_Controller::Is_Set_IDPW(FString I, FString p)
 
     return true;
 }
+

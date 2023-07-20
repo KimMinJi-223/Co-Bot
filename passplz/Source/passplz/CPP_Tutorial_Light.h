@@ -30,6 +30,9 @@ public:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 		USpotLightComponent* spotLight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		AActor* clearActor;
 private:
 	UPROPERTY(VisibleAnywhere)
 		UBoxComponent* boxCollision;

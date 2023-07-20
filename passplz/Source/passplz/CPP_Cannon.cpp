@@ -79,15 +79,17 @@ void ACPP_Cannon::SetBombDropLocation(int player_number, double value)
 {
 	static FRotator rotate = FRotator(0.0, 0.0, 0.0);
 
-	if (1 == player_number)
+	if (1 == player_number) {
 		rotate.Yaw = value;
-	else if (2 == player_number)
+	}
+	else if (2 == player_number) {
 		rotate.Pitch = value;
+	}
 	else
 		UE_LOG(LogTemp, Warning, TEXT("rotate err!"));
 
 	UE_LOG(LogTemp, Warning, TEXT("yaw, pitch, roll: %lf, %lf, %lf"), rotate.Yaw, rotate.Pitch, rotate.Roll);
-	
+
 	cannonStand->SetRelativeRotation(FRotator(0.f, rotate.Yaw, 0.f));
 	cannonMuzzle->SetRelativeRotation(FRotator(rotate.Pitch, 0.f, 0.f));
 	targetRotation = rotate;
@@ -109,14 +111,14 @@ void ACPP_Cannon::OnComponentBeginOverlap_lavaCollision(UPrimitiveComponent* Ove
 	if (!car)
 		return;
 
-	if (car->isHaveCapsule)
+	if (!car->isHaveCapsule)
 		return;
 
 	if (car != nullptr) {
 		ACPP_Cobot_Car_Controller* controller = Cast<ACPP_Cobot_Car_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0));
 		controller->ChangeMode(1);
 		controller->isFire = true;
-		controller->fireNum = 3;
+		controller->fireNum = 3; // Ä¸½¶ÇÏ³ª´ç 3¹ß
 		car->isHaveCapsule = false;
 		car->lavaCapsule->SetVisibility(false);
 		FOutputDeviceNull pAR;

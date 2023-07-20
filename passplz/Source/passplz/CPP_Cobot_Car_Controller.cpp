@@ -77,7 +77,7 @@ void ACPP_Cobot_Car_Controller::BeginPlay()
 	fireNum = 0;
 	isFire = false;
 	UIMode = false;
-
+	carMove = false;
 }
 
 void ACPP_Cobot_Car_Controller::PostInitializeComponents()
@@ -165,21 +165,42 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 
 		if (0.0 == pack->direction) {
 
+			CarForward(1);
+			player->ChangAim(true, true);
+		}
+		else {
+			if (pack->direction > 0.0) {
+				CarForward(50.f);
+
+				player->ChangAim(false, true);
+			}
+		
+			else {
+
+				player->ChangAim(true, false);
+			CarRotation(pack->direction * 5.f);
+			}
+
+		}
+
+		/*if (0.0 == pack->direction) {
+
 			CarForward(pack->acceleration);
 			player->ChangAim(true, true);
-			;
 		}
 		else {
 			if (pack->direction > 0.0) {
 
 				player->ChangAim(false, true);
 			}
-		
-			else
+
+			else {
+
 				player->ChangAim(true, false);
+			}
 
 			CarRotation(pack->direction);
-		}
+		}*/
 
 	} break;
 	case static_cast<int>(packet_type::sc_cannon_yaw):
@@ -187,12 +208,20 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 		sc_cannon_yaw_packet* pack = reinterpret_cast<sc_cannon_yaw_packet*>(packet);
 
 		Cast<ACPP_Cannon>(cannon)->SetBombDropLocation(1, pack->yaw);
+
+		FOutputDeviceNull pAR;
+		Cast<ACPP_Cannon>(cannon)->CallFunctionByNameWithArguments(TEXT("Cannon_UnCheck"), pAR, nullptr, true);
+
 	} break;
 	case static_cast<int>(packet_type::sc_cannon_pitch):
 	{
 		sc_cannon_pitch_packet* pack = reinterpret_cast<sc_cannon_pitch_packet*>(packet);
 
 		Cast<ACPP_Cannon>(cannon)->SetBombDropLocation(2, pack->pitch);
+
+		FOutputDeviceNull pAR;
+		Cast<ACPP_Cannon>(cannon)->CallFunctionByNameWithArguments(TEXT("Cannon_UnCheck"), pAR, nullptr, true);
+
 	} break;
 	case static_cast<int>(packet_type::sc_cannon_click):
 	{
@@ -202,16 +231,19 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 			// 자기가 누른거
 			// 여기서는 아무 행동을 안해도 되고 아니면
 			// 상대방한테 발사 요청을 보냈다는 메시지를 생성해도 됨
-			//Cast<ACPP_Cannon>(cannon)->FireLava(); // 이건 임시 원래 없어야 함
+			
 		}
 		else {
 			// 상대방이 누른거
 			// 여기는 상대방으로부터 발사요청이 왔다는 메시지를 생성해줘야 함
-			//Cast<ACPP_Cannon>(cannon)->FireLava(); // 이건 임시 원래 없어야 함
+			FOutputDeviceNull pAR;
+			Cast<ACPP_Cannon>(cannon)->CallFunctionByNameWithArguments(TEXT("Cannon_Check"), pAR, nullptr, true);
 		}
 	} break;
 	case static_cast<int>(packet_type::sc_cannon_fire):
 	{
+		FOutputDeviceNull pAR;
+		Cast<ACPP_Cannon>(cannon)->CallFunctionByNameWithArguments(TEXT("Cannon_Check"), pAR, nullptr, true);
 		// 대포 발사하는 함수 호출
 		Cast<ACPP_Cannon>(cannon)->FireLava();
 	} break;
@@ -235,16 +267,23 @@ void ACPP_Cobot_Car_Controller::CarInput(const FInputActionValue& Value)
 		return;
 	}
 
+	
 	UE_LOG(LogTemp, Warning, TEXT("%f"), Value.Get<float>());
 
 	cs_car_direction_packet pack;
 	pack.size = sizeof(pack);
 	pack.type = static_cast<char>(packet_type::cs_car_direction);
 
-	if (0.0 != Value.Get<float>())
+	if (0.0 != Value.Get<float>()) {
+		if (carMove)
+			return;
+		carMove = true;
 		pack.direction = true;
-	else
+	}
+	else {
+		carMove = false;
 		pack.direction = false;
+	}
 
 	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 
@@ -256,8 +295,9 @@ void ACPP_Cobot_Car_Controller::CarInput(const FInputActionValue& Value)
 
 void ACPP_Cobot_Car_Controller::CannonInput(const FInputActionValue& Value)
 {
-	if (mode == 1) {
-		UE_LOG(LogTemp, Warning, TEXT("CannonInput %f"), Value.Get<float>());
+	if (mode == 0) {
+		UE_LOG(LogTemp, Warning, TEXT("carMode"));
+		return;
 	}
 
 	cs_cannon_packet pack;
@@ -292,14 +332,26 @@ void ACPP_Cobot_Car_Controller::RotateInput(const FInputActionValue& Value)
 {
 	//컨트롤러가 아닌 플레이어에 있는 스프링암을 회전해야함
 	//컨트롤러 회전은 서버에서 결정한다.
-	player->SpringArm->AddRelativeRotation(FRotator(Value.Get<FVector2D>().Y, Value.Get<FVector2D>().X, 0.0f));
+
+	player->SpringArm->AddRelativeRotation(FRotator(Value.Get<FVector2D>().Y, Value.Get<FVector2D>().X, 0.0f), true);
 }
 
 void ACPP_Cobot_Car_Controller::CarForward(float acceleration)
 {
 	UE_LOG(LogTemp, Warning, TEXT("CarForward"));
-	player->AddActorWorldOffset(player->GetActorForwardVector() * acceleration);
+	FHitResult HitResult;
+	player->AddActorWorldOffset(player->GetActorForwardVector() * acceleration, true, &HitResult);
+
+	if (HitResult.IsValidBlockingHit())
+	{
+		FVector Normal = HitResult.Normal;
+		FVector SlideDirection = FVector::VectorPlaneProject(player->GetActorForwardVector(), Normal).GetSafeNormal();
+		FVector SlideMove = SlideDirection * (1.f - HitResult.Time) * 5.f;
+		player->AddActorWorldOffset(SlideMove, true);
+	}
 }
+
+
 
 void ACPP_Cobot_Car_Controller::CarRotation(float rotationValue)
 {
