@@ -20,6 +20,8 @@ enum class packet_type {
 	cs_create_room,
 	sc_create_room_ok,
 
+	cs_show_room_list,
+
 	cs_enter,
 	cs_move,
 	cs_logout,
@@ -170,6 +172,12 @@ struct sc_create_room_ok_packet {
 	int		host_id;
 	int		room_mode;
 	wchar_t room_name[MAX_NAME];
+};
+
+struct cs_show_room_list_packet {
+	char size;
+	char type;
+	int room_mode;
 };
 
 struct cs_enter_packet {
