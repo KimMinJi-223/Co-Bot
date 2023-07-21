@@ -25,6 +25,7 @@ private:
 	SOCKET* sock;
 	UCPP_CobotGameInstance* instance;
 
+	bool prev_enter = false;
 public:
 	/*UFUNCTION(BlueprintCallable, Category = "print")
 	void IDprint() {

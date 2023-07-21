@@ -286,6 +286,7 @@ void ACPP_Cobot_Car_Controller::CarInput(const FInputActionValue& Value)
 	}
 
 	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+	UE_LOG(LogTemp, Warning, TEXT("send ret: %d"), ret);
 
 	if (mode == 0) {
 		UE_LOG(LogTemp, Warning, TEXT("CarInput %f"), Value.Get<float>());

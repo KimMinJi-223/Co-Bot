@@ -68,6 +68,8 @@ public:
 	void send_login_fail_packet();
 	void send_create_room_ok(wchar_t* room_name, int room_mode);
 	void send_game_start_packet(int stage);
+	void send_show_room_list_packet(wchar_t* room_name, wchar_t* host_name, int room_id, int stage);
+	void send_show_room_list_end_packet();
 	void send_left_move_packet(int client_id);
 	void send_right_move_packet(int client_id);
 	void send_push_maze_button_packet(direction direction);

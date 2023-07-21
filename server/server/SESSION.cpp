@@ -110,11 +110,14 @@ void SESSION::send_create_room_ok(wchar_t* room_name, int room_mode)
 	sc_create_room_ok_packet pack;
 	pack.size = sizeof(pack);
 	pack.type = static_cast<char>(packet_type::sc_create_room_ok);
+	pack.room_id = room_id;
 	pack.host_id = id;
 	pack.room_mode = room_mode;
 	wcscpy_s(pack.room_name, MAX_NAME, room_name);
 
 	send_packet(reinterpret_cast<char*>(&pack));
+
+	std::cout << "create room ok send" << std::endl;
 }
 
 void SESSION::send_game_start_packet(int stage)
@@ -125,6 +128,34 @@ void SESSION::send_game_start_packet(int stage)
 	pack.stage = stage;
 
 	send_packet(reinterpret_cast<char*>(&pack));
+
+	std::cout << id << " client에게 game start packet을 보냈습니다.\n";
+}
+
+void SESSION::send_show_room_list_packet(wchar_t* room_name, wchar_t* host_name, int room_id, int stage)
+{
+	sc_show_room_list_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_show_room_list);
+	wcscpy_s(pack.room_name, MAX_NAME, room_name);
+	wcscpy_s(pack.host_name, MAX_NAME, host_name);
+	pack.room_id = room_id;
+	pack.stage = stage;
+
+	send_packet(reinterpret_cast<char*>(&pack));
+
+	std::cout << "send show room list packet\n";
+}
+
+void SESSION::send_show_room_list_end_packet()
+{
+	sc_show_room_list_end_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_show_room_list_end);
+
+	send_packet(reinterpret_cast<char*>(&pack));
+
+	std::cout << "send show room list end\n";
 }
 
 void SESSION::send_left_move_packet(int client_id)

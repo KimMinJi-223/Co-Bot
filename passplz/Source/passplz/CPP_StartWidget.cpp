@@ -54,8 +54,12 @@ bool UCPP_StartWidget::SendLoginIDPW()
 
 	switch (buff[1])
 	{
-	case static_cast<int>(packet_type::sc_login_fail): return false;
-	case static_cast<int>(packet_type::sc_login_success): return true;
+	case static_cast<int>(packet_type::sc_login_fail): 
+		UE_LOG(LogTemp, Warning, TEXT("recv login fail"));
+		return false;
+	case static_cast<int>(packet_type::sc_login_success): 
+		UE_LOG(LogTemp, Warning, TEXT("recv login success"));
+		return true;
 	}
 
 	return false;
@@ -147,14 +151,14 @@ void UCPP_StartWidget::CreateRoom()
 	ioctlsocket(*sock, FIONBIO, &nonBlockingMode); // sock을 논블로킹 모드로 설정
 
 	if (ret != buff[0])
-		UE_LOG(LogTemp, Warning, TEXT("C signup recv err"));
+		UE_LOG(LogTemp, Warning, TEXT("create room recv err"));
 
 	switch (buff[1])
 	{
 	case static_cast<int>(packet_type::sc_create_room_ok):
 	{
 		sc_create_room_ok_packet* recv_pack = reinterpret_cast<sc_create_room_ok_packet*>(&buff);
-		roomID = recv_pack->room_mode;
+		roomID = recv_pack->room_id;
 		roomName = WCHAR_TO_TCHAR(recv_pack->room_name);
 		roomMode = recv_pack->room_mode;
 
@@ -176,24 +180,50 @@ void UCPP_StartWidget::CallEventSuccessAddRoom(FString name, int mode, int id)
 
 void UCPP_StartWidget::NormalModeRefresh()
 {
+	UE_LOG(LogTemp, Warning, TEXT("normal mode refresh()"));
 	//서버에 데이터 요청 요청하는 패킷 보내기
 	//서버에 방이름이랑 스테이지 번호를 보낸다.
+	cs_show_room_list_packet send_pack;
+	send_pack.size = sizeof(send_pack);
+	send_pack.type = static_cast<char>(packet_type::cs_show_room_list);
+	send_pack.room_mode = 0;
+
+	int ret = send(*sock, reinterpret_cast<char*>(&send_pack), sizeof(send_pack), 0);
 
 	//계속 대기
+	u_long BlockingMode = 0;
+	ioctlsocket(*sock, FIONBIO, &BlockingMode); // sock을 블로킹 모드로 설정
 
-	//방이 총 몇개인지 + 방이름 + 유저이름 + 방아이디 + 스테이지번호 + 방이름 + ..... 순으로 담아서 클라에 보내주기
+	while (true)
+	{
+		char buff[BUF_SIZE];
+		ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
 
-	roomCount = 10; //10에 패킷에 있는 방의 수를 넣어주세요
+		if (ret != buff[0])
+			UE_LOG(LogTemp, Warning, TEXT("normal mode refresh recv err"));
 
-	for (int i = 0; i < roomCount; ++i) {
-		roomName = TEXT("aaa"); //서버에서
-		userName = TEXT("aaa"); //서버에서
-		roomID = i; //서버에서 받은거
-		stageNum = i; //서버에서
+		switch (buff[1])
+		{
+		case static_cast<int>(packet_type::sc_show_room_list):
+		{
+			sc_show_room_list_packet* recv_pack = reinterpret_cast<sc_show_room_list_packet*>(&buff);
 
-		FOutputDeviceNull pAR;
-		CallFunctionByNameWithArguments(TEXT("show_Room"), pAR, nullptr, true);
+			roomName = WCHAR_TO_TCHAR(recv_pack->room_name);
+			userName = WCHAR_TO_TCHAR(recv_pack->host_name);
+			roomID = recv_pack->room_id;
+			stageNum = recv_pack->stage;
+
+			FOutputDeviceNull pAR;
+			CallFunctionByNameWithArguments(TEXT("show_Room"), pAR, nullptr, true);
+		} break;
+		case static_cast<int>(packet_type::sc_show_room_list_end): 
+			UE_LOG(LogTemp, Warning, TEXT("show normal list end"));
+			return;
+		}
 	}
+
+	u_long nonBlockingMode = 1;
+	ioctlsocket(*sock, FIONBIO, &nonBlockingMode); // sock을 논블로킹 모드로 설정
 }
 
 void UCPP_StartWidget::PlayGame(int roomId)
@@ -203,12 +233,31 @@ void UCPP_StartWidget::PlayGame(int roomId)
 	// 방장은 나머지 플레이어가 들어오기 전에 여기서 계속 대기한다.
 	//해당 패킷이 잘 도착하면 true를 리턴 아니면 false를 리턴
 
+	if (!prev_enter) {
+		cs_enter_room_packet pack;
+		pack.size = sizeof(pack);
+		pack.type = static_cast<char>(packet_type::cs_enter_room);
+		pack.room_id = roomId;
+		pack.room_mode = 0;
 
+		int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+
+		if (ret != -1) {
+			UE_LOG(LogTemp, Warning, TEXT("send room enter packet"));
+			prev_enter = true;
+		} else if (-1 == ret) {
+			UE_LOG(LogTemp, Warning, TEXT("send enter room packet err"));
+		} else {
+			UE_LOG(LogTemp, Warning, TEXT("enter room packet err ret: %d"), ret);
+		}
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("call recv()"));
 	char buff[BUF_SIZE];
 	int ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
-	UE_LOG(LogTemp, Warning, TEXT("recv OK"));
+	UE_LOG(LogTemp, Warning, TEXT("ret: %d, game start packet size: %d"), ret, sizeof(sc_game_start_packet));
 
-	if (-1 <= ret) {
+	if (-1 == ret) {
 
 		FTimerHandle waitTimer;
 		GetWorld()->GetTimerManager().SetTimer(waitTimer, FTimerDelegate::CreateLambda([&]()
@@ -223,10 +272,12 @@ void UCPP_StartWidget::PlayGame(int roomId)
 		
 		sc_game_start_packet* pack = reinterpret_cast<sc_game_start_packet*>(&buff);
 
-		pack->stage; // 여기에 시작해야 하는 스테이지가 담겨있다.
+		stageNum = pack->stage; // 여기에 시작해야 하는 스테이지가 담겨있다.
 
 		FOutputDeviceNull pAR;
 		CallFunctionByNameWithArguments(TEXT("open_lavel"), pAR, nullptr, true);
+	} else {
+		UE_LOG(LogTemp, Warning, TEXT("errerrerr ret: %d"), ret);
 	}
 }
 

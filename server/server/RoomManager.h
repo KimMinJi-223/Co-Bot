@@ -6,7 +6,7 @@
 
 #include "protocol.h"
 
-enum class room_mode { null, normal, speed };
+enum class room_mode { normal, speed, null };
 
 class RoomManager
 {
