@@ -286,6 +286,7 @@ void ACPP_Cobot_Car_Controller::CarInput(const FInputActionValue& Value)
 	}
 
 	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+	UE_LOG(LogTemp, Warning, TEXT("send ret %d"), ret);
 
 	if (mode == 0) {
 		UE_LOG(LogTemp, Warning, TEXT("CarInput %f"), Value.Get<float>());
@@ -333,12 +334,17 @@ void ACPP_Cobot_Car_Controller::RotateInput(const FInputActionValue& Value)
 	//컨트롤러가 아닌 플레이어에 있는 스프링암을 회전해야함
 	//컨트롤러 회전은 서버에서 결정한다.
 
+	/*AddYawInput(Value.Get<FVector2D>().Y);
+	AddPitchInput(Value.Get<FVector2D>().X);*/
+
 	player->SpringArm->AddRelativeRotation(FRotator(Value.Get<FVector2D>().Y, Value.Get<FVector2D>().X, 0.0f), true);
 }
 
 void ACPP_Cobot_Car_Controller::CarForward(float acceleration)
 {
 	UE_LOG(LogTemp, Warning, TEXT("CarForward"));
+	FVector preLocation = player->GetActorLocation();
+	
 	FHitResult HitResult;
 	player->AddActorWorldOffset(player->GetActorForwardVector() * acceleration, true, &HitResult);
 
@@ -349,16 +355,45 @@ void ACPP_Cobot_Car_Controller::CarForward(float acceleration)
 		FVector SlideMove = SlideDirection * (1.f - HitResult.Time) * 5.f;
 		player->AddActorWorldOffset(SlideMove, true);
 	}
+
+	FVector newLocation = player->GetActorLocation();
+	//여기서 newLocatoin을 send
+
+
+	player->SetActorLocation(preLocation);
 }
-
-
-
 void ACPP_Cobot_Car_Controller::CarRotation(float rotationValue)
 {
-	FRotator control_rotation = GetControlRotation();
+	/*FRotator control_rotation = GetControlRotation();
 	control_rotation.Yaw += rotationValue;
+	SetControlRotation(control_rotation);*/
+
+	float preYaw = player->GetActorRotation().Yaw;
+	preYaw = rotationValue;
+	//여기서 preYaw를 send하면 됨
+
+
+}
+
+void ACPP_Cobot_Car_Controller::SetPlayerLocation(FVector newLocation)
+{
+	player->SetActorLocation(newLocation);
+	player->ChangAim(true, true);
+}
+
+void ACPP_Cobot_Car_Controller::SetPlayerYaw(float newYaw)
+{
+	FRotator control_rotation = GetControlRotation();
+	if (control_rotation.Yaw > newYaw)
+		player->ChangAim(false, true);
+	else
+		player->ChangAim(true, false);
+
+	control_rotation.Yaw = newYaw;
 	SetControlRotation(control_rotation);
 }
+
+
 
 void ACPP_Cobot_Car_Controller::ChangeMode(int Mode)
 {

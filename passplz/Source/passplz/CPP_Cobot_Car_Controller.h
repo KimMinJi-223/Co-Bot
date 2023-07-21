@@ -102,6 +102,9 @@ public:
 	//서버 : 회전 하라는 함수 이 함수 호출하면 됨
 	void CarRotation(float rotationValue);
 
+	void SetPlayerLocation(FVector newLocation);
+	void SetPlayerYaw(float newYaw);
+
 	UFUNCTION(BlueprintCallable)
 		void ChangeMode(int Mode);
 
