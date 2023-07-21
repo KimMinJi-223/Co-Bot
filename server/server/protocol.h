@@ -24,6 +24,8 @@ enum class packet_type {
 	sc_game_start,
 
 	cs_show_room_list,
+	sc_show_room_list,
+	sc_show_room_list_end,
 
 	cs_enter,
 	cs_move,
@@ -123,7 +125,7 @@ struct cs_signup_packet {
 	char	size;
 	char	type;
 	wchar_t id[MAX_NAME];
-	wchar_t pw[MAX_NAME];\
+	wchar_t pw[MAX_NAME];
 };
 
 struct sc_signup_success_packet {
@@ -174,6 +176,7 @@ struct cs_create_room_packet {
 struct sc_create_room_ok_packet {
 	char	size;
 	char	type;
+	int		room_id;
 	int		host_id;
 	int		room_mode;
 	wchar_t room_name[MAX_NAME];
@@ -184,7 +187,6 @@ struct cs_enter_room_packet {
 	char	type;
 	int		room_mode;
 	int		room_id;
-	int		host_id;
 };
 
 struct sc_game_start_packet {
@@ -197,6 +199,20 @@ struct cs_show_room_list_packet {
 	char size;
 	char type;
 	int room_mode;
+};
+
+struct sc_show_room_list_packet {
+	char	size;
+	char	type;
+	wchar_t room_name[MAX_NAME];
+	wchar_t host_name[MAX_NAME];
+	int		room_id;
+	int		stage;
+};
+
+struct sc_show_room_list_end_packet {
+	char size;
+	char type;
 };
 
 struct cs_enter_packet {

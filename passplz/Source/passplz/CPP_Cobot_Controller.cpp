@@ -47,7 +47,7 @@ void ACPP_Cobot_Controller::BeginPlay()
 
     sock = instance->GetSocketMgr()->GetSocket();
 
-    SendEnterPacket();
+    //SendEnterPacket();
 
     Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(-7500.f, 3470.f, 500.f), FRotator(0.0f, 0.0f, 0.0f));
     Player_2->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), FVector(0.0f, 1.0f, 0.0f));
