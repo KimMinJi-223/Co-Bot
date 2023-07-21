@@ -163,7 +163,7 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 
 		UE_LOG(LogTemp, Warning, TEXT("direction: %lf"), pack->direction);
 
-		/*if (0.0 == pack->direction) {
+		if (0.0 == pack->direction) {
 
 			CarForward(1);
 			player->ChangAim(true, true);
@@ -181,26 +181,26 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 			CarRotation(pack->direction * 5.f);
 			}
 
-		}*/
-
-		if (0.0 == pack->direction) {
-
-			CarForward(pack->acceleration);
-			player->ChangAim(true, true);
 		}
-		else {
-			if (pack->direction > 0.0) {
 
-				player->ChangAim(false, true);
-			}
+		//if (0.0 == pack->direction) {
 
-			else {
+		//	CarForward(pack->acceleration);
+		//	player->ChangAim(true, true);
+		//}
+		//else {
+		//	if (pack->direction > 0.0) {
 
-				player->ChangAim(true, false);
-			}
+		//		player->ChangAim(false, true);
+		//	}
 
-			CarRotation(pack->direction);
-		}
+		//	else {
+
+		//		player->ChangAim(true, false);
+		//	}
+
+		//	CarRotation(pack->direction);
+		//}
 
 	} break;
 	case static_cast<int>(packet_type::sc_cannon_yaw):
@@ -360,16 +360,16 @@ void ACPP_Cobot_Car_Controller::CarForward(float acceleration)
 	//여기서 newLocatoin을 send
 
 
-	player->SetActorLocation(preLocation);
+	//player->SetActorLocation(preLocation);
 }
 void ACPP_Cobot_Car_Controller::CarRotation(float rotationValue)
 {
-	/*FRotator control_rotation = GetControlRotation();
+	FRotator control_rotation = GetControlRotation();
 	control_rotation.Yaw += rotationValue;
-	SetControlRotation(control_rotation);*/
+	SetControlRotation(control_rotation);
 
-	float preYaw = player->GetActorRotation().Yaw;
-	preYaw = rotationValue;
+	//float preYaw = player->GetActorRotation().Yaw;
+	//preYaw = rotationValue;
 	//여기서 preYaw를 send하면 됨
 
 

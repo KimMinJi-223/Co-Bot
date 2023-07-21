@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/DecalComponent.h"
 #include "GameFramework/ProjectileMovementComponent.h"
+#include "NiagaraComponent.h"
 #include "CPP_Lava.generated.h"
 
 UCLASS()
@@ -54,6 +55,8 @@ private:
 		UMaterialInstanceDynamic* explosionDecalDynamicMaterial;
 	UPROPERTY(VisibleAnywhere)
 		UDecalComponent* explosionDecal;
+	UPROPERTY(VisibleAnywhere)
+		UNiagaraComponent* fireNiagara;
 
 	float opacityValue;
 	FVector crashLocation;

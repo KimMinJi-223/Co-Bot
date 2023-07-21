@@ -13,11 +13,13 @@ ACPP_Lava::ACPP_Lava()
 	explosionDecal = CreateDefaultSubobject<UDecalComponent>("targetLocation");
 	lavaBall = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("lavaBall"));
 	CollisionComponent = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComponent"));
+	fireNiagara = CreateDefaultSubobject<UNiagaraComponent>(TEXT("fireNiagara"));
 	CollisionComponent->InitSphereRadius(4.0f);
 
 	RootComponent = CollisionComponent;
 	lavaBall->SetupAttachment(CollisionComponent);
 	explosionDecal->SetupAttachment(CollisionComponent);
+	fireNiagara->SetupAttachment(CollisionComponent);
 
 	ProjectileMovementComponent->SetUpdatedComponent(RootComponent);
 	ProjectileMovementComponent->InitialSpeed = 2000.f; //초기속도
@@ -27,7 +29,7 @@ ACPP_Lava::ACPP_Lava()
 	explosionDecal->SetWorldScale3D(FVector(5.0f, 1.4f, 1.4f));
 	explosionDecal->SetVisibility(false);
 
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LAVABALL(TEXT("/Game/K_Test/input/cap_Object004.cap_Object004"));
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_LAVABALL(TEXT("/Game/K_Test/input/fireball.fireball"));
 	if (SM_LAVABALL.Succeeded()) {
 		lavaBall->SetStaticMesh(SM_LAVABALL.Object);
 	}
@@ -49,6 +51,14 @@ void ACPP_Lava::BeginPlay()
 	DynamicMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, nullptr);
 
 	//RenderTargetTexture = Cast<UTextureRenderTarget2D>(StaticLoadObject(UTextureRenderTarget2D::StaticClass(), nullptr, TEXT("/Game/K_Test/lava/rendertaget.rendertaget")));
+
+
+	FStringAssetReference fireNiagaraAsset(TEXT("/Game/particles/missile/ns_missile.ns_missile"));
+	UNiagaraSystem* NiagaraSystem = Cast<UNiagaraSystem>(fireNiagaraAsset.TryLoad());
+	if (NiagaraSystem)
+	{
+		fireNiagara->SetAsset(NiagaraSystem);
+	}
 }
 
 // Called every frame
