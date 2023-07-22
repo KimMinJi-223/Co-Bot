@@ -117,6 +117,11 @@ void ACPP_Maze_2S::OnComponentBeginOverlap_clear(UPrimitiveComponent* Overlapped
 	if (maze_actor)
 		Cast<ACPP_Stage2_MissionButton>(maze_actor)->MazeNoCollision();
 
+	FVector spawnLocation = GetActorLocation();
+	spawnLocation.Y += 300;
+	spawnLocation.Z -= 1500;
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->clearFX, spawnLocation);
+
 }
 
 void ACPP_Maze_2S::BridgeTimer()

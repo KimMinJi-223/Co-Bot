@@ -162,6 +162,13 @@ void ACPP_GearKey_2S::OnClearOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 	if (maze_actor)
 		Cast<ACPP_Stage2_MissionButton>(maze_actor)->GearNoCollision();
+
+
+	FVector spawnLocation = GetActorLocation();
+	spawnLocation.X += 1000;
+	spawnLocation.Y -= 100;
+	spawnLocation.Z -= 1500;
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->clearFX, spawnLocation);
 }
 
 void ACPP_GearKey_2S::BridgeTimer()

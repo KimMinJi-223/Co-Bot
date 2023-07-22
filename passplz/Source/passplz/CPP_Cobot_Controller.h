@@ -20,6 +20,10 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
+
+#include "NiagaraFunctionLibrary.h"
+#include "NiagaraComponent.h"
+
 #include "CPP_Cobot_Controller.generated.h"
 
 /**
@@ -104,7 +108,7 @@ private:
 
 public:
 	bool Is_Set_IDPW(FString I, FString p);
-
+	TObjectPtr<UNiagaraSystem> clearFX;
 
 protected:
 	UPROPERTY(BlueprintReadWrite)
