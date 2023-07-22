@@ -203,6 +203,23 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 		//}
 
 	} break;
+	case static_cast<int>(packet_type::sc_car_location):
+	{
+		sc_car_location_packet* pack = reinterpret_cast<sc_car_location_packet*>(packet);
+
+		FVector newLocation;
+		newLocation.X = pack->car_location.x;
+		newLocation.Y = pack->car_location.y;
+		newLocation.Z = pack->car_location.z;
+
+		SetPlayerLocation(newLocation);
+	} break;
+	case static_cast<int>(packet_type::sc_car_rotation_yaw):
+	{
+		sc_car_rotation_yaw_packet* pack = reinterpret_cast<sc_car_rotation_yaw_packet*>(packet);
+
+		SetPlayerYaw(pack->yaw);
+	} break;
 	case static_cast<int>(packet_type::sc_cannon_yaw):
 	{
 		sc_cannon_yaw_packet* pack = reinterpret_cast<sc_cannon_yaw_packet*>(packet);
@@ -343,8 +360,10 @@ void ACPP_Cobot_Car_Controller::RotateInput(const FInputActionValue& Value)
 void ACPP_Cobot_Car_Controller::CarForward(float acceleration)
 {
 	UE_LOG(LogTemp, Warning, TEXT("CarForward"));
+	UE_LOG(LogTemp, Warning, TEXT("acc: %f"), acceleration);
 	FVector preLocation = player->GetActorLocation();
-	
+	UE_LOG(LogTemp, Warning, TEXT("preLoc: %f %f"), preLocation.X, preLocation.Y);
+
 	FHitResult HitResult;
 	player->AddActorWorldOffset(player->GetActorForwardVector() * acceleration, true, &HitResult);
 
@@ -358,21 +377,36 @@ void ACPP_Cobot_Car_Controller::CarForward(float acceleration)
 
 	FVector newLocation = player->GetActorLocation();
 	//여기서 newLocatoin을 send
+	UE_LOG(LogTemp, Warning, TEXT("newLocation: %f %f"), newLocation.X, newLocation.Y);
 
+	cs_car_location_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::cs_car_location);
+	pack.car_location.x = newLocation.X;
+	pack.car_location.y = newLocation.Y;
+	pack.car_location.z = newLocation.Z;
 
-	//player->SetActorLocation(preLocation);
+	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+
+	player->SetActorLocation(preLocation);
 }
+
 void ACPP_Cobot_Car_Controller::CarRotation(float rotationValue)
 {
-	FRotator control_rotation = GetControlRotation();
+	/*FRotator control_rotation = GetControlRotation();
 	control_rotation.Yaw += rotationValue;
-	SetControlRotation(control_rotation);
+	SetControlRotation(control_rotation);*/
 
-	//float preYaw = player->GetActorRotation().Yaw;
-	//preYaw = rotationValue;
+	float preYaw = player->GetActorRotation().Yaw;
+	preYaw += rotationValue;
 	//여기서 preYaw를 send하면 됨
 
+	cs_car_rotation_yaw_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::cs_car_rotation_yaw);
+	pack.yaw = preYaw;
 
+	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 }
 
 void ACPP_Cobot_Car_Controller::SetPlayerLocation(FVector newLocation)

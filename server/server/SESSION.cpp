@@ -295,6 +295,26 @@ void SESSION::send_move_car_packet(float direction, float acceleration)
 	send_packet(reinterpret_cast<char*>(&pack));
 }
 
+void SESSION::send_car_location_packet(vector_d3 location)
+{
+	sc_car_location_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_car_location);
+	pack.car_location = location;
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_car_rotation_yaw_packet(float yaw)
+{
+	sc_car_rotation_yaw_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_car_rotation_yaw);
+	pack.yaw = yaw;
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
 void SESSION::send_stage3_enter_packet(int id, int tm_id)
 {
 	sc_stage3_enter_packet pack;
@@ -310,6 +330,8 @@ void SESSION::send_stage3_enter_packet(int id, int tm_id)
 	}
 	
 	send_packet(reinterpret_cast<char*>(&pack));
+
+	std::cout << id << " client에게 stage3 enter packet을 보냈습니다.\n";
 }
 
 void SESSION::send_cannon_yaw_packet(double value)

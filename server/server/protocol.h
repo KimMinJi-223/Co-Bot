@@ -90,6 +90,12 @@ enum class packet_type {
 	cs_car_direction,
 	sc_car_direction,
 
+	cs_car_location,
+	sc_car_location,
+
+	cs_car_rotation_yaw,
+	sc_car_rotation_yaw,
+
 	cs_cannon,
 	sc_cannon_yaw,
 	sc_cannon_pitch,
@@ -98,11 +104,11 @@ enum class packet_type {
 	sc_cannon_click,
 	sc_cannon_fire,
 };
+
 enum class direction { forward, back, left, right };
 enum class color { red, green, blue, black };
 enum class button_type { s2_maze_forward, s2_maze_back, s2_maze_right, s2_maze_left };
 enum class endbutton_type { s2_maze_forward, s2_maze_back, s2_maze_right, s2_maze_left };
-
 
 struct vector_d3 {
 	double x;
@@ -295,6 +301,19 @@ struct sc_logout_packet
 	char type;
 };
 
+struct cs_stage3_enter_packet
+{
+	char size;
+	char type;
+};
+
+struct sc_stage3_enter_packet
+{
+	char	size;
+	char	type;
+	int		player_number;
+};
+
 struct cs_car_direction_packet
 {
 	char size;
@@ -310,17 +329,28 @@ struct sc_car_direction_packet
 	float	acceleration;
 };
 
-struct cs_stage3_enter_packet
-{
-	char size;
-	char type;
+struct cs_car_location_packet {
+	char		size;
+	char		type;
+	vector_d3	car_location;
 };
 
-struct sc_stage3_enter_packet
-{
+struct sc_car_location_packet {
+	char		size;
+	char		type;
+	vector_d3	car_location;
+};
+
+struct cs_car_rotation_yaw_packet {
 	char	size;
 	char	type;
-	int		player_number;
+	float	yaw;
+};
+
+struct sc_car_rotation_yaw_packet {
+	char	size;
+	char	type;
+	float	yaw;
 };
 
 struct cs_cannon_packet

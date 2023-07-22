@@ -321,8 +321,12 @@ void ServerMain::worker_thread()
 
 				// std::cout << key << " client is push? " << clients[key].move_car << ", " << clients[key].tm_id << " client is push? " << clients[clients[key].tm_id].move_car << std::endl;
 
-				clients[key].send_move_car_packet(direction, acceleration);
-				clients[clients[key].tm_id].send_move_car_packet(direction, acceleration);
+				// 여기서 호스트한테만 보내야 한다.
+				int host_id = normal_rooms[clients[key].room_id].get_host_id();
+				std::cout << "host id: " << host_id;
+				clients[host_id].send_move_car_packet(direction, acceleration);
+				/*clients[key].send_move_car_packet(direction, acceleration);
+				clients[clients[key].tm_id].send_move_car_packet(direction, acceleration);*/
 
 				TIMER_EVENT event;
 				event.object_id = key;
@@ -776,22 +780,28 @@ void ServerMain::process_packet(char* packet, int client_id)
 	{
 		std::cout << client_id << "client enter!" << std::endl;
 
+		// stage3로 바로 들어왔을 때 테스트를 할 수 있도록 임시방편임. 수정해야 함.
 		{
 			std::lock_guard<std::mutex> lock{ clients[client_id].state_lock };
 			clients[client_id].state = state::ingame;
 		}
 
-		bool is_matching = matching(client_id);
-		if (!is_matching)
-			std::cout << "이미 다른 팀원이 있습니다." << std::endl;
+		if (client_id == 0) clients[client_id].tm_id = 1;
+		else if (client_id == 1) clients[client_id].tm_id = 0;
+		else std::cout << "stage3 enter matching err";
+
+		clients[client_id].room_id = 0;
+		normal_rooms[0].set_host_id(0);
+		//bool is_matching = matching(client_id);
+		//if (!is_matching)
+		//	std::cout << "이미 다른 팀원이 있습니다." << std::endl;
 
 		std::cout << "complete matching\n";
-
-		set_team_position(client_id);
+		// --------------------------------------------------------------------
 
 		clients[client_id].send_stage3_enter_packet(client_id, clients[client_id].tm_id);
 	} break;
-	case static_cast<int>(packet_type::cs_car_direction):
+	case static_cast<int>(packet_type::cs_car_direction): // 누구든 한명 키를 누르면 들어오는 곳
 	{
 		using namespace std;
 
@@ -811,6 +821,20 @@ void ServerMain::process_packet(char* packet, int client_id)
 		} else {
 			clients[client_id].move_car = false;
 		}
+	} break;
+	case static_cast<int>(packet_type::cs_car_location):
+	{
+		cs_car_location_packet* pack = reinterpret_cast<cs_car_location_packet*>(packet);
+
+		clients[client_id].send_car_location_packet(pack->car_location);
+		clients[clients[client_id].tm_id].send_car_location_packet(pack->car_location);
+	} break;
+	case static_cast<int>(packet_type::cs_car_rotation_yaw):
+	{
+		cs_car_rotation_yaw_packet* pack = reinterpret_cast<cs_car_rotation_yaw_packet*>(packet);
+
+		clients[client_id].send_car_rotation_yaw_packet(pack->yaw);
+		clients[clients[client_id].tm_id].send_car_rotation_yaw_packet(pack->yaw);
 	} break;
 	case static_cast<int>(packet_type::cs_cannon):
 	{
@@ -871,7 +895,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 	}
 }
 
-bool ServerMain::matching(int client_id)
+bool ServerMain::matching(int client_id) // 후에 없어질 함수
 {
 	for (int i{}; ; ++i)
 	{
@@ -987,13 +1011,10 @@ char* ServerMain::ConvertWCtoC(wchar_t* str)
 }
 
 // 해야 할 것
-// 1. controller를 들어갈 때 매칭하고 있는데 이걸 바꿔야 한다.
-// - 게임 시작 전에 방에 들어온 사람과 매칭이 되도록 하는 것으로 만들어야 한다.
-// 
-// 근데 생각해보니 굳이 방만들기 리스트를 DB로 하지 않아도 될 것 같다.
-// - 게임이 시작되거나 만든 클라이언트가 게임을 종료하면 없어질 정보이기 때문이다.
-// - 그리고 수시로 만들어지고 삭제되는 방 만들기에서 비효율적일 것 같다.
-
-// show room list 패킷을 받았을 때 처리를 해줘야 한다.
-
-// 두 명이 들어왔을 때 게임 시작할 수 있게끔 해주어야 한다.
+// 1. stage3에서 자동차 움직일 때 키씹 생기는 거 고쳐야 한다.
+// -> ad를 번갈아 누를 때 중복으로 처리되는건지 확인해봐야 한다.
+// 2. 한쪽 클라에서만 충돌처리가 되도록 바꿔야 한다.
+// -> 회전은 어느식으로 하는지...
+// 3. 여러명이서 들어갔을 때 잘 되는거 확인해야 한다.
+// 4. 방 만들고 들어가서 게임 시작 전까지 많은 오류가 존재한다. -> 다 고쳐야 한다.
+// 5. 링버퍼

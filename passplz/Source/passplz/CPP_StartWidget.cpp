@@ -218,6 +218,10 @@ void UCPP_StartWidget::NormalModeRefresh()
 		} break;
 		case static_cast<int>(packet_type::sc_show_room_list_end): 
 			UE_LOG(LogTemp, Warning, TEXT("show normal list end"));
+
+			u_long nonBlockingMode = 1;
+			ioctlsocket(*sock, FIONBIO, &nonBlockingMode); // sock을 논블로킹 모드로 설정
+
 			return;
 		}
 	}

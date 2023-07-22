@@ -79,8 +79,10 @@ public:
 	void send_cobot_button(packet_type type);
 	void send_board_color(int color, int client_id);
 	void send_logout_packet();
-	void send_move_car_packet(float direction, float acceleration);
 	void send_stage3_enter_packet(int id, int tm_id);
+	void send_move_car_packet(float direction, float acceleration);
+	void send_car_location_packet(vector_d3 location);
+	void send_car_rotation_yaw_packet(float yaw);
 	void send_cannon_yaw_packet(double value);
 	void send_cannon_pitch_packet(double value);
 	void send_cannon_click_packet(int click_id);
