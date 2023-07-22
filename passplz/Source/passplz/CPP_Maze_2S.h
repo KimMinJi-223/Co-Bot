@@ -4,6 +4,7 @@
 
 #include "passplz.h"
 #include "GameFramework/Actor.h"
+#include "NiagaraComponent.h"
 #include "CPP_Maze_2S.generated.h"
 
 UCLASS()
@@ -29,6 +30,7 @@ public:
 	void target_back();
 	void target_right();
 	void target_left();
+
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -57,6 +59,8 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 		UBoxComponent* clear;
+
+
 
 	FTimerHandle bridgeTimer;
 	float bridgeTime = 0.f;

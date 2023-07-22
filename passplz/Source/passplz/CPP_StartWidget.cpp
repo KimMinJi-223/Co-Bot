@@ -264,7 +264,7 @@ void UCPP_StartWidget::PlayGame(int roomId)
 		
 		sc_game_start_packet* pack = reinterpret_cast<sc_game_start_packet*>(&buff);
 
-		// stageNum = pack->stage; // 여기에 시작해야 하는 스테이지가 담겨있다.
+		//stageNum = pack->stage; // 여기에 시작해야 하는 스테이지가 담겨있다.
 
 		FOutputDeviceNull pAR;
 		CallFunctionByNameWithArguments(TEXT("open_lavel"), pAR, nullptr, true);
