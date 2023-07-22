@@ -20,7 +20,11 @@ enum class packet_type {
 	cs_create_room,
 	sc_create_room_ok,
 
+	cs_delete_room,
+
 	cs_enter_room,
+	sc_enter_room_fail,
+
 	sc_game_start,
 
 	cs_show_room_list,
@@ -28,6 +32,8 @@ enum class packet_type {
 	sc_show_room_list_end,
 
 	cs_enter,
+	sc_enter,
+
 	cs_move,
 	cs_logout,
 
@@ -175,8 +181,14 @@ struct cs_create_room_packet {
 	char	size;
 	char	type;
 	int		room_id;
-	int		room_mode;
+	int		stage;
 	wchar_t room_name[MAX_NAME];
+};
+
+struct cs_delete_room_packet {
+	char	size;
+	char	type;
+	int		room_id;
 };
 
 struct sc_create_room_ok_packet {
@@ -184,27 +196,13 @@ struct sc_create_room_ok_packet {
 	char	type;
 	int		room_id;
 	int		host_id;
-	int		room_mode;
-	wchar_t room_name[MAX_NAME];
-};
-
-struct cs_enter_room_packet {
-	char	size;
-	char	type;
-	int		room_mode;
-	int		room_id;
-};
-
-struct sc_game_start_packet {
-	char	size;
-	char	type;
 	int		stage;
+	wchar_t room_name[MAX_NAME];
 };
 
 struct cs_show_room_list_packet {
 	char size;
 	char type;
-	int room_mode;
 };
 
 struct sc_show_room_list_packet {
@@ -221,9 +219,32 @@ struct sc_show_room_list_end_packet {
 	char type;
 };
 
+struct cs_enter_room_packet {
+	char	size;
+	char	type;
+	int		room_id;
+};
+
+struct sc_enter_room_fail_packet {
+	char size;
+	char type;
+};
+
+struct sc_game_start_packet {
+	char	size;
+	char	type;
+	int		stage;
+};
+
 struct cs_enter_packet {
 	char size;
 	char type;
+};
+
+struct sc_enter_packet {
+	char	size;
+	char	type;
+	int		id;
 };
 
 struct cs_move_packet {

@@ -40,7 +40,7 @@ public:
 		, host_id(-1)
 		, team_id(-1)
 		, stage(-1) 
-		, number_of_people(0) {};
+		, number_of_people(-1) {};
 	~RoomManager() {};
 };
 
