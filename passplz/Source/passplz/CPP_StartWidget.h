@@ -43,14 +43,18 @@ public:
 	//방만들기
 	UFUNCTION(BlueprintCallable)
 		void CreateRoom();
-	void CallEventSuccessAddRoom(FString name, int mode, int id);
 
 	//새로고침
 	UFUNCTION(BlueprintCallable)
 		void NormalModeRefresh();
 
+	//매칭 대기 및 스테이지 오픈
 	UFUNCTION(BlueprintCallable)
 		void PlayGame(int roomId);
+
+	//방 삭제
+	UFUNCTION(BlueprintCallable)
+		void DeleteRoom(int roomId);
 
 protected:
 	UPROPERTY(BlueprintReadWrite)
@@ -79,8 +83,6 @@ protected:
 		int stageNum;
 	UPROPERTY(BlueprintReadWrite)
 		FString userName;
-	UPROPERTY(BlueprintReadWrite)
-		int roomMode;
 	UPROPERTY(BlueprintReadWrite)
 		int roomID;
 

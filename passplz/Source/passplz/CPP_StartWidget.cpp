@@ -135,7 +135,6 @@ void UCPP_StartWidget::CreateRoom()
 	pack.size = sizeof(pack);
 	pack.type = static_cast<char>(packet_type::cs_create_room);
 	wcscpy_s(pack.room_name, MAX_NAME, room_name);
-	pack.room_mode = roomMode;
 
 	//서버에 방이름과 스테이지 번호를 보낸다. (room_name, stageNum)
 	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
@@ -160,22 +159,11 @@ void UCPP_StartWidget::CreateRoom()
 		sc_create_room_ok_packet* recv_pack = reinterpret_cast<sc_create_room_ok_packet*>(&buff);
 		roomID = recv_pack->room_id;
 		roomName = WCHAR_TO_TCHAR(recv_pack->room_name);
-		roomMode = recv_pack->room_mode;
 
 		FOutputDeviceNull pAR;
 		CallFunctionByNameWithArguments(TEXT("wait"), pAR, nullptr, true);
 	} break;
 	}
-}
-
-void UCPP_StartWidget::CallEventSuccessAddRoom(FString name, int mode, int id)
-{
-	roomName = name;
-	roomMode = mode;
-	roomID = id;
-
-	FOutputDeviceNull pAR;
-	CallFunctionByNameWithArguments(TEXT("add_Room"), pAR, nullptr, true);
 }
 
 void UCPP_StartWidget::NormalModeRefresh()
@@ -279,5 +267,10 @@ void UCPP_StartWidget::PlayGame(int roomId)
 	} else {
 		UE_LOG(LogTemp, Warning, TEXT("errerrerr ret: %d"), ret);
 	}
+}
+
+void UCPP_StartWidget::DeleteRoom(int roomId)
+{
+	//여기에 해당 방을 삭제하는 패킷을 보냄
 }
 
