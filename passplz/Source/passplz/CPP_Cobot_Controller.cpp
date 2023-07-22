@@ -47,6 +47,11 @@ void ACPP_Cobot_Controller::BeginPlay()
 
     sock = instance->GetSocketMgr()->GetSocket();
 
+    cs_enter_packet pack;
+    pack.size = sizeof(pack);
+    pack.type = static_cast<char>(packet_type::cs_enter);
+
+    int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
     //SendEnterPacket();
 
     Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(-7500.f, 3470.f, 500.f), FRotator(0.0f, 0.0f, 0.0f));
@@ -210,9 +215,9 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
 {
     switch (packet[1])
     {
-    case static_cast<int>(packet_type::sc_login_success):
+    case static_cast<int>(packet_type::sc_enter):
     {
-        sc_login_success_packet* pack = reinterpret_cast<sc_login_success_packet*>(packet);
+        sc_enter_packet* pack = reinterpret_cast<sc_enter_packet*>(packet);
         id = pack->id;
 
         UE_LOG(LogTemp, Warning, TEXT("recv login packet, my id: %d"), id);
@@ -220,6 +225,7 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
     case static_cast<int>(packet_type::sc_move):
     {
         sc_move_packet* pack = reinterpret_cast<sc_move_packet*>(packet);
+
         if (pack->client_id != id) { // 상대방이 움직였다
             tm_location = pack->location;
 

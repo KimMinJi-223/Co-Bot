@@ -7,7 +7,8 @@ SESSION::SESSION()
 	: state(state::free)
 	, sock(0)
 	, id(-1)
-	, stage(0)
+	, current_stage(0)
+	, db_stage(0)
 	, location(-1.f, -1.f, -1.f)
 	, yaw(0.f)
 	, tm_id(-1)
@@ -82,7 +83,7 @@ void SESSION::send_login_success_packet()
 	pack.size = sizeof(pack);
 	pack.type = static_cast<char>(packet_type::sc_login_success);
 	pack.id = id;
-	pack.stage = stage;
+	pack.stage = db_stage;
 	//pack.x = x;
 	//pack.y = y;
 	//pack.z = z;
@@ -106,23 +107,25 @@ void SESSION::send_login_fail_packet()
 	send_packet(reinterpret_cast<char*>(&pack));
 }
 
-void SESSION::send_create_room_ok(wchar_t* room_name, int room_mode)
-{
-	sc_create_room_ok_packet pack;
-	pack.size = sizeof(pack);
-	pack.type = static_cast<char>(packet_type::sc_create_room_ok);
-	pack.room_id = room_id;
-	pack.host_id = id;
-	pack.room_mode = room_mode;
-	wcscpy_s(pack.room_name, MAX_NAME, room_name);
-
-	send_packet(reinterpret_cast<char*>(&pack));
-
-	std::cout << "create room ok send" << std::endl;
-}
+//void SESSION::send_create_room_ok(wchar_t* room_name)
+//{
+//	sc_create_room_ok_packet pack;
+//	pack.size = sizeof(pack);
+//	pack.type = static_cast<char>(packet_type::sc_create_room_ok);
+//	pack.room_id = room_id;
+//	pack.host_id = id;
+//	pack.stage = stage;
+//	wcscpy_s(pack.room_name, MAX_NAME, room_name);
+//
+//	send_packet(reinterpret_cast<char*>(&pack));
+//
+//	std::cout << "create room ok send" << std::endl;
+//}
 
 void SESSION::send_game_start_packet(int stage)
 {
+	current_stage = stage;
+
 	sc_game_start_packet pack;
 	pack.size = sizeof(pack);
 	pack.type = static_cast<char>(packet_type::sc_game_start);
@@ -159,6 +162,25 @@ void SESSION::send_show_room_list_end_packet()
 	std::cout << "send show room list end\n";
 }
 
+void SESSION::send_enter_packet()
+{
+	sc_enter_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_enter);
+	pack.id = id;
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_enter_room_fail_packet()
+{
+	sc_enter_room_fail_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_enter_room_fail);
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
 void SESSION::send_left_move_packet(int client_id)
 {
 	sc_move_packet pack;
@@ -179,6 +201,8 @@ void SESSION::send_left_move_packet(int client_id)
 	}
 
 	send_packet(reinterpret_cast<char*>(&pack));
+
+	// std::cout << client_id << " -> " << id << " send left move packet\n";
 }
 
 void SESSION::send_right_move_packet(int client_id)

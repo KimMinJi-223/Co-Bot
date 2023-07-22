@@ -59,6 +59,13 @@ bool UCPP_StartWidget::SendLoginIDPW()
 		return false;
 	case static_cast<int>(packet_type::sc_login_success): 
 		UE_LOG(LogTemp, Warning, TEXT("recv login success"));
+
+		// 서버에서 db에 저장되어 있는 스테이지 값을 보내준다.
+		sc_login_success_packet* pack = reinterpret_cast<sc_login_success_packet*>(&buff);
+
+		pack->stage; // 여기에 DB에 저장되어 있던 stage가 넘어온다.
+		// 예) 2면 1, 2가능 
+
 		return true;
 	}
 
@@ -134,36 +141,39 @@ void UCPP_StartWidget::CreateRoom()
 	cs_create_room_packet pack;
 	pack.size = sizeof(pack);
 	pack.type = static_cast<char>(packet_type::cs_create_room);
+	pack.stage = stageNum;
 	wcscpy_s(pack.room_name, MAX_NAME, room_name);
 
 	//서버에 방이름과 스테이지 번호를 보낸다. (room_name, stageNum)
 	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 	if (ret <= 0) UE_LOG(LogTemp, Warning, TEXT("CreateRoom() send err"));
 
-	u_long BlockingMode = 0;
-	ioctlsocket(*sock, FIONBIO, &BlockingMode); // sock을 블로킹 모드로 설정
+	FOutputDeviceNull pAR;
+	CallFunctionByNameWithArguments(TEXT("wait"), pAR, nullptr, true);
 
-	char buff[BUF_SIZE];
-	ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
+	//u_long BlockingMode = 0;
+	//ioctlsocket(*sock, FIONBIO, &BlockingMode); // sock을 블로킹 모드로 설정
 
-	u_long nonBlockingMode = 1;
-	ioctlsocket(*sock, FIONBIO, &nonBlockingMode); // sock을 논블로킹 모드로 설정
+	//char buff[BUF_SIZE];
+	//ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
 
-	if (ret != buff[0])
-		UE_LOG(LogTemp, Warning, TEXT("create room recv err"));
+	//u_long nonBlockingMode = 1;
+	//ioctlsocket(*sock, FIONBIO, &nonBlockingMode); // sock을 논블로킹 모드로 설정
 
-	switch (buff[1])
-	{
-	case static_cast<int>(packet_type::sc_create_room_ok):
-	{
-		sc_create_room_ok_packet* recv_pack = reinterpret_cast<sc_create_room_ok_packet*>(&buff);
-		roomID = recv_pack->room_id;
-		roomName = WCHAR_TO_TCHAR(recv_pack->room_name);
+	//if (ret != buff[0])
+	//	UE_LOG(LogTemp, Warning, TEXT("create room recv err"));
 
-		FOutputDeviceNull pAR;
-		CallFunctionByNameWithArguments(TEXT("wait"), pAR, nullptr, true);
-	} break;
-	}
+	//switch (buff[1])
+	//{
+	//case static_cast<int>(packet_type::sc_create_room_ok):
+	//{
+	//	sc_create_room_ok_packet* recv_pack = reinterpret_cast<sc_create_room_ok_packet*>(&buff);
+	//	roomID = recv_pack->room_id;
+	//	roomName = WCHAR_TO_TCHAR(recv_pack->room_name);
+
+	//	
+	//} break;
+	//}
 }
 
 void UCPP_StartWidget::NormalModeRefresh()
@@ -174,7 +184,6 @@ void UCPP_StartWidget::NormalModeRefresh()
 	cs_show_room_list_packet send_pack;
 	send_pack.size = sizeof(send_pack);
 	send_pack.type = static_cast<char>(packet_type::cs_show_room_list);
-	send_pack.room_mode = 0;
 
 	int ret = send(*sock, reinterpret_cast<char*>(&send_pack), sizeof(send_pack), 0);
 
@@ -196,10 +205,12 @@ void UCPP_StartWidget::NormalModeRefresh()
 		{
 			sc_show_room_list_packet* recv_pack = reinterpret_cast<sc_show_room_list_packet*>(&buff);
 
+			UE_LOG(LogTemp, Warning, TEXT("stage: %d"), recv_pack->stage);
+
 			roomName = WCHAR_TO_TCHAR(recv_pack->room_name);
 			userName = WCHAR_TO_TCHAR(recv_pack->host_name);
 			roomID = recv_pack->room_id;
-			//stageNum = recv_pack->stage;
+			stageNum = recv_pack->stage;
 
 			FOutputDeviceNull pAR;
 			CallFunctionByNameWithArguments(TEXT("show_Room"), pAR, nullptr, true);
@@ -230,7 +241,6 @@ void UCPP_StartWidget::PlayGame(int roomId)
 		pack.size = sizeof(pack);
 		pack.type = static_cast<char>(packet_type::cs_enter_room);
 		pack.room_id = roomId;
-		pack.room_mode = 0;
 
 		int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 
@@ -260,14 +270,22 @@ void UCPP_StartWidget::PlayGame(int roomId)
 			}), 1.f, false);
 
 	} else if (buff[0] == ret) {
-		UE_LOG(LogTemp, Warning, TEXT("recv game start packet"));
-		
-		sc_game_start_packet* pack = reinterpret_cast<sc_game_start_packet*>(&buff);
+		if (buff[1] == static_cast<char>(packet_type::sc_game_start)) {
+			UE_LOG(LogTemp, Warning, TEXT("recv game start packet"));
 
-		// stageNum = pack->stage; // 여기에 시작해야 하는 스테이지가 담겨있다.
+			sc_game_start_packet* pack = reinterpret_cast<sc_game_start_packet*>(&buff);
 
-		FOutputDeviceNull pAR;
-		CallFunctionByNameWithArguments(TEXT("open_lavel"), pAR, nullptr, true);
+			stageNum = pack->stage; // 여기에 시작해야 하는 스테이지가 담겨있다.
+
+			FOutputDeviceNull pAR;
+			CallFunctionByNameWithArguments(TEXT("open_lavel"), pAR, nullptr, true);
+		} else if (buff[1] == static_cast<char>(packet_type::sc_enter_room_fail)) {
+			UE_LOG(LogTemp, Warning, TEXT("no room"));
+			// 클라!
+			// 메시지 띄우기
+			// 새로고침
+			return;
+		}
 	} else {
 		UE_LOG(LogTemp, Warning, TEXT("errerrerr ret: %d"), ret);
 	}
@@ -276,5 +294,11 @@ void UCPP_StartWidget::PlayGame(int roomId)
 void UCPP_StartWidget::DeleteRoom(int roomId)
 {
 	//여기에 해당 방을 삭제하는 패킷을 보냄
+	cs_delete_room_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::cs_delete_room);
+	pack.room_id = roomId;
+
+	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 }
 
