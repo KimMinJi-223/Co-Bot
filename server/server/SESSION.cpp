@@ -409,6 +409,16 @@ void SESSION::send_cannon_fire_packet()
 	send_packet(reinterpret_cast<char*>(&pack));
 }
 
+void SESSION::send_select_bridge_widget_packet(int index)
+{
+	sc_select_bridge_widget_packcet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_select_bridge_widget);
+	pack.index = index;
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
 // 23.4.14
 // 1. OVER_EX 동적 할당해주는 부분에서 메모리 릭이 있는 듯하다.
 // 2. std::atomic<std::shared_ptr>에 대해서 더 조사해보기

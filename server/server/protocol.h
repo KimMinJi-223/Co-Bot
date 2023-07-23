@@ -112,6 +112,9 @@ enum class packet_type {
 	cs_cannon_click,
 	sc_cannon_click,
 	sc_cannon_fire,
+
+	cs_select_bridge_widget,
+	sc_select_bridge_widget,
 };
 
 enum class direction { forward, back, left, right };
@@ -426,4 +429,16 @@ struct sc_cannon_fire_packet
 {
 	char size;
 	char type;
+};
+
+struct cs_select_bridge_widget_packet {
+	char	size;
+	char	type;
+	int		index;
+};
+
+struct sc_select_bridge_widget_packcet {
+	char	size;
+	char	type;
+	int		index;
 };

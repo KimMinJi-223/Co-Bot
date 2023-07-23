@@ -91,6 +91,7 @@ public:
 	void send_cannon_pitch_packet(double value);
 	void send_cannon_click_packet(int click_id);
 	void send_cannon_fire_packet();
+	void send_select_bridge_widget_packet(int index);
 
 public:
 	SESSION();

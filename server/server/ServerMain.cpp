@@ -908,6 +908,12 @@ void ServerMain::process_packet(char* packet, int client_id)
 			clients[clients[client_id].tm_id].send_cannon_click_packet(clients[client_id].stage3_player_number);
 		}		
 	} break;
+	case static_cast<int>(packet_type::cs_select_bridge_widget):
+	{
+		cs_select_bridge_widget_packet* pack = reinterpret_cast<cs_select_bridge_widget_packet*>(packet);
+
+		clients[clients[client_id].tm_id].send_select_bridge_widget_packet(pack->index);
+	} break;
 	}
 }
 
