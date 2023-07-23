@@ -31,7 +31,6 @@ public:
 	void target_right();
 	void target_left();
 
-
 private:
 	UPROPERTY(VisibleAnywhere)
 		UBoxComponent* center;
@@ -60,7 +59,8 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		UBoxComponent* clear;
 
-
+	UPROPERTY(VisibleAnywhere)
+		UStaticMeshComponent* blockCube;
 
 	FTimerHandle bridgeTimer;
 	float bridgeTime = 0.f;

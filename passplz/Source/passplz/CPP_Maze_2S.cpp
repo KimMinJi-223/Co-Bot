@@ -21,6 +21,7 @@ ACPP_Maze_2S::ACPP_Maze_2S()
 	right_target_collision = CreateDefaultSubobject<UBoxComponent>(TEXT("right_target_collision"));
 	left_target_collision = CreateDefaultSubobject<UBoxComponent>(TEXT("left_target_collision"));
 	clear = CreateDefaultSubobject<UBoxComponent>(TEXT("clear"));
+	blockCube = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("blockCube"));
 
 	RootComponent = center;
 
@@ -34,8 +35,11 @@ ACPP_Maze_2S::ACPP_Maze_2S()
 	back_target_collision->SetupAttachment(Target);
 	right_target_collision->SetupAttachment(Target);
 	left_target_collision->SetupAttachment(Target);
+	blockCube->SetupAttachment(RootComponent);
 
 	center->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	blockCube->SetVisibility(false);
 }
 
 // Called when the game starts or when spawned
@@ -122,6 +126,7 @@ void ACPP_Maze_2S::OnComponentBeginOverlap_clear(UPrimitiveComponent* Overlapped
 	spawnLocation.Z -= 1500;
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->clearFX, spawnLocation);
 
+	blockCube->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ACPP_Maze_2S::BridgeTimer()

@@ -78,6 +78,8 @@ private:
 
 	AActor* cannon;
 
+	AActor* bridge;
+
 	int mode;
 
 	bool carMove;
@@ -106,6 +108,9 @@ public:
 	void SetPlayerYaw(float newYaw);
 
 	UFUNCTION(BlueprintCallable)
+		void SelectBridgeWidget(AActor* bridgeWidget, int index);
+
+	UFUNCTION(BlueprintCallable)
 		void ChangeMode(int Mode);
 
 	UFUNCTION(BlueprintCallable)
@@ -120,4 +125,6 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 		bool UIMode; //UI¸ðµå
 
+	UPROPERTY(BlueprintReadWrite)
+		int ButtonIndex; 
 };

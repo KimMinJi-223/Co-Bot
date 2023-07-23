@@ -123,4 +123,7 @@ public:
 	// void RecvColor(int newcolor);
 	void OnlyRecvColor(int newcolor);
 	void RecvAndSendColor(int newcolor);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		AActor* clearActor;
 };
