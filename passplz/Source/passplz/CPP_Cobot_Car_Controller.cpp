@@ -279,17 +279,22 @@ void ACPP_Cobot_Car_Controller::CarInput(const FInputActionValue& Value)
 	//서버 : 여기서 키를 누르거나 떼면 여길 들어오는데 이때 서버에 패킷 보내야함
 	//서버에는 각 클라 키에 대한 bool값을 가진다.
 	//서버에서 가속과 관련된 계산이 필요합니다. -> 점점 커지는 값 그리고 뗐을때는 점점 작아지는 값 필요 그 값을 넘겨주세요
+
+	cs_car_direction_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::cs_car_direction);
+
 	if (UIMode) {
+		carMove = false;
+		pack.direction = false;
+		int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+		UE_LOG(LogTemp, Warning, TEXT("send ret: %d"), ret);
 		UE_LOG(LogTemp, Warning, TEXT("UIMODE"));
 		return;
 	}
 
 	
 	UE_LOG(LogTemp, Warning, TEXT("%f"), Value.Get<float>());
-
-	cs_car_direction_packet pack;
-	pack.size = sizeof(pack);
-	pack.type = static_cast<char>(packet_type::cs_car_direction);
 
 	if (0.0 != Value.Get<float>()) {
 		if (carMove)
