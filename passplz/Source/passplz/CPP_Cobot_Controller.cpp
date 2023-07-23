@@ -398,6 +398,11 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("packet_type::sc_logout"));
 	} break;
+	case static_cast<int>(packet_type::sc_esc):
+	{
+		sc_esc_packet* pack = reinterpret_cast<sc_esc_packet*>(packet);
+		pack->stage; // 여기에 나가기 버튼을 누른 해당 스테이지가 들어가 있음.
+	} break;
 	}
 }
 
@@ -515,13 +520,15 @@ void ACPP_Cobot_Controller::Run_Released()
 
 void ACPP_Cobot_Controller::SendEsc()
 {
-	
+	cs_esc_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::cs_esc);
+
+	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 }
 
 void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 {
-
-
 	//발 충돌 박스 위치 업데이트
 	player->Foot_left_Zone->SetWorldLocation(player->GetMesh()->GetSocketLocation("left"));
 	player->Foot_right_Zone->SetWorldLocation(player->GetMesh()->GetSocketLocation("right"));

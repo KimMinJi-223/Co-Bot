@@ -577,6 +577,12 @@ void ServerMain::process_packet(char* packet, int client_id)
 		//clients[client_id].send_login_success_packet();
 		clients[client_id].send_enter_packet();
 	} break;
+	case static_cast<int>(packet_type::cs_esc):
+	{
+		clients[client_id].tm_id = -1;
+
+		clients[clients[client_id].tm_id].send_esc_packet();
+	} break;
 	case static_cast<int>(packet_type::cs_move):
 	{
 		cs_move_packet* pack = reinterpret_cast<cs_move_packet*>(packet);

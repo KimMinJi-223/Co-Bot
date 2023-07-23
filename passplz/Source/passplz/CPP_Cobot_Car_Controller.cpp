@@ -264,6 +264,11 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 		// 대포 발사하는 함수 호출
 		Cast<ACPP_Cannon>(cannon)->FireLava();
 	} break;
+	case static_cast<int>(packet_type::sc_esc):
+	{
+		sc_esc_packet* pack = reinterpret_cast<sc_esc_packet*>(packet);
+		pack->stage; // 여기에 나가기 버튼을 누른 해당 스테이지가 들어가 있음.
+	} break;
 	}
 }
 
@@ -452,6 +457,11 @@ void ACPP_Cobot_Car_Controller::ChangeMode(int Mode)
 
 void ACPP_Cobot_Car_Controller::SendEsc()
 {
+	cs_esc_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::cs_esc);
+
+	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 }
 
 
