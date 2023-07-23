@@ -426,11 +426,13 @@ void ACPP_Time_Color_Button::OnComponentBeginOverlap_timeColorFootholdCollision(
 		if (!cobotColor.Equals(currentFootholdColor)) {
 			//같지 않으면 콜리전을 없앤다.
 			timeColorFoothold->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			timeColorFoothold->SetVisibility(false);
 			timeColorFootholdCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
 			GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
 				{
 					timeColorFoothold->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+					timeColorFoothold->SetVisibility(true);
 					timeColorFootholdCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 
 				}), WaitTime, false);

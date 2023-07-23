@@ -55,10 +55,14 @@ protected:
 		FRotator targetRotation;
 
 public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		AActor* clearActor;
+
 	//서버 : 조준점 위치 정해주는 거
 	void SetBombDropLocation(int player_number, double value);
 	//서버 : 발사하는 함수
 	void FireLava();
+
 
 	UFUNCTION()
 		void OnComponentBeginOverlap_lavaCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

@@ -9,6 +9,7 @@
 #include "CPP_Color_Forklift.h"
 #include "CPP_Cobot.h"
 #include "CPP_Time_Color_Button.h"
+#include "CPP_Tutorial_Light.h"
 #include <chrono>
 
 ACPP_Cobot_Controller::ACPP_Cobot_Controller()
@@ -401,7 +402,16 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
 	case static_cast<int>(packet_type::sc_esc):
 	{
 		sc_esc_packet* pack = reinterpret_cast<sc_esc_packet*>(packet);
-		pack->stage; // 여기에 나가기 버튼을 누른 해당 스테이지가 들어가 있음.
+		if (pack->stage == 1) {
+
+			FOutputDeviceNull pAR;
+			Cast<ACPP_Tutorial_Light>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Tutorial_Light::StaticClass()))->clearActor->CallFunctionByNameWithArguments(TEXT("GameEnd"), pAR, nullptr, true);
+		}
+		else if(pack->stage == 2) {
+			FOutputDeviceNull pAR;
+			Cast<ACPP_Time_Color_Button>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Time_Color_Button::StaticClass()))->clearActor->CallFunctionByNameWithArguments(TEXT("GameEnd"), pAR, nullptr, true);
+		}
+
 	} break;
 	}
 }

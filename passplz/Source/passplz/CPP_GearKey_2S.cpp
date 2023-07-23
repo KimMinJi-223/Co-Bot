@@ -24,7 +24,7 @@ ACPP_GearKey_2S::ACPP_GearKey_2S()
 	child_gear3 = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("child_gear3"));
 	Key = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Key"));
 	Key_frame = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Key_frame"));
-
+	blockCube = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("blockCube"));
 
 	RootComponent = clear;
 
@@ -40,6 +40,7 @@ ACPP_GearKey_2S::ACPP_GearKey_2S()
 	left_Key_collision->SetupAttachment(Key);
 
 	Key_frame->SetupAttachment(RootComponent);
+	blockCube->SetupAttachment(RootComponent);
 
 	center_gear->SetRelativeLocation(FVector(-390.f, 0.f, 0.f));
 	child_gear1->SetRelativeLocation(FVector(-390.f, 230.f, -80.f));
@@ -79,7 +80,10 @@ ACPP_GearKey_2S::ACPP_GearKey_2S()
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_KEY_FRAME(TEXT("/Engine/BasicShapes/Cube.Cube"));
 	if (SM_KEY_FRAME.Succeeded()) {
 		Key_frame->SetStaticMesh(SM_KEY_FRAME.Object);
+		blockCube->SetStaticMesh(SM_KEY_FRAME.Object);
 	}
+
+	blockCube->SetVisibility(false);
 }
 
 // Called when the game starts or when spawned
@@ -169,6 +173,8 @@ void ACPP_GearKey_2S::OnClearOverlap(UPrimitiveComponent* OverlappedComponent, A
 	spawnLocation.Y -= 100;
 	spawnLocation.Z -= 1500;
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->clearFX, spawnLocation);
+
+	blockCube->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 
 void ACPP_GearKey_2S::BridgeTimer()

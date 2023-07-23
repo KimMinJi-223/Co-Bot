@@ -268,12 +268,15 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 	{
 		sc_select_bridge_widget_packcet* pack = reinterpret_cast<sc_select_bridge_widget_packcet*>(packet);
 
-		pack->index; // 여기에 상대방이 누른 인덱스 값이 넘어옴.
+		ButtonIndex = pack->index; // 여기에 상대방이 누른 인덱스 값이 넘어옴.
+		FOutputDeviceNull pAR;
+		bridge->CallFunctionByNameWithArguments(TEXT("getButton"), pAR, nullptr, true);
 	} break;
 	case static_cast<int>(packet_type::sc_esc):
 	{
 		sc_esc_packet* pack = reinterpret_cast<sc_esc_packet*>(packet);
-		pack->stage; // 여기에 나가기 버튼을 누른 해당 스테이지가 들어가 있음.
+		FOutputDeviceNull pAR;
+		Cast<ACPP_Cannon>(cannon)->clearActor->CallFunctionByNameWithArguments(TEXT("GameEnd"), pAR, nullptr, true);
 	} break;
 	}
 }
@@ -443,6 +446,20 @@ void ACPP_Cobot_Car_Controller::SetPlayerYaw(float newYaw)
 	SetControlRotation(control_rotation);
 }
 
+void ACPP_Cobot_Car_Controller::SelectBridgeWidget(AActor* bridgeWidget, int index)
+{
+	// select_bridge_widget() {}
+// 이걸로 instance와 sock 가져오기
+// instance = Cast<UCPP_CobotGameInstance>(GetWorld()->GetGameInstance());
+// sock = instance->GetSocketMgr()->GetSocket();
+	cs_select_bridge_widget_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::cs_select_bridge_widget);
+	pack.index = index;
+	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+
+}
+
 
 
 void ACPP_Cobot_Car_Controller::ChangeMode(int Mode)
@@ -476,17 +493,3 @@ void ACPP_Cobot_Car_Controller::SendEsc()
 }
 
 
-// select_bridge_widget() {}
-// 이걸로 instance와 sock 가져오기
-// instance = Cast<UCPP_CobotGameInstance>(GetWorld()->GetGameInstance());
-// sock = instance->GetSocketMgr()->GetSocket();
-// cs_select_bridge_widget_packcet pack;
-// pack.size = sizeof(pack);
-// pack.type = static_cast<char>(packet_type::cs_select_bridge_widget);
-// pack.index = ; 여기에 인덱스 번호 넣어서 서버로 보내주면 됨.
-// int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
-
-// 받는건
-// ProcessPacket 함수의 
-// case static_cast<int>(packet_type::sc_select_bridge_widget):
-// 여기서 받음
