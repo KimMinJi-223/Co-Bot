@@ -108,6 +108,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void ChangeMode(int Mode);
 
+	UFUNCTION(BlueprintCallable)
+		void SendEsc();
+
 	UPROPERTY(BlueprintReadWrite)
 		int fireNum;
 
