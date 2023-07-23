@@ -588,8 +588,6 @@ void ServerMain::process_packet(char* packet, int client_id)
 		int room_id = clients[client_id].room_id;
 		normal_rooms[room_id].exit_room();
 
-		clients[client_id].tm_id = -1;
-
 		clients[clients[client_id].tm_id].send_esc_packet();
 	} break;
 	case static_cast<int>(packet_type::cs_move):

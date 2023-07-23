@@ -192,7 +192,7 @@ void SESSION::send_delete_room_packet()
 
 void SESSION::send_esc_packet()
 {
-	tm_id = -1;
+	//tm_id = -1;
 
 	sc_esc_packet pack;
 	pack.size = sizeof(pack);
