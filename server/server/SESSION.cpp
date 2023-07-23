@@ -181,6 +181,18 @@ void SESSION::send_enter_room_fail_packet()
 	send_packet(reinterpret_cast<char*>(&pack));
 }
 
+void SESSION::send_esc_packet()
+{
+	tm_id = -1;
+
+	sc_esc_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_esc);
+	pack.stage = current_stage;
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
 void SESSION::send_left_move_packet(int client_id)
 {
 	sc_move_packet pack;

@@ -34,6 +34,9 @@ enum class packet_type {
 	cs_enter,
 	sc_enter,
 
+	cs_esc,
+	sc_esc,
+
 	cs_move,
 	cs_logout,
 
@@ -245,6 +248,17 @@ struct sc_enter_packet {
 	char	size;
 	char	type;
 	int		id;
+};
+
+struct cs_esc_packet {
+	char	size;
+	char	type;
+};
+
+struct sc_esc_packet {
+	char	size;
+	char	type;
+	int		stage;
 };
 
 struct cs_move_packet {
