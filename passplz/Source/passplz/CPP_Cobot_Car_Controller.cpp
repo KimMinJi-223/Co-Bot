@@ -450,6 +450,10 @@ void ACPP_Cobot_Car_Controller::ChangeMode(int Mode)
 	}
 }
 
+void ACPP_Cobot_Car_Controller::SendEsc()
+{
+}
+
 
 
 

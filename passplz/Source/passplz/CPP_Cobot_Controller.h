@@ -98,6 +98,9 @@ public: //장애물과 서버 데이터 통신을 위해 필요한 API
 	SOCKET* GetSocket() { return sock; };
 	void SetWidget(UUserWidget* widget) { current_widget = widget; }
 
+	UFUNCTION(BlueprintCallable)
+		void SendEsc();
+
 private:
 	class ACPP_Cobot* player;
 	FVector player_pos;
@@ -126,5 +129,7 @@ private:
 	int current_input;
 	float rotate_min;
 	float rotate_max;
+
+
 
 };
