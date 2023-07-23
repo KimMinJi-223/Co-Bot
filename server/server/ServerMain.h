@@ -12,10 +12,11 @@ private:
 
 	concurrency::concurrent_priority_queue<TIMER_EVENT> timer_queue;
 
-	SQLHENV		sqlenv;
-	SQLHDBC		sqldbc;
-	SQLHSTMT	sqlstmt = 0;
-	SQLRETURN	sqlret;
+	// DB O
+	//SQLHENV		sqlenv;
+	//SQLHDBC		sqldbc;
+	//SQLHSTMT	sqlstmt = 0;
+	//SQLRETURN	sqlret;
 
 public:
 	bool init();

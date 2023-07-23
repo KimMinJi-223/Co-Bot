@@ -76,28 +76,28 @@ bool ServerMain::init()
 	setlocale(LC_ALL, "korean");
 
 	// DB 연동
-	sqlret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &sqlenv); // 환경 핸들 할당
+	//sqlret = SQLAllocHandle(SQL_HANDLE_ENV, SQL_NULL_HANDLE, &sqlenv); // 환경 핸들 할당
 
-	if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
-		// ODBC 버전 환경 속성 설정
-		sqlret = SQLSetEnvAttr(sqlenv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER*)SQL_OV_ODBC3, 0); 
-		
-		if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
-			// 연결 핸들 할당
-			sqlret = SQLAllocHandle(SQL_HANDLE_DBC, sqlenv, &sqldbc); 
-			
-			if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
-				// login timeout 5초로 설정
-				SQLSetConnectAttr(sqldbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER)5, 0); 
-				
-				// 연결할 데이터 소스
-				sqlret = SQLConnect(sqldbc, (SQLWCHAR*)L"COBOT_2023", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0); 
-				
-				if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO)
-					sqlret = SQLAllocHandle(SQL_HANDLE_STMT, sqldbc, &sqlstmt); // 상태 핸들 할당
-			}
-		}
-	}
+	//if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
+	//	// ODBC 버전 환경 속성 설정
+	//	sqlret = SQLSetEnvAttr(sqlenv, SQL_ATTR_ODBC_VERSION, (SQLPOINTER*)SQL_OV_ODBC3, 0); 
+	//	
+	//	if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
+	//		// 연결 핸들 할당
+	//		sqlret = SQLAllocHandle(SQL_HANDLE_DBC, sqlenv, &sqldbc); 
+	//		
+	//		if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
+	//			// login timeout 5초로 설정
+	//			SQLSetConnectAttr(sqldbc, SQL_LOGIN_TIMEOUT, (SQLPOINTER)5, 0); 
+	//			
+	//			// 연결할 데이터 소스
+	//			sqlret = SQLConnect(sqldbc, (SQLWCHAR*)L"COBOT_2023", SQL_NTS, (SQLWCHAR*)NULL, 0, NULL, 0); 
+	//			
+	//			if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO)
+	//				sqlret = SQLAllocHandle(SQL_HANDLE_STMT, sqldbc, &sqlstmt); // 상태 핸들 할당
+	//		}
+	//	}
+	//}
 	// --------------------
 
 	std::cout << "서버가 활성화 되었습니다. 접속을 기다립니다..." << std::endl;
@@ -373,48 +373,49 @@ void ServerMain::process_packet(char* packet, int client_id)
 		
 		wprintf(L"id: %s, pw: %s\n", pack->id, pack->pw);
 
+		// DB O
 		// 회원가입
-		wchar_t query_str[256];
-		//wsprintf(query_str, L"SELECT * FROM user_table WHERE EXISTS id='%s'", pack->id);
-		//wsprintf(query_str, L"SELECT id FROM user_table WHERE id='%s'", pack->id);
-		wsprintf(query_str, L"EXEC select_user_by_name '%s'", pack->id);
-		sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
-		if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
-			// 중복되는 아이디이므로 회원가입 실패 패킷 보내기
-			std::cout << "sql문은 성공적\n";
-			SQLWCHAR sz_id[MAX_NAME];
-			SQLLEN cb_id = 0;
+		//wchar_t query_str[256];
+		////wsprintf(query_str, L"SELECT * FROM user_table WHERE EXISTS id='%s'", pack->id);
+		////wsprintf(query_str, L"SELECT id FROM user_table WHERE id='%s'", pack->id);
+		//wsprintf(query_str, L"EXEC select_user_by_name '%s'", pack->id);
+		//sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
+		//if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
+		//	// 중복되는 아이디이므로 회원가입 실패 패킷 보내기
+		//	std::cout << "sql문은 성공적\n";
+		//	SQLWCHAR sz_id[MAX_NAME];
+		//	SQLLEN cb_id = 0;
 
-			sqlret = SQLBindCol(sqlstmt, 1, SQL_C_WCHAR, sz_id, MAX_NAME, &cb_id);
+		//	sqlret = SQLBindCol(sqlstmt, 1, SQL_C_WCHAR, sz_id, MAX_NAME, &cb_id);
 
-			for (int i = 0; ; ++i) { // 실제로 데이터를 꺼낸다.
-				sqlret = SQLFetch(sqlstmt);
-				if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) { // 회원가입 실패
-					clients[client_id].send_signup_fail_packet();
-					SQLCloseCursor(sqlstmt);
-					SQLFreeStmt(sqlstmt, SQL_UNBIND);
-					return;
-				} else { // 회원가입 성공
-					SQLCloseCursor(sqlstmt);
-					SQLFreeStmt(sqlstmt, SQL_UNBIND);
-					std::cout << "회원가입 성공으로 들어옴\n";
-					//wsprintf(query_str, L"INSERT INTO user_table(id, pw, stage) VALUES('%s', '%s', 1)", pack->id, pack->pw);
-					wsprintf(query_str, L"EXEC insert_user_info '%s', '%s', 1", pack->id, pack->pw);
-					sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
-					if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO)
-						clients[client_id].send_signup_success_packet();
-					else
-						show_error(sqlstmt, SQL_HANDLE_STMT, sqlret);					
+		//	for (int i = 0; ; ++i) { // 실제로 데이터를 꺼낸다.
+		//		sqlret = SQLFetch(sqlstmt);
+		//		if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) { // 회원가입 실패
+		//			clients[client_id].send_signup_fail_packet();
+		//			SQLCloseCursor(sqlstmt);
+		//			SQLFreeStmt(sqlstmt, SQL_UNBIND);
+		//			return;
+		//		} else { // 회원가입 성공
+		//			SQLCloseCursor(sqlstmt);
+		//			SQLFreeStmt(sqlstmt, SQL_UNBIND);
+		//			std::cout << "회원가입 성공으로 들어옴\n";
+		//			//wsprintf(query_str, L"INSERT INTO user_table(id, pw, stage) VALUES('%s', '%s', 1)", pack->id, pack->pw);
+		//			wsprintf(query_str, L"EXEC insert_user_info '%s', '%s', 1", pack->id, pack->pw);
+		//			sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
+		//			if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO)
+		//				clients[client_id].send_signup_success_packet();
+		//			else
+		//				show_error(sqlstmt, SQL_HANDLE_STMT, sqlret);					
 
-					SQLCloseCursor(sqlstmt);
-					SQLFreeStmt(sqlstmt, SQL_UNBIND);
-					return;
-				}
-			}
+		//			SQLCloseCursor(sqlstmt);
+		//			SQLFreeStmt(sqlstmt, SQL_UNBIND);
+		//			return;
+		//		}
+		//	}
 
-		} else {
-			std::cout << "DB err\n";
-		}
+		//} else {
+		//	std::cout << "DB err\n";
+		//}
 	} break;
 	case static_cast<int>(packet_type::cs_login):
 	{
@@ -431,8 +432,8 @@ void ServerMain::process_packet(char* packet, int client_id)
 
 		// --- 로그인 사용 X 버전 ---
 		clients[client_id].send_login_success_packet();
-		if (client_id == 0) clients[client_id].tm_id = 1;
-		else if (client_id == 1) clients[client_id].tm_id = 0;
+		//if (client_id == 0) clients[client_id].tm_id = 1;
+		//else if (client_id == 1) clients[client_id].tm_id = 0;
 		// ------------------------
 		
 		// --- 로그인 사용 O 버전 ---
@@ -697,38 +698,40 @@ void ServerMain::process_packet(char* packet, int client_id)
 
 			std::cout << client_id << " client current stage: " << clients[client_id].current_stage << ", db stage: " << clients[client_id].db_stage << std::endl;
 
+			// DB O
 			// DB에 있는거랑 현재 스테이지 비교
-			if (clients[client_id].db_stage < clients[client_id].current_stage) {
-				// 이때 DB에 stage 정보 업데이트
-				wchar_t query_str[256];
-				wsprintf(query_str, L"EXEC update_stage '%s', %d", clients[client_id].name,  clients[client_id].current_stage);
-				wprintf(L"%s\n", query_str);
-				sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
-				if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
-					std::cout << client_id << " client stage change " << clients[client_id].db_stage << " -> " << clients[client_id].current_stage << std::endl;
-					++clients[client_id].db_stage;
-				} else {
-					std::cout << "stage update fail\n";
-				}
-				SQLCloseCursor(sqlstmt);
-				SQLFreeStmt(sqlstmt, SQL_UNBIND);
-			}
+			//if (clients[client_id].db_stage < clients[client_id].current_stage) {
+			//	// 이때 DB에 stage 정보 업데이트
+			//	wchar_t query_str[256];
+			//	wsprintf(query_str, L"EXEC update_stage '%s', %d", clients[client_id].name,  clients[client_id].current_stage);
+			//	wprintf(L"%s\n", query_str);
+			//	sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
+			//	if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
+			//		std::cout << client_id << " client stage change " << clients[client_id].db_stage << " -> " << clients[client_id].current_stage << std::endl;
+			//		++clients[client_id].db_stage;
+			//	} else {
+			//		std::cout << "stage update fail\n";
+			//	}
+			//	SQLCloseCursor(sqlstmt);
+			//	SQLFreeStmt(sqlstmt, SQL_UNBIND);
+			//}
 
-			if (clients[tm_id].db_stage < clients[tm_id].current_stage) {
-				// 이때 DB에 stage 정보 업데이트
-				wchar_t query_str[256];
-				wsprintf(query_str, L"EXEC update_stage '%s', %d", clients[tm_id].name, clients[tm_id].current_stage);
-				wprintf(L"%s\n", query_str);
-				sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
-				if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
-					std::cout << tm_id << " client stage change " << clients[tm_id].db_stage << " -> " << clients[tm_id].current_stage << std::endl;
-					++clients[tm_id].db_stage;
-				} else {
-					std::cout << "stage update fail\n";
-				}
-				SQLCloseCursor(sqlstmt);
-				SQLFreeStmt(sqlstmt, SQL_UNBIND);
-			}
+			// DB O
+			//if (clients[tm_id].db_stage < clients[tm_id].current_stage) {
+			//	// 이때 DB에 stage 정보 업데이트
+			//	wchar_t query_str[256];
+			//	wsprintf(query_str, L"EXEC update_stage '%s', %d", clients[tm_id].name, clients[tm_id].current_stage);
+			//	wprintf(L"%s\n", query_str);
+			//	sqlret = SQLExecDirect(sqlstmt, (SQLWCHAR*)query_str, SQL_NTS);
+			//	if (sqlret == SQL_SUCCESS || sqlret == SQL_SUCCESS_WITH_INFO) {
+			//		std::cout << tm_id << " client stage change " << clients[tm_id].db_stage << " -> " << clients[tm_id].current_stage << std::endl;
+			//		++clients[tm_id].db_stage;
+			//	} else {
+			//		std::cout << "stage update fail\n";
+			//	}
+			//	SQLCloseCursor(sqlstmt);
+			//	SQLFreeStmt(sqlstmt, SQL_UNBIND);
+			//}
 
 			clients[client_id].send_elevator_ok_packet();
 			clients[clients[client_id].tm_id].send_elevator_ok_packet();
@@ -997,11 +1000,12 @@ void ServerMain::do_timer_thread()
 
 void ServerMain::DB_disconnect()
 {
-	SQLCancel(sqlstmt);
-	SQLFreeHandle(SQL_HANDLE_STMT, sqlstmt);
-	SQLDisconnect(sqldbc);
-	SQLFreeHandle(SQL_HANDLE_DBC, sqldbc);
-	SQLFreeHandle(SQL_HANDLE_ENV, sqlenv);
+	// DB O
+	//SQLCancel(sqlstmt);
+	//SQLFreeHandle(SQL_HANDLE_STMT, sqlstmt);
+	//SQLDisconnect(sqldbc);
+	//SQLFreeHandle(SQL_HANDLE_DBC, sqldbc);
+	//SQLFreeHandle(SQL_HANDLE_ENV, sqlenv);
 }
 
 void ServerMain::show_error(SQLHANDLE hHandle, SQLSMALLINT hType, RETCODE RetCode)
