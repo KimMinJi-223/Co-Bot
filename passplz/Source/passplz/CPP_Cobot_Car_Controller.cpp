@@ -457,7 +457,7 @@ void ACPP_Cobot_Car_Controller::SelectBridgeWidget(AActor* bridgeWidget, int ind
 	pack.type = static_cast<char>(packet_type::cs_select_bridge_widget);
 	pack.index = index;
 	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
-
+	//bridge = bridgeWidget;
 }
 
 

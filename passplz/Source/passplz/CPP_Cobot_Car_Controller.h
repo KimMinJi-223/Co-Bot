@@ -78,8 +78,6 @@ private:
 
 	AActor* cannon;
 
-	AActor* bridge;
-
 	int mode;
 
 	bool carMove;
@@ -127,4 +125,7 @@ public:
 
 	UPROPERTY(BlueprintReadWrite)
 		int ButtonIndex; 
+
+	UPROPERTY(BlueprintReadWrite)
+		AActor* bridge;
 };
