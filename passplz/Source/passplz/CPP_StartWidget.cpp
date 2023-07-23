@@ -134,6 +134,8 @@ bool UCPP_StartWidget::SendSingupIDPW()
 
 void UCPP_StartWidget::CreateRoom()
 {
+	prev_enter = false;
+
 	UE_LOG(LogTemp, Warning, TEXT("CreateAndWait()"));
 
 	wchar_t* room_name = TCHAR_TO_WCHAR(*roomName);
@@ -179,6 +181,7 @@ void UCPP_StartWidget::CreateRoom()
 void UCPP_StartWidget::NormalModeRefresh()
 {
 	UE_LOG(LogTemp, Warning, TEXT("normal mode refresh()"));
+	prev_enter = false;
 	//서버에 데이터 요청 요청하는 패킷 보내기
 	//서버에 방이름이랑 스테이지 번호를 보낸다.
 	cs_show_room_list_packet send_pack;
@@ -284,6 +287,10 @@ void UCPP_StartWidget::PlayGame(int roomId)
 			// 클라!
 			// 메시지 띄우기
 			// 새로고침
+			return;
+		} else if (buff[1] == static_cast<char>(packet_type::sc_delete_room)) {
+			UE_LOG(LogTemp, Warning, TEXT("delete room"));
+			prev_enter = false;
 			return;
 		}
 	} else {

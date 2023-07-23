@@ -21,6 +21,7 @@ enum class packet_type {
 	sc_create_room_ok,
 
 	cs_delete_room,
+	sc_delete_room,
 
 	cs_enter_room,
 	sc_enter_room_fail,
@@ -195,6 +196,11 @@ struct cs_delete_room_packet {
 	char	size;
 	char	type;
 	int		room_id;
+};
+
+struct sc_delete_room_packet {
+	char size;
+	char type;
 };
 
 struct sc_create_room_ok_packet {

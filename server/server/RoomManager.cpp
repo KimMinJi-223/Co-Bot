@@ -18,7 +18,7 @@ void RoomManager::exit_room()
 	host_id = -1;
 	team_id = -1;
 	stage = -1;
-	number_of_people = -1;
+	number_of_people = 0;
 }
 
 void RoomManager::set_room_name(wchar_t* room_name)

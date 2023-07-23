@@ -505,7 +505,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 
 		room_id = get_normal_room_id();
 
-		std::cout << "rood id: " << room_id << std::endl;
+		std::cout << "create rood id: " << room_id << std::endl;
 
 		clients[client_id].room_id = room_id;
 
@@ -523,6 +523,8 @@ void ServerMain::process_packet(char* packet, int client_id)
 		int room_id = pack->room_id;
 
 		normal_rooms[room_id].exit_room();
+
+		clients[client_id].send_delete_room_packet();
 	} break;
 	case static_cast<int>(packet_type::cs_enter_room):
 	{
@@ -531,6 +533,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 		int room_id = pack->room_id;
 		if (!normal_rooms[room_id].is_use()) {
 			clients[client_id].send_enter_room_fail_packet();
+			std::cout << client_id << " client에게 enter fail 패킷을 보냈습니다.\n";
 			return;
 		}
 
@@ -548,6 +551,8 @@ void ServerMain::process_packet(char* packet, int client_id)
 			clients[host_id].tm_id = client_id; // 지금 들어온 사람을 호스트의 팀원으로 지정
 
 			std::cout << client_id << ", " << host_id << " matching!" << std::endl;
+			std::cout << "room id: " << room_id << std::endl;
+			std::cout << "room count: " << normal_rooms[room_id].get_number_of_people() << std::endl;
 		}
 
 		if (normal_rooms[room_id].get_number_of_people() == 2) {
@@ -579,6 +584,9 @@ void ServerMain::process_packet(char* packet, int client_id)
 	} break;
 	case static_cast<int>(packet_type::cs_esc):
 	{
+		int room_id = clients[client_id].room_id;
+		normal_rooms[room_id].exit_room();
+
 		clients[client_id].tm_id = -1;
 
 		clients[clients[client_id].tm_id].send_esc_packet();

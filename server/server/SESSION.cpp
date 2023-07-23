@@ -7,8 +7,8 @@ SESSION::SESSION()
 	: state(state::free)
 	, sock(0)
 	, id(-1)
-	, current_stage(0)
-	, db_stage(0)
+	, current_stage(1)
+	, db_stage(1)
 	, location(-1.f, -1.f, -1.f)
 	, yaw(0.f)
 	, tm_id(-1)
@@ -177,6 +177,15 @@ void SESSION::send_enter_room_fail_packet()
 	sc_enter_room_fail_packet pack;
 	pack.size = sizeof(pack);
 	pack.type = static_cast<char>(packet_type::sc_enter_room_fail);
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_delete_room_packet()
+{
+	sc_delete_room_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_delete_room);
 
 	send_packet(reinterpret_cast<char*>(&pack));
 }
