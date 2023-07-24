@@ -89,7 +89,7 @@ void ACPP_Elevator::OnComponentBeginOverlap_boxCollision(UPrimitiveComponent* Ov
 
 	UE_LOG(LogTemp, Warning, TEXT("hi~"));
 
-	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+	SOCKET* sock = Cast<UCPP_CobotGameInstance>(GetWorld()->GetGameInstance())->GetSocketMgr()->GetSocket();;
 
 	// 서버로 엘베 들어온거 보내기 (패킷)
 	cs_elevator_packet pack;
@@ -105,7 +105,7 @@ void ACPP_Elevator::OnComponentEndOverlap_boxCollision(UPrimitiveComponent* Over
 {
 	--checkNumOfCobot;
 
-	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
+	SOCKET* sock = Cast<UCPP_CobotGameInstance>(GetWorld()->GetGameInstance())->GetSocketMgr()->GetSocket();;
 
 	cs_elevator_packet pack;
 	pack.size = sizeof(pack);

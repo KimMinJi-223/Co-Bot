@@ -130,6 +130,7 @@ private:
 	float rotate_min;
 	float rotate_max;
 
+	bool isClear;
 
 
 };

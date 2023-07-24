@@ -130,7 +130,11 @@ void ACPP_Cobot_Controller::Tick(float DeltaTime)
 	}
  */
  //UE_LOG(LogTemp, Warning, TEXT("tick: %d"), id);
-
+	if (isClear) {
+		FVector P2Location = Player_2->GetActorLocation();
+		P2Location.Z = player->GetActorLocation().Z;
+		Player_2->SetActorLocation(P2Location);
+	}
 	RecvPacket();
 }
 
@@ -346,6 +350,10 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
 	{
 		Cast<ACPP_Elevator>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Elevator::StaticClass()))->ElevatorOperateCameraMoveLevelChange();
 		UE_LOG(LogTemp, Warning, TEXT("sc_elevator"));
+		player->GetMesh()->SetAnimInstanceClass(nullptr);
+		Player_2->GetMesh()->SetAnimInstanceClass(nullptr);
+		isClear = true;
+
 	} break;
 	case static_cast<int>(packet_type::sc_push_button_Forklift_red):
 	{
