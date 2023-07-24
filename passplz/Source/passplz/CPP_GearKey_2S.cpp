@@ -175,6 +175,9 @@ void ACPP_GearKey_2S::OnClearOverlap(UPrimitiveComponent* OverlappedComponent, A
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->clearFX, spawnLocation);
 
 	blockCube->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/firework_rocket_launch.firework_rocket_launch"));
+	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
 }
 
 void ACPP_GearKey_2S::BridgeTimer()

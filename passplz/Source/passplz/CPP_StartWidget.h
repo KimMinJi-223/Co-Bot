@@ -68,6 +68,8 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 		bool isSuccessLogin;
 
+
+
 	//회원가입 관련
 	UPROPERTY(BlueprintReadWrite)
 		FString signupID;

@@ -27,9 +27,6 @@ public:
 
 private:
 	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* cannonMuzzle;
-
-	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* cannonStand;
 
 protected:
@@ -57,6 +54,10 @@ protected:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		AActor* clearActor;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		UStaticMeshComponent* cannonMuzzle;
+
 
 	//서버 : 조준점 위치 정해주는 거
 	void SetBombDropLocation(int player_number, double value);

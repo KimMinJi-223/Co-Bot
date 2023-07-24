@@ -102,6 +102,11 @@ void ACPP_Cannon::FireLava()
 	ACPP_Lava* lavaBall = GetWorld()->SpawnActor<ACPP_Lava>(ACPP_Lava::StaticClass(), fireStartLocation, GetActorRotation());
 	lavaBall->ProjectileMovementComponent->Velocity = projectileVelocity;
 	lavaBall->ProjectileMovementComponent->Activate();
+	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/missle_shot.missle_shot"));
+	UGameplayStatics::PlaySound2D(this, Sound);
+	FOutputDeviceNull pAR;
+	CallFunctionByNameWithArguments(TEXT("Launch"), pAR, nullptr, true);
+
 }
 
 void ACPP_Cannon::OnComponentBeginOverlap_lavaCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

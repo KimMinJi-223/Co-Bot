@@ -63,7 +63,7 @@ bool UCPP_StartWidget::SendLoginIDPW()
 		// 서버에서 db에 저장되어 있는 스테이지 값을 보내준다.
 		sc_login_success_packet* pack = reinterpret_cast<sc_login_success_packet*>(&buff);
 
-		pack->stage; // 여기에 DB에 저장되어 있던 stage가 넘어온다.
+		Cast<UCPP_CobotGameInstance>(GetWorld()->GetGameInstance())->permitStage = pack->stage; // 여기에 DB에 저장되어 있던 stage가 넘어온다.
 		// 예) 2면 1, 2가능 
 
 		return true;

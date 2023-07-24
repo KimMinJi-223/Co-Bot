@@ -126,6 +126,7 @@ void ACPP_Color_Forklift::FindAndMoveForkliftByColor()
 
 	if (!GetWorldTimerManager().IsTimerActive(forkliftsMoveTimer)) {
 		GetWorld()->GetTimerManager().SetTimer(forkliftsMoveTimer, this, &ACPP_Color_Forklift::ForkliftMoveTimer, 0.03f, true);
+		
 	}
 }
 
@@ -136,15 +137,20 @@ void ACPP_Color_Forklift::ForkliftMoveTimer()
 		if (isForkliftsMove[i]) {
 			stopTimer = false;
 
+			USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_1/forklift_movement_Cue.forklift_movement_Cue"));
+			UGameplayStatics::PlaySoundAtLocation(this, Sound, Forklifts[i]->GetComponentLocation(), GetActorRotation());
+
 			Forklifts[i]->AddLocalOffset(FVector(forklifrsdirection[i], 0.0f, 0.0f));
 			forkliftsMoveTime[i] += 0.03;
 			if (forkliftsMoveTime[i] > 3.f) {
 				isForkliftsMove[i] = false;
 				forklifrsdirection[i] *= -1;
 				forkliftsMoveTime[i] = 0.f;
+			
 			}
 		}
 	}
+
 
 	if (stopTimer)
 		GetWorldTimerManager().ClearTimer(forkliftsMoveTimer);

@@ -490,11 +490,11 @@ void ServerMain::process_packet(char* packet, int client_id)
 		//}
 		// ------------------------------
 
-		//bool is_matching = matching(client_id);
-		//if (!is_matching)
-		//	std::cout << "이미 다른 팀원이 있습니다." << std::endl;
+		/*bool is_matching = matching(client_id);
+		if (!is_matching)
+			std::cout << "이미 다른 팀원이 있습니다." << std::endl;
 
-		//set_team_position(client_id);
+		set_team_position(client_id);*/
 	} break;
 	case static_cast<int>(packet_type::cs_create_room):
 	{
@@ -566,9 +566,11 @@ void ServerMain::process_packet(char* packet, int client_id)
 		cs_show_room_list_packet* pack = reinterpret_cast<cs_show_room_list_packet*>(packet);
 
 		std::cout << "show normal room list\n";
-		for (int i{}; i < MAX_ROOM; ++i)
-			if (normal_rooms[i].is_use())
-				clients[client_id].send_show_room_list_packet(normal_rooms[i].get_room_name(), clients[normal_rooms[i].get_host_id()].name, i, normal_rooms[i].get_stage());
+		/*for (int i{}; i < MAX_ROOM; ++i)
+		   if (normal_rooms[i].is_use())
+			  clients[client_id].send_show_room_list_packet(normal_rooms[i].get_room_name(), clients[normal_rooms[i].get_host_id()].name, i, normal_rooms[i].get_stage());*/
+
+		clients[client_id].send_show_room_list_packet(normal_rooms[0].get_room_name(), clients[normal_rooms[0].get_host_id()].name, 0, normal_rooms[0].get_stage());
 
 		std::cout << "list end\n";
 		clients[client_id].send_show_room_list_end_packet();
