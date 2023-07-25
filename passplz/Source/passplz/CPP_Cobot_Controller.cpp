@@ -161,6 +161,12 @@ void ACPP_Cobot_Controller::RecvPacket()
 	while (remain_data > 0)
 	{
 		int packet_size = p[0];
+		if (0 == packet_size) {
+			UE_LOG(LogTemp, Warning, TEXT("packet size: 0!!!!!!!!!!!!"));
+			remain_data = 0;
+			return;
+		}
+
 		if (packet_size <= remain_data)
 		{
 			ProcessPacket(p);
