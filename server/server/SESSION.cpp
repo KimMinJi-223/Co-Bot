@@ -289,6 +289,8 @@ void SESSION::send_elevator_ok_packet()
 	pack.type = static_cast<char>(packet_type::sc_elevator);
 
 	send_packet(reinterpret_cast<char*>(&pack));
+
+	std::cout << id << " client: send elevator packet\n";
 }
 
 void SESSION::send_forklift_button(packet_type type)

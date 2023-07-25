@@ -48,7 +48,7 @@ bool UCPP_StartWidget::SendLoginIDPW()
 	ioctlsocket(*sock, FIONBIO, &nonBlockingMode); // sock을 논블로킹 모드로 설정
 
 	if (ret != buff[0]) {
-		UE_LOG(LogTemp, Warning, TEXT("%d start widget signup recv err"), ret);
+		UE_LOG(LogTemp, Warning, TEXT("%d start widget login recv err"), ret);
 		return false;
 	}
 

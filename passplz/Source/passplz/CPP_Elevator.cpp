@@ -98,6 +98,8 @@ void ACPP_Elevator::OnComponentBeginOverlap_boxCollision(UPrimitiveComponent* Ov
 	pack.elevator_number = checkNumOfCobot;
 
 	send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
+
+	UE_LOG(LogTemp, Warning, TEXT("send elevator packet"));
 }
 
 void ACPP_Elevator::OnComponentEndOverlap_boxCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
