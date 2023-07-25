@@ -232,6 +232,31 @@ void ServerMain::worker_thread()
 			while (remain_data > 0)
 			{
 				int packet_size = p[0];
+				if (0 == packet_size) {
+					std::cout << "packet size: 0!!!!!!!!!!!!!!!!\n";
+
+					clients[key].prev_remain = 0;
+
+					int tm_id = clients[key].tm_id;
+					clients[key].send_cobot_button(packet_type::sc_push_button_cobot_green);
+					clients[tm_id].send_cobot_button(packet_type::sc_push_button_cobot_green);
+
+					clients[key].send_left_move_packet(key); // 움직인 클라한테 보내기
+					clients[tm_id].send_left_move_packet(key); // 상대 클라한테 보내기
+
+					clients[key].send_right_move_packet(key); // 움직인 클라한테 보내기
+					clients[tm_id].send_right_move_packet(key); // 상대 클라한테 보내기
+
+					clients[key].send_left_move_packet(tm_id); // 움직인 클라한테 보내기
+					clients[tm_id].send_left_move_packet(tm_id); // 상대 클라한테 보내기
+
+					clients[key].send_right_move_packet(tm_id); // 움직인 클라한테 보내기
+					clients[tm_id].send_right_move_packet(tm_id); // 상대 클라한테 보내기
+
+					clients[key].recv_packet();
+
+					return;
+				}
 				if (packet_size <= remain_data) {
 					process_packet(p, static_cast<int>(key));
 					p = p + packet_size;
