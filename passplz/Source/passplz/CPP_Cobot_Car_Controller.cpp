@@ -163,44 +163,28 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 
 		UE_LOG(LogTemp, Warning, TEXT("direction: %lf"), pack->direction);
 
-		if (0.0 == pack->direction) {
+		/*if (0.0 == pack->direction) {
 
 			CarForward(1);
-			player->ChangAim(true, true);
 		}
 		else {
 			if (pack->direction > 0.0) {
 				CarForward(50.f);
-
-				player->ChangAim(false, true);
 			}
 		
 			else {
-
-				player->ChangAim(true, false);
 			CarRotation(pack->direction * 5.f);
 			}
 
+		}*/
+
+		if (0.0 == pack->direction) {
+
+			CarForward(pack->acceleration);
 		}
-
-		//if (0.0 == pack->direction) {
-
-		//	CarForward(pack->acceleration);
-		//	player->ChangAim(true, true);
-		//}
-		//else {
-		//	if (pack->direction > 0.0) {
-
-		//		player->ChangAim(false, true);
-		//	}
-
-		//	else {
-
-		//		player->ChangAim(true, false);
-		//	}
-
-		//	CarRotation(pack->direction);
-		//}
+		else {
+			CarRotation(pack->direction);
+		}
 
 	} break;
 	case static_cast<int>(packet_type::sc_car_location):
@@ -217,6 +201,8 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 	case static_cast<int>(packet_type::sc_car_rotation_yaw):
 	{
 		sc_car_rotation_yaw_packet* pack = reinterpret_cast<sc_car_rotation_yaw_packet*>(packet);
+		UE_LOG(LogTemp, Warning, TEXT("%f"), pack->yaw);
+
 
 		SetPlayerYaw(pack->yaw);
 	} break;
@@ -419,6 +405,7 @@ void ACPP_Cobot_Car_Controller::CarRotation(float rotationValue)
 	float preYaw = player->GetActorRotation().Yaw;
 	preYaw += rotationValue;
 	//여기서 preYaw를 send하면 됨
+	UE_LOG(LogTemp, Warning, TEXT("preYaw %f, rotationValue %f"), preYaw, rotationValue);
 
 	cs_car_rotation_yaw_packet pack;
 	pack.size = sizeof(pack);
@@ -437,10 +424,17 @@ void ACPP_Cobot_Car_Controller::SetPlayerLocation(FVector newLocation)
 void ACPP_Cobot_Car_Controller::SetPlayerYaw(float newYaw)
 {
 	FRotator control_rotation = GetControlRotation();
-	if (control_rotation.Yaw > newYaw)
+	UE_LOG(LogTemp, Warning, TEXT("control_rotation.Yaw %f > newYaw %f"), control_rotation.Yaw, newYaw);
+
+	if (control_rotation.Yaw > newYaw) {
+		UE_LOG(LogTemp, Warning, TEXT("control_rotation.Yaw > newYaw"));
 		player->ChangAim(false, true);
-	else
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("else"));
+
 		player->ChangAim(true, false);
+	}
 
 	control_rotation.Yaw = newYaw;
 	SetControlRotation(control_rotation);
