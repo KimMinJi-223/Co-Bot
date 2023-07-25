@@ -116,16 +116,16 @@ void ACPP_Cobot_Car_Controller::RecvPacket()
 	int ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
 	if (ret <= 0)
 	{
-		//GetLastError();
-		//UE_LOG(LogTemp, Warning, TEXT("recv() fail"));
-		//std::cout << "recv() fail!" << std::endl;
+		GetLastError();
+		std::cout << "recv() fail!" << std::endl;
 		return;
 	}
-
 	if (prev_remain > 0) // 만약 전에 남아있는 데이터가 있다면
 	{
-		strcat(prev_packet_buff, buff);
-	} else {
+		strcat_s(prev_packet_buff, buff);
+	}
+	else
+	{
 		memcpy(prev_packet_buff, buff, ret);
 	}
 	int remain_data = ret + prev_remain;
@@ -133,12 +133,19 @@ void ACPP_Cobot_Car_Controller::RecvPacket()
 	while (remain_data > 0)
 	{
 		int packet_size = p[0];
+		if (0 == packet_size) {
+			UE_LOG(LogTemp, Warning, TEXT("packet size: 0!!!!!!!!!!!!"));
+			remain_data = 0;
+			return;
+		}
+
 		if (packet_size <= remain_data)
 		{
 			ProcessPacket(p);
 			p = p + packet_size;
 			remain_data -= packet_size;
-		} else break;
+		}
+		else break;
 	}
 	prev_remain = remain_data;
 	if (remain_data > 0)
