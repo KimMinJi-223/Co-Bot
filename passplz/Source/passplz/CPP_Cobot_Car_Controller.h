@@ -84,6 +84,7 @@ private:
 public:
 
 	//a나 d를 누름
+	UFUNCTION(BlueprintCallable)
 	void CarInput(const FInputActionValue& Value);
 
 	//1클라는 대포의 목표지점을 앞뒤로, 2클라는 목표지점을 양옆으로 조준한다.(서버에서 계산)

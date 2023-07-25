@@ -403,7 +403,7 @@ void ACPP_Cobot_Car_Controller::CarForward(float acceleration)
 
 	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 
-	player->SetActorLocation(preLocation);
+	//player->SetActorLocation(preLocation);
 }
 
 void ACPP_Cobot_Car_Controller::CarRotation(float rotationValue)
