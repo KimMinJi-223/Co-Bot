@@ -7,6 +7,7 @@
 #include "CPP_Cobot_Car_Controller.h"
 #include "CPP_Cobot_Car.h"
 //#include "Engine/World.h"
+#include "CPP_Elevator.h"
 #include "CPP_Stage3Cobot.h"
 #include "CPP_Cannon.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -271,6 +272,15 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 		ButtonIndex = pack->index; // 여기에 상대방이 누른 인덱스 값이 넘어옴.
 		FOutputDeviceNull pAR;
 		bridge->CallFunctionByNameWithArguments(TEXT("getButton"), pAR, nullptr, true);
+	} break;
+	case static_cast<int>(packet_type::sc_elevator):
+	{
+		Cast<ACPP_Elevator>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Elevator::StaticClass()))->ElevatorOperateCameraMoveLevelChange();
+		UE_LOG(LogTemp, Warning, TEXT("sc_elevator"));
+		//player->GetMesh()->SetAnimInstanceClass(nullptr);
+		//Player_2->GetMesh()->SetAnimInstanceClass(nullptr);
+		//isClear = true;
+		//UE_LOG(LogTemp, Warning, TEXT("recv elevator packet"));
 	} break;
 	case static_cast<int>(packet_type::sc_esc):
 	{
