@@ -331,17 +331,17 @@ void ServerMain::worker_thread()
 			if (clients[key].move_car) {
 				if (clients[clients[key].tm_id].move_car) {
 					direction = 0.0;
-					acceleration += 0.3;
+					acceleration += 0.1;
 
-					if (acceleration >= 50.f)
-						acceleration = 50.f;
+					if (acceleration >= 20.f)
+						acceleration = 20.f;
 				} else {
 					acceleration = 0.0;
 
 					if (key < clients[key].tm_id)
-						direction = -0.5;
+						direction = -1.5;
 					else
-						direction = 0.5;
+						direction = 1.5;
 				}
 
 				// std::cout << key << " client is push? " << clients[key].move_car << ", " << clients[key].tm_id << " client is push? " << clients[clients[key].tm_id].move_car << std::endl;
@@ -925,8 +925,11 @@ void ServerMain::process_packet(char* packet, int client_id)
 	{
 		cs_car_location_packet* pack = reinterpret_cast<cs_car_location_packet*>(packet);
 
-		clients[client_id].send_car_location_packet(pack->car_location);
-		clients[clients[client_id].tm_id].send_car_location_packet(pack->car_location);
+		int team_id = normal_rooms[clients[client_id].room_id].get_team_id();
+
+		clients[team_id].send_car_location_packet(pack->car_location);
+		// clients[client_id].send_car_location_packet(pack->car_location);
+		// clients[clients[client_id].tm_id].send_car_location_packet(pack->car_location);
 	} break;
 	case static_cast<int>(packet_type::cs_car_rotation_yaw):
 	{
