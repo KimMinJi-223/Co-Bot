@@ -150,7 +150,7 @@ void ACPP_Cobot_Controller::RecvPacket()
 	}
 	if (prev_remain > 0) // 만약 전에 남아있는 데이터가 있다면
 	{
-		strcat(prev_packet_buff, buff);
+		strcat_s(prev_packet_buff, buff);
 	}
 	else
 	{
@@ -161,6 +161,12 @@ void ACPP_Cobot_Controller::RecvPacket()
 	while (remain_data > 0)
 	{
 		int packet_size = p[0];
+		if (packet_size == 0) {
+			UE_LOG(LogTemp, Warning, TEXT("packet size 0!!!!!"))
+				remain_data = 0;
+			return;
+		}
+
 		if (packet_size <= remain_data)
 		{
 			ProcessPacket(p);
@@ -179,42 +185,42 @@ void ACPP_Cobot_Controller::RecvPacket()
 
 	int recv_ret = recv(*sock, reinterpret_cast<char*>(&recv_buff), BUF_SIZE, 0);
 	if (recv_ret <= 0)
-		return;
+	   return;
 
 	UE_LOG(LogTemp, Warning, TEXT("number of copies: %d"), ring_buff.number_of_copies);
 	UE_LOG(LogTemp, Warning, TEXT("write pos: %d"), ring_buff.write_pos);
 	UE_LOG(LogTemp, Warning, TEXT("read pos: %d"), ring_buff.read_pos);
 	int enqueue_ret = ring_buff.enqueue(recv_buff, recv_ret);
 	if (static_cast<int>(error::full_buffer) == enqueue_ret) {
-		UE_LOG(LogTemp, Warning, TEXT("full buffer"));
-		return;
+	   UE_LOG(LogTemp, Warning, TEXT("full buffer"));
+	   return;
 	} else if (static_cast<int>(error::in_data_is_too_big) == enqueue_ret) {
-		UE_LOG(LogTemp, Warning, TEXT("in data is too big"));
-		return;
+	   UE_LOG(LogTemp, Warning, TEXT("in data is too big"));
+	   return;
 	} else if(static_cast<int>(error::no_seat_in_buffer) == enqueue_ret) {
-		UE_LOG(LogTemp, Warning, TEXT("no seat in buffer"));
-		return;
+	   UE_LOG(LogTemp, Warning, TEXT("no seat in buffer"));
+	   return;
 	}
 
 	while ((ring_buff.remain_data() != 0 && ring_buff.peek_front() != 0) && (ring_buff.peek_front() <= ring_buff.remain_data()))
 	{
-		char pack_size = ring_buff.peek_front();
-		char dequeue_data[BUFFER_SIZE] = {};
+	   char pack_size = ring_buff.peek_front();
+	   char dequeue_data[BUFFER_SIZE] = {};
 
-		UE_LOG(LogTemp, Warning, TEXT("enqueue ret: %d"), enqueue_ret);
-		UE_LOG(LogTemp, Warning, TEXT("remain data: %d"), ring_buff.remain_data());
-		UE_LOG(LogTemp, Warning, TEXT("pack size: %d"), pack_size);
-		int dequeue_ret = ring_buff.dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
-		if (static_cast<int>(error::no_data_in_buffer) == dequeue_ret) {
-			UE_LOG(LogTemp, Warning, TEXT("no data in buffer"));
-			break;
-		} else if (static_cast<int>(error::out_data_is_too_big) == dequeue_ret) {
-			UE_LOG(LogTemp, Warning, TEXT("out data is too buffer"));
-			break;
-		}
-		UE_LOG(LogTemp, Warning, TEXT("dequeue ret: %d"), dequeue_ret);
+	   UE_LOG(LogTemp, Warning, TEXT("enqueue ret: %d"), enqueue_ret);
+	   UE_LOG(LogTemp, Warning, TEXT("remain data: %d"), ring_buff.remain_data());
+	   UE_LOG(LogTemp, Warning, TEXT("pack size: %d"), pack_size);
+	   int dequeue_ret = ring_buff.dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
+	   if (static_cast<int>(error::no_data_in_buffer) == dequeue_ret) {
+		  UE_LOG(LogTemp, Warning, TEXT("no data in buffer"));
+		  break;
+	   } else if (static_cast<int>(error::out_data_is_too_big) == dequeue_ret) {
+		  UE_LOG(LogTemp, Warning, TEXT("out data is too buffer"));
+		  break;
+	   }
+	   UE_LOG(LogTemp, Warning, TEXT("dequeue ret: %d"), dequeue_ret);
 
-		ProcessPacket(dequeue_data);
+	   ProcessPacket(dequeue_data);
 	}*/
 }
 
@@ -249,6 +255,13 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
 				Player_2->Current_right.Z = pack->current.z;
 
 				Player_2->Time_right = pack->time;
+			}
+
+			if (!Player_2) {
+				UE_LOG(LogTemp, Warning, TEXT("Player_2 Spawn"));
+				Player_2 = GetWorld()->SpawnActor<ACPP_Cobot>(ACPP_Cobot::StaticClass(), FVector(-7500.f, 3470.f, 500.f), FRotator(0.0f, 0.0f, 0.0f));
+				Player_2->GetMesh()->SetVectorParameterValueOnMaterials(TEXT("cobot_color"), FVector(0.0f, 1.0f, 0.0f));
+				Player_2->SetCollision();
 			}
 
 			Player_2->SetActorLocation(FVector(tm_location.x, tm_location.y, tm_location.z));
@@ -415,7 +428,7 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
 			FOutputDeviceNull pAR;
 			Cast<ACPP_Tutorial_Light>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Tutorial_Light::StaticClass()))->clearActor->CallFunctionByNameWithArguments(TEXT("GameEnd"), pAR, nullptr, true);
 		}
-		else if(pack->stage == 2) {
+		else if (pack->stage == 2) {
 			FOutputDeviceNull pAR;
 			Cast<ACPP_Time_Color_Button>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Time_Color_Button::StaticClass()))->clearActor->CallFunctionByNameWithArguments(TEXT("GameEnd"), pAR, nullptr, true);
 		}
@@ -609,8 +622,8 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 
 		  //  UE_LOG(LogTemp, Warning, TEXT("%f"), HitResult.Location.Z);
 
-				SendMovePacket(direction::left);
-	
+			SendMovePacket(direction::left);
+
 		}
 	}
 	else {
@@ -619,8 +632,8 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 			player->Target_left = player->Current_left;
 			player->Time_left = 0.f;
 
-				SendMovePacket(direction::left);
-	
+			SendMovePacket(direction::left);
+
 		}
 
 		if (((int)NewAxisValue) == 2) { // D key
@@ -653,9 +666,9 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 							if (HitResult.IsValidBlockingHit())
 								player->Current_right = HitResult.Location;*/
 
-			
-					SendMovePacket(direction::right);
-	
+
+				SendMovePacket(direction::right);
+
 
 			}
 		}
@@ -666,8 +679,8 @@ void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 
 				player->Time_right = 0.f;
 
-					SendMovePacket(direction::right);
-		
+				SendMovePacket(direction::right);
+
 			}
 		}
 	}

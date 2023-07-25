@@ -300,6 +300,9 @@ void ACPP_Stage2_MissionButton::OnMazeLeftEndOverlap(UPrimitiveComponent* Overla
 //기어 버튼 충돌 시작
 void ACPP_Stage2_MissionButton::OnGearforwardOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_1/button_click_Cue.button_click_Cue"));
+	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
+
 	isGearForward = true;
 	HasTimer(gearTimer, 1);
 	UE_LOG(LogTemp, Warning, TEXT("OnGearforwardOverlap"));
@@ -307,6 +310,9 @@ void ACPP_Stage2_MissionButton::OnGearforwardOverlap(UPrimitiveComponent* Overla
 
 void ACPP_Stage2_MissionButton::OnGearBackOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_1/button_click_Cue.button_click_Cue"));
+	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
+
 	isGearBack = true;
 	HasTimer(gearTimer, 1);
 	UE_LOG(LogTemp, Warning, TEXT("OnGearBackOverlap"));
@@ -314,6 +320,9 @@ void ACPP_Stage2_MissionButton::OnGearBackOverlap(UPrimitiveComponent* Overlappe
 
 void ACPP_Stage2_MissionButton::OnGearRightOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_1/button_click_Cue.button_click_Cue"));
+	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
+
 	isGearRight = true;
 	HasTimer(gearTimer, 1);
 	UE_LOG(LogTemp, Warning, TEXT("OnGearRightOverlap"));
@@ -321,6 +330,9 @@ void ACPP_Stage2_MissionButton::OnGearRightOverlap(UPrimitiveComponent* Overlapp
 
 void ACPP_Stage2_MissionButton::OnGearLeftOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
+	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_1/button_click_Cue.button_click_Cue"));
+	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
+
 	isGearLeft = true;
 	HasTimer(gearTimer, 1);
 	UE_LOG(LogTemp, Warning, TEXT("OnGearLeftOverlap"));
