@@ -150,32 +150,32 @@ void UCPP_StartWidget::CreateRoom()
 	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 	if (ret <= 0) UE_LOG(LogTemp, Warning, TEXT("CreateRoom() send err"));
 
+	u_long BlockingMode = 0;
+	ioctlsocket(*sock, FIONBIO, &BlockingMode); // sock을 블로킹 모드로 설정
+
+	char buff[BUF_SIZE];
+	ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
+
+	u_long nonBlockingMode = 1;
+	ioctlsocket(*sock, FIONBIO, &nonBlockingMode); // sock을 논블로킹 모드로 설정
+
+	if (ret != buff[0])
+		UE_LOG(LogTemp, Warning, TEXT("create room recv err"));
+
+	switch (buff[1])
+	{
+	case static_cast<int>(packet_type::sc_create_room_ok):
+	{
+		sc_create_room_ok_packet* recv_pack = reinterpret_cast<sc_create_room_ok_packet*>(&buff);
+		roomID = recv_pack->room_id;
+		roomName = WCHAR_TO_TCHAR(recv_pack->room_name);
+
+		UE_LOG(LogTemp, Warning, TEXT("recv room id: %d"), roomID);
+	} break;
+	}
+
 	FOutputDeviceNull pAR;
 	CallFunctionByNameWithArguments(TEXT("wait"), pAR, nullptr, true);
-
-	//u_long BlockingMode = 0;
-	//ioctlsocket(*sock, FIONBIO, &BlockingMode); // sock을 블로킹 모드로 설정
-
-	//char buff[BUF_SIZE];
-	//ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
-
-	//u_long nonBlockingMode = 1;
-	//ioctlsocket(*sock, FIONBIO, &nonBlockingMode); // sock을 논블로킹 모드로 설정
-
-	//if (ret != buff[0])
-	//	UE_LOG(LogTemp, Warning, TEXT("create room recv err"));
-
-	//switch (buff[1])
-	//{
-	//case static_cast<int>(packet_type::sc_create_room_ok):
-	//{
-	//	sc_create_room_ok_packet* recv_pack = reinterpret_cast<sc_create_room_ok_packet*>(&buff);
-	//	roomID = recv_pack->room_id;
-	//	roomName = WCHAR_TO_TCHAR(recv_pack->room_name);
-
-	//	
-	//} break;
-	//}
 }
 
 void UCPP_StartWidget::NormalModeRefresh()
@@ -244,6 +244,8 @@ void UCPP_StartWidget::PlayGame(int roomId)
 		pack.size = sizeof(pack);
 		pack.type = static_cast<char>(packet_type::cs_enter_room);
 		pack.room_id = roomId;
+
+		UE_LOG(LogTemp, Warning, TEXT("room id: %d"), roomId);
 
 		int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 

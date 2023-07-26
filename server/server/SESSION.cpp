@@ -107,20 +107,20 @@ void SESSION::send_login_fail_packet()
 	send_packet(reinterpret_cast<char*>(&pack));
 }
 
-//void SESSION::send_create_room_ok(wchar_t* room_name)
-//{
-//	sc_create_room_ok_packet pack;
-//	pack.size = sizeof(pack);
-//	pack.type = static_cast<char>(packet_type::sc_create_room_ok);
-//	pack.room_id = room_id;
-//	pack.host_id = id;
-//	pack.stage = stage;
-//	wcscpy_s(pack.room_name, MAX_NAME, room_name);
-//
-//	send_packet(reinterpret_cast<char*>(&pack));
-//
-//	std::cout << "create room ok send" << std::endl;
-//}
+void SESSION::send_create_room_ok(wchar_t* room_name)
+{
+	sc_create_room_ok_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_create_room_ok);
+	pack.room_id = room_id;
+	pack.host_id = id;
+	// pack.stage = stage;
+	wcscpy_s(pack.room_name, MAX_NAME, room_name);
+
+	send_packet(reinterpret_cast<char*>(&pack));
+
+	std::cout << "create room ok send" << std::endl;
+}
 
 void SESSION::send_game_start_packet(int stage)
 {
