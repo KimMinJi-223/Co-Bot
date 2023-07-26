@@ -138,24 +138,27 @@ bool ServerMain::AssociateSocketWithIOCP(SOCKET sock, ULONG_PTR key)
 
 void disconnect(int c_id)
 {
-	for (auto& pl : clients) {
-		{
-			std::lock_guard<std::mutex> ll(pl.sock_lock);
-			if (state::ingame != pl.state) continue;
-		}
-		{
-			std::lock_guard<std::mutex> ll(clients[pl.tm_id].sock_lock);
-			if (state::ingame != clients[pl.tm_id].state) continue;
-		}
-		sc_logout_packet p;
-		p.size = sizeof(p);
-		p.type = static_cast<char>(packet_type::sc_logout);
-		clients[pl.tm_id].send_logout_packet();
-	}
-	closesocket(clients[c_id].sock);
+	//for (auto& pl : clients) {
+	//	{
+	//		std::lock_guard<std::mutex> ll(pl.sock_lock);
+	//		if (state::ingame != pl.state) continue;
+	//	}
+	//	{
+	//		std::lock_guard<std::mutex> ll(clients[pl.tm_id].sock_lock);
+	//		if (state::ingame != clients[pl.tm_id].state) continue;
+	//	}
+	//	//sc_logout_packet p;
+	//	//p.size = sizeof(p);
+	//	//p.type = static_cast<char>(packet_type::sc_logout);
+	//	// clients[pl.tm_id].send_logout_packet();
+	//}
 
-	std::lock_guard<std::mutex> ll(clients[c_id].sock_lock);
-	clients[c_id].state = state::free;
+	{
+		std::lock_guard<std::mutex> ll(clients[c_id].sock_lock);
+		clients[c_id].state = state::free;
+	}
+
+	closesocket(clients[c_id].sock);
 }
 
 void ServerMain::worker_thread()
@@ -179,9 +182,9 @@ void ServerMain::worker_thread()
 			std::cout << "num bytes: " << num_bytes << "over_ex mode: IO_RECV" << "over_ex mode: IO_SEND" << std::endl;
 
 			if (IO_SEND == over_ex->mode)
-				delete over_ex;
-
-				continue;
+				 delete over_ex;
+			
+			continue;
 		}
 
 		switch (over_ex->mode)
@@ -347,9 +350,10 @@ void ServerMain::worker_thread()
 				// std::cout << key << " client is push? " << clients[key].move_car << ", " << clients[key].tm_id << " client is push? " << clients[clients[key].tm_id].move_car << std::endl;
 
 				// 여기서 호스트한테만 보내야 한다.
-				int host_id = normal_rooms[clients[key].room_id].get_host_id();
-				std::cout << "host id: " << host_id;
-				clients[host_id].send_move_car_packet(direction, acceleration);
+				/*int room_id = clients[key].room_id;
+				int host_id = normal_rooms[0].host_id;*/
+				std::cout << "host id: " << key;
+				clients[key].send_move_car_packet(direction, acceleration);
 				/*clients[key].send_move_car_packet(direction, acceleration);
 				clients[clients[key].tm_id].send_move_car_packet(direction, acceleration);*/
 
@@ -448,6 +452,20 @@ void ServerMain::process_packet(char* packet, int client_id)
 		cs_login_packet* pack = reinterpret_cast<cs_login_packet*>(packet);
 		printf("%d client로부터 login packet을 받았습니다.\n", client_id);
 
+		char* input_id = ConvertWCtoC(pack->id);
+		for (int i{}; i < MAX_USER; ++i) {
+			clients[i].state_lock.lock();
+			if (clients[i].state == state::ingame) {
+				clients[i].state_lock.unlock();
+				if (strcmp(input_id, ConvertWCtoC(clients[i].name)) == 0) {
+					clients[client_id].send_login_fail_packet();
+					break;
+				}
+			} else {
+				clients[i].state_lock.unlock();
+			}
+		}
+
 		wcscpy_s(clients[client_id].name, MAX_NAME, pack->id);
 		wprintf(L"%d client의 name: %s,\n", client_id, clients[client_id].name);
 
@@ -532,14 +550,14 @@ void ServerMain::process_packet(char* packet, int client_id)
 
 		room_id = get_normal_room_id();
 
-		std::cout << "create rood id: " << room_id << std::endl;
-
 		clients[client_id].room_id = room_id;
 
 		normal_rooms[room_id].set_room_name(pack->room_name);
 		normal_rooms[room_id].set_host_id(client_id);
 		normal_rooms[room_id].set_number_of_people(0);
 		normal_rooms[room_id].set_stage(pack->stage);
+
+		std::cout << "create rood id: " << room_id << ", host id: " << normal_rooms[room_id].get_host_id() << std::endl;
 
 		clients[client_id].send_create_room_ok(normal_rooms[room_id].get_room_name());
 	} break;
@@ -763,9 +781,11 @@ void ServerMain::process_packet(char* packet, int client_id)
 
 			clients[client_id].send_elevator_ok_packet();
 			clients[clients[client_id].tm_id].send_elevator_ok_packet();
-		} else if (3 == clients[client_id].current_stage && 4 == pack->elevator_number) {
-			std::cout << "recv stage3 elevator packet\n";
-			++clients[client_id].current_stage;
+		} else if (3 == clients[client_id].current_stage && 1 == pack->elevator_number) {
+			std::cout << client_id << " client recv stage3 elevator packe" << pack->elevator_number << " elevator number\n";
+
+			if (4 > clients[client_id].current_stage)
+				++clients[client_id].current_stage;
 
 			int tm_id = clients[client_id].tm_id;
 			if (clients[client_id].current_stage == clients[tm_id].current_stage) {
@@ -803,6 +823,9 @@ void ServerMain::process_packet(char* packet, int client_id)
 					SQLCloseCursor(sqlstmt);
 					SQLFreeStmt(sqlstmt, SQL_UNBIND);
 				}
+
+				clients[client_id].current_stage = 1;
+				clients[tm_id].current_stage = 1;
 
 				clients[client_id].send_elevator_ok_packet();
 				clients[clients[client_id].tm_id].send_elevator_ok_packet();
@@ -1005,39 +1028,39 @@ void ServerMain::process_packet(char* packet, int client_id)
 	}
 }
 
-bool ServerMain::matching(int client_id) // 후에 없어질 함수
-{
-	for (int i{}; ; ++i)
-	{
-		if (MAX_USER == i) i = 0;
-		//clients[i].state_lock.lock();
-		if (state::ingame != clients[i].state || i == client_id) continue;
-		//clients[i].state_lock.unlock();
-
-		//clients[client_id].match_lock.lock();
-		if (-1 == clients[client_id].tm_id) {
-			//clients[i].match_lock.lock();
-			if (-1 == clients[i].tm_id) {
-			 	clients[client_id].tm_id = clients[i].id;
-				clients[i].tm_id = client_id;
-				//clients[i].match_lock.unlock();
-				//clients[client_id].match_lock.unlock();
-
-				std::cout << i << ", " << client_id << "matching!" << std::endl;
-
-				return true;
-			}
-			else {
-				//clients[i].match_lock.unlock();
-			}
-		}
-		else { // 이미 팀원이 있다는 소리
-			//clients[client_id].match_lock.unlock();
-
-			return false;
-		}
-	}
-}
+//bool ServerMain::matching(int client_id) // 후에 없어질 함수
+//{
+//	for (int i{}; ; ++i)
+//	{
+//		if (MAX_USER == i) i = 0;
+//		//clients[i].state_lock.lock();
+//		if (state::ingame != clients[i].state || i == client_id) continue;
+//		//clients[i].state_lock.unlock();
+//
+//		//clients[client_id].match_lock.lock();
+//		if (-1 == clients[client_id].tm_id) {
+//			//clients[i].match_lock.lock();
+//			if (-1 == clients[i].tm_id) {
+//			 	clients[client_id].tm_id = clients[i].id;
+//				clients[i].tm_id = client_id;
+//				//clients[i].match_lock.unlock();
+//				//clients[client_id].match_lock.unlock();
+//
+//				std::cout << i << ", " << client_id << "matching!" << std::endl;
+//
+//				return true;
+//			}
+//			else {
+//				//clients[i].match_lock.unlock();
+//			}
+//		}
+//		else { // 이미 팀원이 있다는 소리
+//			//clients[client_id].match_lock.unlock();
+//
+//			return false;
+//		}
+//	}
+//}
 
 void ServerMain::set_team_position(int client_id)
 {
