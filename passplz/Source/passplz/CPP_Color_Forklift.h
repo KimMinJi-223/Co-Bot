@@ -49,6 +49,11 @@ private:
 
 	FTimerHandle forkliftsMoveTimer;
 
+	//버튼 사운드
+	USoundBase* buttonSound;
+	//지게차 사운드
+	USoundBase* forkliftSound;
+
 public:
 	FVector GetPillarColor() { return pillarColor; };
 	void SetPillarColor();

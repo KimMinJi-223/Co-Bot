@@ -29,6 +29,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* cannonStand;
 
+	USoundBase* shotSound;
 protected:
 	//목표 범위
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)

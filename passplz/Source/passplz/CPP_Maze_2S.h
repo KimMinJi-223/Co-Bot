@@ -4,6 +4,7 @@
 
 #include "passplz.h"
 #include "GameFramework/Actor.h"
+#include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
 #include "CPP_Maze_2S.generated.h"
 
@@ -64,6 +65,10 @@ private:
 
 	FTimerHandle bridgeTimer;
 	float bridgeTime = 0.f;
+
+	//클리어 효과
+	UNiagaraSystem* fireNiagaraSystemAsset;
+	USoundBase* fireSound;
 public:
 	UFUNCTION()
 		void OnComponentBeginOverlap_clear(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

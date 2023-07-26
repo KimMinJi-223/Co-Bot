@@ -34,6 +34,25 @@ ACPP_Lava::ACPP_Lava()
 		lavaBall->SetStaticMesh(SM_LAVABALL.Object);
 	}
 
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> m_MeltLava(TEXT("/Game/K_Test/input/m_MeltLava.m_MeltLava"));
+	if (m_MeltLava.Succeeded())
+	{
+		explosionDecal->SetDecalMaterial(m_MeltLava.Object);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UMaterialInterface> m_brush(TEXT("/Game/K_Test/input/m_brush.m_brush"));
+	if (m_MeltLava.Succeeded())
+	{
+		brushMaterial = m_brush.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NiagaraSystemAsset(TEXT("/Game/particles/missile/ns_missile.ns_missile"));
+	if (NiagaraSystemAsset.Succeeded())
+	{
+		fireNiagara->SetAsset(NiagaraSystemAsset.Object);
+	}
+
+
 	isExplosion = false;
 	opacityValue = 1.0f;
 }
@@ -44,21 +63,8 @@ void ACPP_Lava::BeginPlay()
 	Super::BeginPlay();
 	lavaBall->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 
-	explosionDecal->SetDecalMaterial(LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/K_Test/input/m_MeltLava.m_MeltLava")));
 	explosionDecalDynamicMaterial = explosionDecal->CreateDynamicMaterialInstance();
-	//머티리얼 설정
-	UMaterialInterface* BaseMaterial = LoadObject<UMaterialInterface>(nullptr, TEXT("/Game/K_Test/input/m_brush.m_brush"));
-	DynamicMaterial = UMaterialInstanceDynamic::Create(BaseMaterial, nullptr);
-
-	//RenderTargetTexture = Cast<UTextureRenderTarget2D>(StaticLoadObject(UTextureRenderTarget2D::StaticClass(), nullptr, TEXT("/Game/K_Test/lava/rendertaget.rendertaget")));
-
-
-	FStringAssetReference fireNiagaraAsset(TEXT("/Game/particles/missile/ns_missile.ns_missile"));
-	UNiagaraSystem* NiagaraSystem = Cast<UNiagaraSystem>(fireNiagaraAsset.TryLoad());
-	if (NiagaraSystem)
-	{
-		fireNiagara->SetAsset(NiagaraSystem);
-	}
+	DynamicMaterial = UMaterialInstanceDynamic::Create(brushMaterial, nullptr);
 }
 
 // Called every frame

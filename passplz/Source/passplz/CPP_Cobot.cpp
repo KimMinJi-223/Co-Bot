@@ -46,6 +46,13 @@ ACPP_Cobot::ACPP_Cobot()
 		UE_LOG(LogTemp, Warning, TEXT("Animation NO"));
 	}
 
+	static ConstructorHelpers::FObjectFinder<USoundBase> colorChangeSoundAsset(TEXT("/Game/game_sound/stage_1/forklift_movement_Cue.forklift_movement_Cue"));
+	if (colorChangeSoundAsset.Succeeded())
+	{
+		colorChangeSound = colorChangeSoundAsset.Object;
+	}
+	
+
 	GetCharacterMovement()->MaxWalkSpeed = 100.f;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;
@@ -142,8 +149,7 @@ void ACPP_Cobot::SetCollision()
 
 void ACPP_Cobot::RecvColor(int newcolor)
 {
-	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_2/button_colorChange_click_Cue.button_colorChange_click_Cue"));
-	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
+	UGameplayStatics::PlaySoundAtLocation(this, colorChangeSound, GetActorLocation(), GetActorRotation());
 
 	switch (newcolor) {
 	case 0: //ทนตๅ

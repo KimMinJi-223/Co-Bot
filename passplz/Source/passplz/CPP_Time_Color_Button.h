@@ -115,6 +115,7 @@ private:
 
 	FTimerHandle changeTimer;
 	float changeTime = 0.f;
+	USoundBase* buttonSound;
 
 public:
 	// void FootholdColorChangeTimer();
