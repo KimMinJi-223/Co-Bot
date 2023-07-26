@@ -43,8 +43,9 @@ ACPP_Cannon::ACPP_Cannon()
 	if (SM_SPHERE.Succeeded()) {
 		damageRadius->SetStaticMesh(SM_SPHERE.Object);
 	}
+	
 
-	static ConstructorHelpers::FObjectFinder<UMaterial> DecalMaterialAsset(TEXT("/Game/K_Test/lava/m_circle.m_circle"));
+	static ConstructorHelpers::FObjectFinder<UMaterial> DecalMaterialAsset(TEXT("/Game/K_Test/input/m_circle.m_circle"));
 	if (DecalMaterialAsset.Succeeded())
 	{
 		targetLocation->SetDecalMaterial(DecalMaterialAsset.Object);

@@ -119,11 +119,6 @@ protected:
 	UPROPERTY(BlueprintReadWrite)
 		FString Passward; //비밀번호
 
-
-
-protected:
-	UCurveFloat* Cobot_Curve;
-
 private:
 	int previous_input;
 	int current_input;
