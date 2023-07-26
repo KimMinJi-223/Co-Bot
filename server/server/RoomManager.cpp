@@ -21,6 +21,22 @@ void RoomManager::exit_room()
 	number_of_people = 0;
 }
 
+bool RoomManager::is_in_game()
+{
+	return game;
+}
+
+void RoomManager::in_game()
+{
+	game = true;
+}
+
+void RoomManager::out_game()
+{
+	game = false;
+	exit_room();
+}
+
 void RoomManager::set_room_name(wchar_t* room_name)
 {
 	wcscpy_s(this->room_name, MAX_ROOM, room_name);

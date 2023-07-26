@@ -541,7 +541,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 		normal_rooms[room_id].set_number_of_people(0);
 		normal_rooms[room_id].set_stage(pack->stage);
 
-		//clients[client_id].send_create_room_ok(normal_rooms[room_id].get_room_name());
+		clients[client_id].send_create_room_ok(normal_rooms[room_id].get_room_name());
 	} break;
 	case static_cast<int>(packet_type::cs_delete_room):
 	{
@@ -583,6 +583,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 		}
 
 		if (normal_rooms[room_id].get_number_of_people() == 2) {
+			normal_rooms[room_id].in_game();
 			clients[client_id].send_game_start_packet(normal_rooms[pack->room_id].get_stage());
 			clients[clients[client_id].tm_id].send_game_start_packet(normal_rooms[pack->room_id].get_stage());
 		}
@@ -592,11 +593,11 @@ void ServerMain::process_packet(char* packet, int client_id)
 		cs_show_room_list_packet* pack = reinterpret_cast<cs_show_room_list_packet*>(packet);
 
 		std::cout << "show normal room list\n";
-		/*for (int i{}; i < MAX_ROOM; ++i)
-		   if (normal_rooms[i].is_use())
-			  clients[client_id].send_show_room_list_packet(normal_rooms[i].get_room_name(), clients[normal_rooms[i].get_host_id()].name, i, normal_rooms[i].get_stage());*/
+		for (int i{}; i < MAX_ROOM; ++i)
+		   if (normal_rooms[i].is_use() && !normal_rooms[i].is_in_game())
+			  clients[client_id].send_show_room_list_packet(normal_rooms[i].get_room_name(), clients[normal_rooms[i].get_host_id()].name, i, normal_rooms[i].get_stage());
 
-		clients[client_id].send_show_room_list_packet(normal_rooms[0].get_room_name(), clients[normal_rooms[0].get_host_id()].name, 0, normal_rooms[0].get_stage());
+		// clients[client_id].send_show_room_list_packet(normal_rooms[0].get_room_name(), clients[normal_rooms[0].get_host_id()].name, 0, normal_rooms[0].get_stage());
 
 		std::cout << "list end\n";
 		clients[client_id].send_show_room_list_end_packet();
@@ -614,7 +615,8 @@ void ServerMain::process_packet(char* packet, int client_id)
 	case static_cast<int>(packet_type::cs_esc):
 	{
 		int room_id = clients[client_id].room_id;
-		normal_rooms[room_id].exit_room();
+		normal_rooms[room_id].out_game();
+		// normal_rooms[room_id].exit_room();
 
 		clients[clients[client_id].tm_id].send_esc_packet();
 	} break;

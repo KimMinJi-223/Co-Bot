@@ -208,7 +208,7 @@ struct sc_create_room_ok_packet {
 	char	type;
 	int		room_id;
 	int		host_id;
-	int		stage;
+	//int		stage;
 	wchar_t room_name[MAX_NAME];
 };
 
