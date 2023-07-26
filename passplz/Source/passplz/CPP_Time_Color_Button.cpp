@@ -73,6 +73,12 @@ ACPP_Time_Color_Button::ACPP_Time_Color_Button()
 		blue2->SetStaticMesh(SM_FOOTHOLD.Object);
 		black2->SetStaticMesh(SM_FOOTHOLD.Object);
 	}
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> buttonSoundAsset(TEXT("/Game/game_sound/stage_2/button_colorChange_click_Cue.button_colorChange_click_Cue"));
+	if (buttonSoundAsset.Succeeded())
+	{
+		buttonSound = buttonSoundAsset.Object;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -360,8 +366,7 @@ void ACPP_Time_Color_Button::OnComponentBeginOverlap_startCollision(UPrimitiveCo
 //버튼1의 충돌==========================================================================================
 void ACPP_Time_Color_Button::OnComponentBeginOverlap_redCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_2/button_colorChange_click_Cue.button_colorChange_click_Cue"));
-	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
+	UGameplayStatics::PlaySoundAtLocation(this, buttonSound, GetActorLocation(), GetActorRotation());
 
 	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
 
@@ -374,9 +379,7 @@ void ACPP_Time_Color_Button::OnComponentBeginOverlap_redCollision(UPrimitiveComp
 
 void ACPP_Time_Color_Button::OnComponentBeginOverlap_greenCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_2/button_colorChange_click_Cue.button_colorChange_click_Cue"));
-	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
-
+	UGameplayStatics::PlaySoundAtLocation(this, buttonSound, GetActorLocation(), GetActorRotation());
 
 	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
 
@@ -389,8 +392,7 @@ void ACPP_Time_Color_Button::OnComponentBeginOverlap_greenCollision(UPrimitiveCo
 
 void ACPP_Time_Color_Button::OnComponentBeginOverlap_blueCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_2/button_colorChange_click_Cue.button_colorChange_click_Cue"));
-	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
+	UGameplayStatics::PlaySoundAtLocation(this, buttonSound, GetActorLocation(), GetActorRotation());
 
 	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
 
@@ -403,8 +405,7 @@ void ACPP_Time_Color_Button::OnComponentBeginOverlap_blueCollision(UPrimitiveCom
 
 void ACPP_Time_Color_Button::OnComponentBeginOverlap_blackCollision(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_2/button_colorChange_click_Cue.button_colorChange_click_Cue"));
-	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
+	UGameplayStatics::PlaySoundAtLocation(this, buttonSound, GetActorLocation(), GetActorRotation());
 
 	SOCKET* sock = Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->GetSocket();
 

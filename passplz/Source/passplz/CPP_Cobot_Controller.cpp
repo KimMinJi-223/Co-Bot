@@ -71,8 +71,6 @@ void ACPP_Cobot_Controller::BeginPlay()
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_GearKey_2S::StaticClass(), gear_actor);
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Color_Forklift::StaticClass(), forklift_actor);
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Time_Color_Button::StaticClass(), board_actor);
-
-	clearFX = LoadObject<UNiagaraSystem>(nullptr, TEXT("/Game/particles/clearFireworks/np_clearFireworks.np_clearFireworks"));
 }
 
 void ACPP_Cobot_Controller::Tick(float DeltaTime)

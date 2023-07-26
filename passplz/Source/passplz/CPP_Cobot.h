@@ -42,8 +42,9 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 		UCameraComponent* Camera;
 
-
 	TSubclassOf<class UAnimInstance> AnimInstanceClass;
+
+	USoundBase* colorChangeSound;
 
 public:
 	UPROPERTY(BlueprintReadWrite)

@@ -60,4 +60,6 @@ private:
 
 	float opacityValue;
 	FVector crashLocation;
+	UMaterialInterface* brushMaterial;
+	UNiagaraSystem* lavaNiagaraSystemAsset;
 };

@@ -72,6 +72,19 @@ ACPP_Color_Forklift::ACPP_Color_Forklift()
 		forklifrsdirection[i] = 1.f;
 		forkliftsMoveTime[i] = 0.f;
 	}
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> buttonSoundAsset(TEXT("/Game/game_sound/stage_1/button_click_Cue.button_click_Cue"));
+	if (buttonSoundAsset.Succeeded())
+	{
+		buttonSound = buttonSoundAsset.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> forkliftSoundAsset(TEXT("/Game/game_sound/stage_1/forklift_movement_Cue.forklift_movement_Cue"));
+	if (buttonSoundAsset.Succeeded())
+	{
+		forkliftSound = buttonSoundAsset.Object;
+	}
+	
 }
 
 // Called when the game starts or when spawned
@@ -106,8 +119,7 @@ void ACPP_Color_Forklift::Tick(float DeltaTime)
 
 void ACPP_Color_Forklift::SetPillarColor()
 {
-	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_1/button_click_Cue.button_click_Cue"));
-	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
+	UGameplayStatics::PlaySoundAtLocation(this, buttonSound, GetActorLocation(), GetActorRotation());
 
 	pillar1->SetVectorParameterValueOnMaterials(TEXT("color"), pillarColor);
 	pillar2->SetVectorParameterValueOnMaterials(TEXT("color"), pillarColor);
@@ -137,8 +149,7 @@ void ACPP_Color_Forklift::ForkliftMoveTimer()
 		if (isForkliftsMove[i]) {
 			stopTimer = false;
 
-			USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/stage_1/forklift_movement_Cue.forklift_movement_Cue"));
-			UGameplayStatics::PlaySoundAtLocation(this, Sound, Forklifts[i]->GetComponentLocation(), GetActorRotation());
+			UGameplayStatics::PlaySoundAtLocation(this, forkliftSound, Forklifts[i]->GetComponentLocation(), GetActorRotation());
 
 			Forklifts[i]->AddLocalOffset(FVector(forklifrsdirection[i], 0.0f, 0.0f));
 			forkliftsMoveTime[i] += 0.03;

@@ -68,6 +68,8 @@ private:
 	bool isGearRight;
 	bool isGearLeft;
 
+	USoundBase* buttonSound;
+
 private:
 
 	//미로 충돌 시작 이벤트==========================================================================

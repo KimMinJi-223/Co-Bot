@@ -83,14 +83,30 @@ ACPP_GearKey_2S::ACPP_GearKey_2S()
 		blockCube->SetStaticMesh(SM_KEY_FRAME.Object);
 	}
 
-	blockCube->SetVisibility(false);
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> SM_FOOTHOLD(TEXT("/Engine/BasicShapes/Cube.Cube"));
+	if (SM_FOOTHOLD.Succeeded()) {
+		blockCube->SetStaticMesh(SM_FOOTHOLD.Object);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UNiagaraSystem> NiagaraSystemAsset(TEXT("/Game/particles/clearFireworks/np_clearFireworks.np_clearFireworks"));
+	if (NiagaraSystemAsset.Succeeded())
+	{
+		fireNiagaraSystemAsset = NiagaraSystemAsset.Object;
+	}
+
+	static ConstructorHelpers::FObjectFinder<USoundBase> fireSoundAsset(TEXT("/Game/game_sound/firework_rocket_launch.firework_rocket_launch"));
+	if (fireSoundAsset.Succeeded())
+	{
+		fireSound = fireSoundAsset.Object;
+	}
+	
 }
 
 // Called when the game starts or when spawned
 void ACPP_GearKey_2S::BeginPlay()
 {
 	Super::BeginPlay();
-
+	blockCube->SetVisibility(false);
 }
 
 // Called every frame
@@ -172,12 +188,10 @@ void ACPP_GearKey_2S::OnClearOverlap(UPrimitiveComponent* OverlappedComponent, A
 	spawnLocation.X += 1000;
 	spawnLocation.Y -= 100;
 	spawnLocation.Z -= 1500;
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Cast<ACPP_Cobot_Controller>(UGameplayStatics::GetPlayerController(GetWorld(), 0))->clearFX, spawnLocation);
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), fireNiagaraSystemAsset, spawnLocation);
 
 	blockCube->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-
-	USoundBase* Sound = LoadObject<USoundBase>(nullptr, TEXT("/Game/game_sound/firework_rocket_launch.firework_rocket_launch"));
-	UGameplayStatics::PlaySoundAtLocation(this, Sound, GetActorLocation(), GetActorRotation());
+	UGameplayStatics::PlaySoundAtLocation(this, fireSound, GetActorLocation(), GetActorRotation());
 }
 
 void ACPP_GearKey_2S::BridgeTimer()
