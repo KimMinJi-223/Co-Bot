@@ -147,12 +147,10 @@ void ACPP_Cobot_Controller::RecvPacket()
 		std::cout << "recv() fail!" << std::endl;
 		return;
 	}
-	if (prev_remain > 0) // 만약 전에 남아있는 데이터가 있다면
-	{
+	if (prev_remain > 0) { // 만약 전에 남아있는 데이터가 있다면
+		UE_LOG(LogTemp, Warning, TEXT("in prev remain!!!!!!!!!!!!!!"));
 		strcat_s(prev_packet_buff, buff);
-	}
-	else
-	{
+	} else {
 		memcpy(prev_packet_buff, buff, ret);
 	}
 	int remain_data = ret + prev_remain;
@@ -161,8 +159,8 @@ void ACPP_Cobot_Controller::RecvPacket()
 	{
 		int packet_size = p[0];
 		if (0 == packet_size) {
-			UE_LOG(LogTemp, Warning, TEXT("packet size: 0!!!!!!!!!!!!"));
-			remain_data = 0;
+			UE_LOG(LogTemp, Warning, TEXT("packet size: 0!!!!!!!!!!!! ret: %d"), ret);
+			prev_remain = 0;
 			return;
 		}
 
