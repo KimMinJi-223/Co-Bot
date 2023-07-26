@@ -350,10 +350,10 @@ void ServerMain::worker_thread()
 				// std::cout << key << " client is push? " << clients[key].move_car << ", " << clients[key].tm_id << " client is push? " << clients[clients[key].tm_id].move_car << std::endl;
 
 				// 여기서 호스트한테만 보내야 한다.
-				/*int room_id = clients[key].room_id;
-				int host_id = normal_rooms[0].host_id;*/
-				std::cout << "host id: " << key;
-				clients[key].send_move_car_packet(direction, acceleration);
+				int room_id = clients[key].room_id;
+				int host_id = normal_rooms[0].get_host_id();
+				std::cout << "host id: " << host_id;
+				clients[host_id].send_move_car_packet(direction, acceleration);
 				/*clients[key].send_move_car_packet(direction, acceleration);
 				clients[clients[key].tm_id].send_move_car_packet(direction, acceleration);*/
 
@@ -1147,8 +1147,5 @@ char* ServerMain::ConvertWCtoC(wchar_t* str)
 // 해야 할 것
 // 1. stage3에서 자동차 움직일 때 키씹 생기는 거 고쳐야 한다.
 // -> ad를 번갈아 누를 때 중복으로 처리되는건지 확인해봐야 한다.
-// 2. 한쪽 클라에서만 충돌처리가 되도록 바꿔야 한다.
-// -> 회전은 어느식으로 하는지...
-// 3. 여러명이서 들어갔을 때 잘 되는거 확인해야 한다.
-// 4. 방 만들고 들어가서 게임 시작 전까지 많은 오류가 존재한다. -> 다 고쳐야 한다.
-// 5. 링버퍼
+// 2. 서버 링버퍼로 잘 되는지 클라도
+// 3. 지금 타이머쪽에서 계속 host_id가 0만 들어감 그거 바꿔야 함
