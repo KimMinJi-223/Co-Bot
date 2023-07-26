@@ -3,7 +3,7 @@
 constexpr int PORT_NUM = 7000;
 constexpr int BUF_SIZE = 2048;
 
-constexpr int MAX_USER = 10;
+constexpr int MAX_USER = 1000;
 constexpr int MAX_NAME = 15;
 
 enum class packet_type {

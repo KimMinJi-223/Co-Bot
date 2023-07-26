@@ -171,7 +171,7 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 
 		UE_LOG(LogTemp, Warning, TEXT("direction: %lf"), pack->direction);
 
-		/*if (0.0 == pack->direction) {
+		if (0.0 == pack->direction) {
 
 			CarForward(1);
 		}
@@ -184,15 +184,15 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 			CarRotation(pack->direction * 5.f);
 			}
 
-		}*/
+		}
 
-		if (0.0 == pack->direction) {
+		/*if (0.0 == pack->direction) {
 
 			CarForward(pack->acceleration);
 		}
 		else {
 			CarRotation(pack->direction);
-		}
+		}*/
 
 	} break;
 	case static_cast<int>(packet_type::sc_car_location):
