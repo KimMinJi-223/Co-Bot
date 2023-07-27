@@ -136,6 +136,9 @@ void ACPP_Color_Forklift::FindAndMoveForkliftByColor()
 
 	isForkliftsMove[currentColorForklift] = true;
 
+	if(isForkliftsMove[currentColorForklift])
+		UGameplayStatics::PlaySoundAtLocation(this, forkliftSound, Forklifts[currentColorForklift]->GetComponentLocation(), GetActorRotation());
+
 	if (!GetWorldTimerManager().IsTimerActive(forkliftsMoveTimer)) {
 		GetWorld()->GetTimerManager().SetTimer(forkliftsMoveTimer, this, &ACPP_Color_Forklift::ForkliftMoveTimer, 0.03f, true);
 		
@@ -148,8 +151,6 @@ void ACPP_Color_Forklift::ForkliftMoveTimer()
 	for (int i = 0; i < 8; ++i) {
 		if (isForkliftsMove[i]) {
 			stopTimer = false;
-
-			UGameplayStatics::PlaySoundAtLocation(this, forkliftSound, Forklifts[i]->GetComponentLocation(), GetActorRotation());
 
 			Forklifts[i]->AddLocalOffset(FVector(forklifrsdirection[i], 0.0f, 0.0f));
 			forkliftsMoveTime[i] += 0.03;
