@@ -72,7 +72,7 @@ void ACPP_Cobot_Car_Controller::BeginPlay()
 		return;
 
 	cannon = UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Cannon::StaticClass());
-	if(cannon)
+	if (cannon)
 		UE_LOG(LogTemp, Warning, TEXT("cannon OK"));
 
 	fireNum = 0;
@@ -179,7 +179,7 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 			if (pack->direction > 0.0) {
 				CarForward(50.f);
 			}
-		
+
 			else {
 			CarRotation(pack->direction * 5.f);
 			}
@@ -198,23 +198,23 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 	case static_cast<int>(packet_type::sc_car_push_down):
 	{
 		sc_car_push_down_packet* pack = reinterpret_cast<sc_car_push_down_packet*>(packet);
-		
-		if (pack->player_number == player_number) { // 내가 눌렀을 때 들어오는 곳
-			UE_LOG(LogTemp, Log, TEXT("my down"));
-		} else { // 상대방이 눌렀을 떄 들어오는 곳
-			UE_LOG(LogTemp, Log, TEXT("tm down"));
-		}
+
+		if (pack->player_number == 1)
+			player->Player1->isWalk = true;
+		else if (pack->player_number == 2)
+			player->Player2->isWalk = true;
+
+
 		// UE_LOG(LogTemp, Warning, TEXT("team car push down!!!!!!!!!!!!!"));
 	} break;
 	case static_cast<int>(packet_type::sc_car_push_up):
 	{
 		sc_car_push_up_packet* pack = reinterpret_cast<sc_car_push_up_packet*>(packet);
 
-		if (pack->player_number == player_number) { // 내가 뗐을 때 들어오는 곳
-			UE_LOG(LogTemp, Log, TEXT("my id: %d, my up"), player_number);
-		} else { // 상대방이 뗐을 떄 들어오는 곳
-			UE_LOG(LogTemp, Log, TEXT("my id: %d, tm up"), player_number);
-		}
+		if (pack->player_number == 1)
+			player->Player1->isWalk = false;
+		else if (pack->player_number == 2)
+			player->Player2->isWalk = false;
 		// UE_LOG(LogTemp, Warning, TEXT("team car push up!!!!!!!!!!!!!"));
 	} break;
 	case static_cast<int>(packet_type::sc_car_location):
@@ -264,7 +264,7 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 			// 자기가 누른거
 			// 여기서는 아무 행동을 안해도 되고 아니면
 			// 상대방한테 발사 요청을 보냈다는 메시지를 생성해도 됨
-			
+
 		}
 		else {
 			// 상대방이 누른거
@@ -332,7 +332,7 @@ void ACPP_Cobot_Car_Controller::CarInput(const FInputActionValue& Value)
 		return;
 	}
 
-	
+
 	UE_LOG(LogTemp, Warning, TEXT("%f"), Value.Get<float>());
 
 	if (0.0 != Value.Get<float>()) {
@@ -376,7 +376,7 @@ void ACPP_Cobot_Car_Controller::FireCannonInput(const FInputActionValue& Value)
 	//	UE_LOG(LogTemp, Warning, TEXT("FireCannonInput %s"), Value.Get<bool>() ? TEXT("true") : TEXT("false"));
 	//	Cast<ACPP_Cannon>(cannon)->FireLava();
 	//}
-	
+
 	if (0.5f < Value.Get<float>() && fireNum != 0 && isFire) {
 		isFire = false;
 		cs_cannon_click_packet pack;
