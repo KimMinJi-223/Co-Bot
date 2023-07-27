@@ -392,13 +392,10 @@ void ACPP_Cobot_Car_Controller::RotateInput(const FInputActionValue& Value)
 void ACPP_Cobot_Car_Controller::CarForward(float acceleration)
 {
 	UE_LOG(LogTemp, Warning, TEXT("CarForward"));
-	UE_LOG(LogTemp, Warning, TEXT("acc: %f"), acceleration);
-	FVector preLocation = player->GetActorLocation();
-	UE_LOG(LogTemp, Warning, TEXT("preLoc: %f %f"), preLocation.X, preLocation.Y);
 
+	FVector preLocation = player->GetActorLocation();
 	FHitResult HitResult;
 	player->AddActorWorldOffset(player->GetActorForwardVector() * acceleration, true, &HitResult);
-
 	if (HitResult.IsValidBlockingHit())
 	{
 		FVector Normal = HitResult.Normal;
@@ -408,8 +405,6 @@ void ACPP_Cobot_Car_Controller::CarForward(float acceleration)
 	}
 
 	FVector newLocation = player->GetActorLocation();
-	//여기서 newLocatoin을 send
-	UE_LOG(LogTemp, Warning, TEXT("newLocation: %f %f"), newLocation.X, newLocation.Y);
 
 	cs_car_location_packet pack;
 	pack.size = sizeof(pack);
@@ -444,25 +439,15 @@ void ACPP_Cobot_Car_Controller::CarRotation(float rotationValue)
 
 void ACPP_Cobot_Car_Controller::SetPlayerLocation(FVector newLocation)
 {
+	UE_LOG(LogTemp, Warning, TEXT("SetPlayerLocation"));
 	player->SetActorLocation(newLocation);
 	player->ChangAim(true, true);
 }
 
 void ACPP_Cobot_Car_Controller::SetPlayerYaw(float newYaw)
 {
+	UE_LOG(LogTemp, Warning, TEXT("SetPlayerYaw"));
 	FRotator control_rotation = GetControlRotation();
-	UE_LOG(LogTemp, Warning, TEXT("control_rotation.Yaw %f > newYaw %f"), control_rotation.Yaw, newYaw);
-
-	if (control_rotation.Yaw > newYaw) {
-		UE_LOG(LogTemp, Warning, TEXT("control_rotation.Yaw > newYaw"));
-		player->ChangAim(false, true);
-	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("else"));
-
-		player->ChangAim(true, false);
-	}
-
 	control_rotation.Yaw = newYaw;
 	SetControlRotation(control_rotation);
 }
