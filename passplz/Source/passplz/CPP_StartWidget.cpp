@@ -172,6 +172,7 @@ void UCPP_StartWidget::CreateRoom()
 
 		UE_LOG(LogTemp, Warning, TEXT("recv room id: %d"), roomID);
 	} break;
+	default: UE_LOG(LogTemp, Warning, TEXT("create room() default")); break;
 	}
 
 	FOutputDeviceNull pAR;

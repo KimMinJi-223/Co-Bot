@@ -463,7 +463,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 				if (strcmp(input_id, ConvertWCtoC(clients[i].name)) == 0) {
 					std::cout << "이미 이 아이디를 사용 중인 플레이어가 있습니다.\n";
 					clients[client_id].send_login_fail_packet();
-					break;
+					return;
 				}
 			} else {
 				clients[i].state_lock.unlock();
@@ -939,7 +939,8 @@ void ServerMain::process_packet(char* packet, int client_id)
 
 		if (pack->direction) {
 			clients[client_id].move_car = true;
-			clients[clients[client_id].tm_id].send_tm_car_push_down_packet();
+			clients[client_id].send_car_push_down_packet(clients[client_id].stage3_player_number);
+			clients[clients[client_id].tm_id].send_car_push_down_packet(clients[client_id].stage3_player_number);
 
 			TIMER_EVENT timer_event;
 			timer_event.event_type = event_type::move_car;
@@ -949,7 +950,8 @@ void ServerMain::process_packet(char* packet, int client_id)
 			timer_queue.push(timer_event);
 		} else {
 			clients[client_id].move_car = false;
-			clients[clients[client_id].tm_id].send_tm_car_push_up_packet();
+			clients[client_id].send_car_push_up_packet(clients[client_id].stage3_player_number);
+			clients[clients[client_id].tm_id].send_car_push_up_packet(clients[client_id].stage3_player_number);
 		}
 	} break;
 	case static_cast<int>(packet_type::cs_car_location):
