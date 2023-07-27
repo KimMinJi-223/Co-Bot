@@ -196,7 +196,7 @@ void ACPP_GearKey_2S::OnClearOverlap(UPrimitiveComponent* OverlappedComponent, A
 
 void ACPP_GearKey_2S::BridgeTimer()
 {
-	UE_LOG(LogTemp, Warning, TEXT("BridgeTimer"));
+	//UE_LOG(LogTemp, Warning, TEXT("BridgeTimer"));
 	
 	bridgeTime += 0.03;
 	UMaterialParameterCollection* MPC = LoadObject<UMaterialParameterCollection>(nullptr, TEXT("/Game/material/function/mpc_bridge_time.mpc_bridge_time"));

@@ -119,14 +119,6 @@ void ACPP_Lava::MeltLavaFloor()
 		UE_LOG(LogTemp, Warning, TEXT("%f, %f, %f"), crashLocation.X, crashLocation.Y, crashLocation.Z);
 		UE_LOG(LogTemp, Warning, TEXT("%f, %f, %f"), HitResult.Location.X, HitResult.Location.Y, HitResult.Location.Z);
 	}
-	else {
-		UE_LOG(LogTemp, Warning, TEXT("%f, %f, %f"), crashLocation.X, crashLocation.Y, crashLocation.Z);
-		UE_LOG(LogTemp, Warning, TEXT("%f, %f, %f"), EndTraceLocation.X, EndTraceLocation.Y, EndTraceLocation.Z);
-		UE_LOG(LogTemp, Warning, TEXT("False"));
-	}
-
-
-
 }
 
 void ACPP_Lava::MeltLavaFloorLocation()
