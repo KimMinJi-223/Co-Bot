@@ -195,6 +195,16 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 		}
 
 	} break;
+	case static_cast<int>(packet_type::sc_tm_car_push_down):
+	{
+		// 상대 팀원이 누르면 들어오는곳
+		UE_LOG(LogTemp, Warning, TEXT("team car push down!!!!!!!!!!!!!"));
+	} break;
+	case static_cast<int>(packet_type::sc_tm_car_push_up):
+	{
+		// 상대 팀원이 떼면 들어오는 곳
+		UE_LOG(LogTemp, Warning, TEXT("team car push up!!!!!!!!!!!!!"));
+	} break;
 	case static_cast<int>(packet_type::sc_car_location):
 	{
 		sc_car_location_packet* pack = reinterpret_cast<sc_car_location_packet*>(packet);

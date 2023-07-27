@@ -455,6 +455,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 		printf("%d client로부터 login packet을 받았습니다.\n", client_id);
 
 		char* input_id = ConvertWCtoC(pack->id);
+		// char* input_id = pack->id; // 스트레스 테스트 전용
 		for (int i{}; i < MAX_USER; ++i) {
 			clients[i].state_lock.lock();
 			if (clients[i].state == state::ingame) {
@@ -477,10 +478,10 @@ void ServerMain::process_packet(char* packet, int client_id)
 			clients[client_id].state = state::ingame;
 		}	
 
-		// --- 로그인 사용 X 버전 ---
-		// clients[client_id].send_login_success_packet();
-		//if (client_id == 0) clients[client_id].tm_id = 1;
-		//else if (client_id == 1) clients[client_id].tm_id = 0;
+		// --- 로그인 사용 X 버전 --- // 스테
+		 //clients[client_id].send_login_success_packet();
+		/*if (client_id == 0) clients[client_id].tm_id = 1;
+		else if (client_id == 1) clients[client_id].tm_id = 0;*/
 		// ------------------------
 		
 		// --- 로그인 사용 O 버전 ---
@@ -644,35 +645,35 @@ void ServerMain::process_packet(char* packet, int client_id)
 	case static_cast<int>(packet_type::cs_move):
 	{
 		cs_move_packet* pack = reinterpret_cast<cs_move_packet*>(packet);
-		//clients[client_id].last_move_time = pack->move_time;
+		// clients[client_id].last_move_time = pack->move_time;
 		printf("%d ID를 가진 클라이언트가 %f, %f, %f 로 이동하였습니다.\n", client_id, pack->location.x, pack->location.y, pack->location.z);
 		clients[client_id].location = pack->location;
-		clients[clients[client_id].tm_id].tm_location = pack->location;
+		clients[clients[client_id].tm_id].tm_location = pack->location; // 스트레스
 
 		clients[client_id].yaw = pack->yaw;
-		clients[clients[client_id].tm_id].tm_yaw = pack->yaw;
+		clients[clients[client_id].tm_id].tm_yaw = pack->yaw; // 스트레스
 
 		if (direction::left == pack->direction) {
 			clients[client_id].current_left = pack->current;
 			clients[client_id].time_left = pack->time;
 
-			clients[clients[client_id].tm_id].tm_current_left = pack->current;
-			clients[clients[client_id].tm_id].tm_time_left = pack->time;
+			clients[clients[client_id].tm_id].tm_current_left = pack->current;// 스트레스
+			clients[clients[client_id].tm_id].tm_time_left = pack->time;		 // 스트레스
 
 			//std::cout << "client_id: " << client_id << ", tm_id: " << clients[client_id].tm_id << std::endl;
 
 			clients[client_id].send_left_move_packet(client_id); // 움직인 클라한테 보내기
-			clients[clients[client_id].tm_id].send_left_move_packet(client_id); // 상대 클라한테 보내기
+			clients[clients[client_id].tm_id].send_left_move_packet(client_id); // 상대 클라한테 보내기  스트레스
 		}
 		else if (direction::right == pack->direction) {
 			clients[client_id].current_right = pack->current;
 			clients[client_id].time_right;
 
-			clients[clients[client_id].tm_id].tm_current_right = pack->current;
-			clients[clients[client_id].tm_id].tm_time_right = pack->time;
+			clients[clients[client_id].tm_id].tm_current_right = pack->current; // 스트레스
+			clients[clients[client_id].tm_id].tm_time_right = pack->time; // 스트레스
 
             clients[client_id].send_right_move_packet(client_id); // 움직인 클라한테 보내기
-            clients[clients[client_id].tm_id].send_right_move_packet(client_id); // 상대 클라한테 보내기
+            clients[clients[client_id].tm_id].send_right_move_packet(client_id); // 상대 클라한테 보내기 스트레스
         }
     } break;
     case static_cast<int>(packet_type::cs_logout):
@@ -938,6 +939,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 
 		if (pack->direction) {
 			clients[client_id].move_car = true;
+			clients[clients[client_id].tm_id].send_tm_car_push_down_packet();
 
 			TIMER_EVENT timer_event;
 			timer_event.event_type = event_type::move_car;
@@ -947,6 +949,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 			timer_queue.push(timer_event);
 		} else {
 			clients[client_id].move_car = false;
+			clients[clients[client_id].tm_id].send_tm_car_push_up_packet();
 		}
 	} break;
 	case static_cast<int>(packet_type::cs_car_location):

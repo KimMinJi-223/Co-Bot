@@ -100,6 +100,9 @@ enum class packet_type {
 	cs_car_direction,
 	sc_car_direction,
 
+	sc_tm_car_push_down,
+	sc_tm_car_push_up,
+
 	cs_car_location,
 	sc_car_location,
 
@@ -160,8 +163,9 @@ struct sc_signup_fail_packet {
 struct cs_login_packet {
 	char	size;
 	char	type;
-	wchar_t id[MAX_NAME];
+	wchar_t id[MAX_NAME]; // 스트레스 테스트 떄문에 바꿈
 	wchar_t passward[MAX_NAME];
+	// char	id[MAX_NAME];
 };
 
 struct sc_login_success_packet {
@@ -278,6 +282,7 @@ struct cs_move_packet {
 	double		yaw;
 	vector_d3	location;
 	vector_d3	current;
+	//unsigned	move_time; // 스트레스 테스트를 위하여
 };
 
 struct sc_move_packet {
@@ -289,6 +294,7 @@ struct sc_move_packet {
 	double		yaw;
 	vector_d3	location;
 	vector_d3	current;
+	//unsigned	move_time; // 스트레스 테스트를 위하여
 };
 
 struct sc_synch_packet {
@@ -371,6 +377,16 @@ struct sc_car_direction_packet
 	char	type;
 	float	direction;
 	float	acceleration;
+};
+
+struct sc_tm_car_push_down_packet {
+	char	size;
+	char	type;
+};
+
+struct sc_tm_car_push_up_packet {
+	char	size;
+	char	type;
 };
 
 struct cs_car_location_packet {

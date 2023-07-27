@@ -211,6 +211,7 @@ void SESSION::send_left_move_packet(int client_id)
 	pack.type = static_cast<int>(packet_type::sc_move);
 	pack.client_id = client_id;
 	pack.direction = direction::left;
+	//pack.move_time = last_move_time; // 스트레스
 	if (client_id == id) {
 		pack.location = location;
 		pack.current = current_left;
@@ -235,6 +236,7 @@ void SESSION::send_right_move_packet(int client_id)
 	pack.type = static_cast<int>(packet_type::sc_move);
 	pack.client_id = client_id;
 	pack.direction = direction::right;
+	//pack.move_time = last_move_time; // 스트레스
 	if (client_id == id) {
 		pack.location = location;
 		pack.current = current_right;
@@ -340,6 +342,24 @@ void SESSION::send_move_car_packet(float direction, float acceleration)
 	pack.type = static_cast<char>(packet_type::sc_car_direction);
 	pack.direction = direction;
 	pack.acceleration = acceleration;
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_tm_car_push_down_packet()
+{
+	sc_tm_car_push_down_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_tm_car_push_down);
+
+	send_packet(reinterpret_cast<char*>(&pack));
+}
+
+void SESSION::send_tm_car_push_up_packet()
+{
+	sc_tm_car_push_up_packet pack;
+	pack.size = sizeof(pack);
+	pack.type = static_cast<char>(packet_type::sc_tm_car_push_up);
 
 	send_packet(reinterpret_cast<char*>(&pack));
 }

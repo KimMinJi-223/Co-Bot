@@ -86,6 +86,8 @@ public:
 	void send_logout_packet();
 	void send_stage3_enter_packet(int id, int tm_id);
 	void send_move_car_packet(float direction, float acceleration);
+	void send_tm_car_push_down_packet();
+	void send_tm_car_push_up_packet();
 	void send_car_location_packet(vector_d3 location);
 	void send_car_rotation_yaw_packet(float yaw);
 	void send_cannon_yaw_packet(double value);
