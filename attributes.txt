@@ -3,3 +3,6 @@
 
 - cobot_main, start, start(1)
 <a href="https://www.flaticon.com/free-icons/start-button" title="start-button icons">Start-button icons created by Freepik - Flaticon</a>
+
+- widget_settings
+<a href="https://www.flaticon.com/free-icons/escape" title="escape icons">Escape icons created by Pixel perfect - Flaticon</a>
