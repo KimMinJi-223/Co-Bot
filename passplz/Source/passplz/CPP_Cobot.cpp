@@ -45,8 +45,8 @@ ACPP_Cobot::ACPP_Cobot()
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("Animation NO"));
 	}
-
-	static ConstructorHelpers::FObjectFinder<USoundBase> colorChangeSoundAsset(TEXT("/Game/game_sound/stage_1/forklift_movement_Cue.forklift_movement_Cue"));
+	
+	static ConstructorHelpers::FObjectFinder<USoundBase> colorChangeSoundAsset(TEXT("/Game/game_sound/stage_2/button_colorChange_click_Cue.button_colorChange_click_Cue"));
 	if (colorChangeSoundAsset.Succeeded())
 	{
 		colorChangeSound = colorChangeSoundAsset.Object;

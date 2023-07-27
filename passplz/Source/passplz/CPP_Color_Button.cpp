@@ -170,12 +170,15 @@ void ACPP_Color_Button::OnComponentBeginOverlap_cyanCollisionCollision(UPrimitiv
 			//같지 않으면 콜리전을 없앤다.
 			cyanFoothold->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 			cyanFootholdCollision->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+			cyanFootholdCollision->SetVisibility(false);
 
 			GetWorld()->GetTimerManager().SetTimer(WaitHandle, FTimerDelegate::CreateLambda([&]()
 				{
 
 					cyanFoothold->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 					cyanFootholdCollision->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+					cyanFootholdCollision->SetVisibility(true);
+
 
 				}), WaitTime, false);
 		}
