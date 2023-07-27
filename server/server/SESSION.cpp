@@ -346,20 +346,22 @@ void SESSION::send_move_car_packet(float direction, float acceleration)
 	send_packet(reinterpret_cast<char*>(&pack));
 }
 
-void SESSION::send_tm_car_push_down_packet()
+void SESSION::send_car_push_down_packet(int player_number)
 {
-	sc_tm_car_push_down_packet pack;
+	sc_car_push_down_packet pack;
 	pack.size = sizeof(pack);
-	pack.type = static_cast<char>(packet_type::sc_tm_car_push_down);
+	pack.type = static_cast<char>(packet_type::sc_car_push_down);
+	pack.player_number = player_number;
 
 	send_packet(reinterpret_cast<char*>(&pack));
 }
 
-void SESSION::send_tm_car_push_up_packet()
+void SESSION::send_car_push_up_packet(int player_number)
 {
-	sc_tm_car_push_up_packet pack;
+	sc_car_push_up_packet pack;
 	pack.size = sizeof(pack);
-	pack.type = static_cast<char>(packet_type::sc_tm_car_push_up);
+	pack.type = static_cast<char>(packet_type::sc_car_push_up);
+	pack.player_number = player_number;
 
 	send_packet(reinterpret_cast<char*>(&pack));
 }

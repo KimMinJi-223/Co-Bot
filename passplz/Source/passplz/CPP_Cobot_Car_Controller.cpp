@@ -195,15 +195,27 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 		}
 
 	} break;
-	case static_cast<int>(packet_type::sc_tm_car_push_down):
+	case static_cast<int>(packet_type::sc_car_push_down):
 	{
-		// 상대 팀원이 누르면 들어오는곳
-		UE_LOG(LogTemp, Warning, TEXT("team car push down!!!!!!!!!!!!!"));
+		sc_car_push_down_packet* pack = reinterpret_cast<sc_car_push_down_packet*>(packet);
+		
+		if (pack->player_number == player_number) { // 내가 눌렀을 때 들어오는 곳
+			UE_LOG(LogTemp, Log, TEXT("my down"));
+		} else { // 상대방이 눌렀을 떄 들어오는 곳
+			UE_LOG(LogTemp, Log, TEXT("tm down"));
+		}
+		// UE_LOG(LogTemp, Warning, TEXT("team car push down!!!!!!!!!!!!!"));
 	} break;
-	case static_cast<int>(packet_type::sc_tm_car_push_up):
+	case static_cast<int>(packet_type::sc_car_push_up):
 	{
-		// 상대 팀원이 떼면 들어오는 곳
-		UE_LOG(LogTemp, Warning, TEXT("team car push up!!!!!!!!!!!!!"));
+		sc_car_push_up_packet* pack = reinterpret_cast<sc_car_push_up_packet*>(packet);
+
+		if (pack->player_number == player_number) { // 내가 뗐을 때 들어오는 곳
+			UE_LOG(LogTemp, Log, TEXT("my id: %d, my up"), player_number);
+		} else { // 상대방이 뗐을 떄 들어오는 곳
+			UE_LOG(LogTemp, Log, TEXT("my id: %d, tm up"), player_number);
+		}
+		// UE_LOG(LogTemp, Warning, TEXT("team car push up!!!!!!!!!!!!!"));
 	} break;
 	case static_cast<int>(packet_type::sc_car_location):
 	{

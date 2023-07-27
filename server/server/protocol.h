@@ -100,8 +100,8 @@ enum class packet_type {
 	cs_car_direction,
 	sc_car_direction,
 
-	sc_tm_car_push_down,
-	sc_tm_car_push_up,
+	sc_car_push_down,
+	sc_car_push_up,
 
 	cs_car_location,
 	sc_car_location,
@@ -379,14 +379,16 @@ struct sc_car_direction_packet
 	float	acceleration;
 };
 
-struct sc_tm_car_push_down_packet {
+struct sc_car_push_down_packet {
 	char	size;
 	char	type;
+	int		player_number;
 };
 
-struct sc_tm_car_push_up_packet {
+struct sc_car_push_up_packet {
 	char	size;
 	char	type;
+	int		player_number;
 };
 
 struct cs_car_location_packet {
