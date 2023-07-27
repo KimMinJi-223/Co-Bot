@@ -105,6 +105,8 @@ void SESSION::send_login_fail_packet()
 	pack.type = static_cast<char>(packet_type::sc_login_fail);
 
 	send_packet(reinterpret_cast<char*>(&pack));
+
+	std::cout << "login fail packet을 보냈습니다.\n";
 }
 
 void SESSION::send_create_room_ok(wchar_t* room_name)

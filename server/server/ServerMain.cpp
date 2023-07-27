@@ -240,21 +240,23 @@ void ServerMain::worker_thread()
 
 					clients[key].prev_remain = 0;
 
-					int tm_id = clients[key].tm_id;
-					clients[key].send_cobot_button(packet_type::sc_push_button_cobot_green);
-					clients[tm_id].send_cobot_button(packet_type::sc_push_button_cobot_green);
+					if (clients[key].current_stage != 3) {
+						int tm_id = clients[key].tm_id;
+						clients[key].send_cobot_button(packet_type::sc_push_button_cobot_green);
+						clients[tm_id].send_cobot_button(packet_type::sc_push_button_cobot_green);
 
-					clients[key].send_left_move_packet(key); // 움직인 클라한테 보내기
-					clients[tm_id].send_left_move_packet(key); // 상대 클라한테 보내기
+						clients[key].send_left_move_packet(key); // 움직인 클라한테 보내기
+						clients[tm_id].send_left_move_packet(key); // 상대 클라한테 보내기
 
-					clients[key].send_right_move_packet(key); // 움직인 클라한테 보내기
-					clients[tm_id].send_right_move_packet(key); // 상대 클라한테 보내기
+						clients[key].send_right_move_packet(key); // 움직인 클라한테 보내기
+						clients[tm_id].send_right_move_packet(key); // 상대 클라한테 보내기
 
-					clients[key].send_left_move_packet(tm_id); // 움직인 클라한테 보내기
-					clients[tm_id].send_left_move_packet(tm_id); // 상대 클라한테 보내기
+						clients[key].send_left_move_packet(tm_id); // 움직인 클라한테 보내기
+						clients[tm_id].send_left_move_packet(tm_id); // 상대 클라한테 보내기
 
-					clients[key].send_right_move_packet(tm_id); // 움직인 클라한테 보내기
-					clients[tm_id].send_right_move_packet(tm_id); // 상대 클라한테 보내기
+						clients[key].send_right_move_packet(tm_id); // 움직인 클라한테 보내기
+						clients[tm_id].send_right_move_packet(tm_id); // 상대 클라한테 보내기
+					}
 
 					clients[key].recv_packet();
 
@@ -351,8 +353,8 @@ void ServerMain::worker_thread()
 
 				// 여기서 호스트한테만 보내야 한다.
 				int room_id = clients[key].room_id;
-				int host_id = normal_rooms[0].get_host_id();
-				std::cout << "host id: " << host_id;
+				int host_id = normal_rooms[room_id].get_host_id();
+				std::cout << "room id" << room_id << ", host id: " << host_id;
 				clients[host_id].send_move_car_packet(direction, acceleration);
 				/*clients[key].send_move_car_packet(direction, acceleration);
 				clients[clients[key].tm_id].send_move_car_packet(direction, acceleration);*/
@@ -458,6 +460,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 			if (clients[i].state == state::ingame) {
 				clients[i].state_lock.unlock();
 				if (strcmp(input_id, ConvertWCtoC(clients[i].name)) == 0) {
+					std::cout << "이미 이 아이디를 사용 중인 플레이어가 있습니다.\n";
 					clients[client_id].send_login_fail_packet();
 					break;
 				}
@@ -584,7 +587,7 @@ void ServerMain::process_packet(char* packet, int client_id)
 
 		int host_id = normal_rooms[room_id].get_host_id();
 
-		std::cout << client_id << " client enter! host is " << host_id << "client!\n";
+		std::cout << client_id << " client enter! host is " << host_id << " client!\n";
 
 		clients[client_id].room_id = room_id;
 		normal_rooms[room_id].set_number_of_people(normal_rooms[room_id].get_number_of_people() + 1);
@@ -902,25 +905,25 @@ void ServerMain::process_packet(char* packet, int client_id)
 	} break;
 	case static_cast<int>(packet_type::cs_stage3_enter):
 	{
-		std::cout << client_id << "client enter!" << std::endl;
+		std::cout << client_id << "client stage3 enter!" << std::endl;
 
 		// stage3로 바로 들어왔을 때 테스트를 할 수 있도록 임시방편임. 수정해야 함.
-		{
+		/*{
 			std::lock_guard<std::mutex> lock{ clients[client_id].state_lock };
 			clients[client_id].state = state::ingame;
-		}
+		}*/
 
-		if (client_id == 0) clients[client_id].tm_id = 1;
+	/*	if (client_id == 0) clients[client_id].tm_id = 1;
 		else if (client_id == 1) clients[client_id].tm_id = 0;
 		else std::cout << "stage3 enter matching err";
 
 		clients[client_id].room_id = 0;
-		normal_rooms[0].set_host_id(0);
+		normal_rooms[0].set_host_id(0);*/
 		//bool is_matching = matching(client_id);
 		//if (!is_matching)
 		//	std::cout << "이미 다른 팀원이 있습니다." << std::endl;
 
-		std::cout << "complete matching\n";
+		//std::cout << "complete matching\n";
 		// --------------------------------------------------------------------
 
 		clients[client_id].send_stage3_enter_packet(client_id, clients[client_id].tm_id);
@@ -1149,3 +1152,4 @@ char* ServerMain::ConvertWCtoC(wchar_t* str)
 // -> ad를 번갈아 누를 때 중복으로 처리되는건지 확인해봐야 한다.
 // 2. 서버 링버퍼로 잘 되는지 클라도
 // 3. 지금 타이머쪽에서 계속 host_id가 0만 들어감 그거 바꿔야 함
+                         
