@@ -364,6 +364,8 @@ void SESSION::send_car_push_up_packet(int player_number)
 	pack.player_number = player_number;
 
 	send_packet(reinterpret_cast<char*>(&pack));
+
+	std::cout << id << " client에게 " << player_number << " 플레이어 car push up packet을 보냈습니다.\n";
 }
 
 void SESSION::send_car_location_packet(vector_d3 location)
