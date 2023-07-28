@@ -144,7 +144,12 @@ void ACPP_Cobot_Controller::RecvPacket()
 		GetLastError();
 		std::cout << "recv() fail!" << std::endl;
 		return;
+	} else if (ret > BUF_SIZE - prev_remain) {
+		UE_LOG(LogTemp, Warning, TEXT("in dat too big!!!!!!!!! recv data size: %d"), ret);
+		prev_remain = 0;
+		return;
 	}
+
 	if (prev_remain > 0) { // 만약 전에 남아있는 데이터가 있다면
 		UE_LOG(LogTemp, Warning, TEXT("in prev remain!!!!!!!!!!!!!!"));
 		strcat_s(prev_packet_buff, buff);
