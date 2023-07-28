@@ -152,7 +152,8 @@ void ACPP_Cobot_Controller::RecvPacket()
 
 	if (prev_remain > 0) { // 만약 전에 남아있는 데이터가 있다면
 		UE_LOG(LogTemp, Warning, TEXT("in prev remain!!!!!!!!!!!!!!"));
-		strcat_s(prev_packet_buff, buff);
+		// strcat_s(prev_packet_buff, ret, buff);
+		memcpy(prev_packet_buff + prev_remain, buff, ret);
 	} else {
 		memcpy(prev_packet_buff, buff, ret);
 	}
