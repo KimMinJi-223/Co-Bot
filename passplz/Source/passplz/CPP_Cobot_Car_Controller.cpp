@@ -199,23 +199,29 @@ void ACPP_Cobot_Car_Controller::ProcessPacket(char* packet)
 	{
 		sc_car_push_down_packet* pack = reinterpret_cast<sc_car_push_down_packet*>(packet);
 
-		if (pack->player_number == 1)
+		if (pack->player_number == 1) {
+			UE_LOG(LogTemp, Warning, TEXT("P1 down"));
 			player->Player1->isWalk = true;
-		else if (pack->player_number == 2)
+		}
+		else if (pack->player_number == 2) {
+			UE_LOG(LogTemp, Warning, TEXT("P2 down"));
 			player->Player2->isWalk = true;
+		}
 
 
-		// UE_LOG(LogTemp, Warning, TEXT("team car push down!!!!!!!!!!!!!"));
 	} break;
 	case static_cast<int>(packet_type::sc_car_push_up):
 	{
 		sc_car_push_up_packet* pack = reinterpret_cast<sc_car_push_up_packet*>(packet);
 
-		if (pack->player_number == 1)
+		if (pack->player_number == 1) {
+			UE_LOG(LogTemp, Warning, TEXT("P1 Up"));
 			player->Player1->isWalk = false;
-		else if (pack->player_number == 2)
+		}
+		else if (pack->player_number == 2) {
+			UE_LOG(LogTemp, Warning, TEXT("P2 Up"));
 			player->Player2->isWalk = false;
-		// UE_LOG(LogTemp, Warning, TEXT("team car push up!!!!!!!!!!!!!"));
+		}
 	} break;
 	case static_cast<int>(packet_type::sc_car_location):
 	{
@@ -453,7 +459,6 @@ void ACPP_Cobot_Car_Controller::SetPlayerLocation(FVector newLocation)
 {
 	UE_LOG(LogTemp, Warning, TEXT("SetPlayerLocation"));
 	player->SetActorLocation(newLocation);
-	player->ChangAim(true, true);
 }
 
 void ACPP_Cobot_Car_Controller::SetPlayerYaw(float newYaw)

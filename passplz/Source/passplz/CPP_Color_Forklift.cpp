@@ -82,7 +82,7 @@ ACPP_Color_Forklift::ACPP_Color_Forklift()
 	static ConstructorHelpers::FObjectFinder<USoundBase> forkliftSoundAsset(TEXT("/Game/game_sound/stage_1/forklift_movement_Cue.forklift_movement_Cue"));
 	if (buttonSoundAsset.Succeeded())
 	{
-		forkliftSound = buttonSoundAsset.Object;
+		forkliftSound = forkliftSoundAsset.Object;
 	}
 	
 }
