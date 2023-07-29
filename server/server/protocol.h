@@ -327,8 +327,9 @@ struct cs_elevator_packet
 
 struct sc_elevator_packet
 {
-	char size;
-	char type;
+	char	size;
+	char	type;
+	int		stage;
 };
 
 struct cs_stage2_last_gate_packet
