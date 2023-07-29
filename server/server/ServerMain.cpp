@@ -832,10 +832,8 @@ void ServerMain::process_packet(char* packet, int client_id)
 				clients[tm_id].current_stage = 1;
 
 				clients[client_id].send_elevator_ok_packet();
-				clients[clients[client_id].tm_id].send_elevator_ok_packet();
+				clients[tm_id].send_elevator_ok_packet();
 			}
-
-
 		}
 	} break;
 	case static_cast<int>(packet_type::cs_push_button_Forklift_red):
