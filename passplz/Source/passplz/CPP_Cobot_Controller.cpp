@@ -362,6 +362,10 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
 	} break;
 	case static_cast<int>(packet_type::sc_elevator):
 	{
+		sc_elevator_packet* pack = reinterpret_cast<sc_elevator_packet*>(packet);
+
+		Cast<UCPP_CobotGameInstance>(GetWorld()->GetGameInstance())->permitStage = pack->stage; // 여기에 DB에 저장되어 있던 stage가 넘어온다.
+
 		Cast<ACPP_Elevator>(UGameplayStatics::GetActorOfClass(GetWorld(), ACPP_Elevator::StaticClass()))->ElevatorOperateCameraMoveLevelChange();
 		UE_LOG(LogTemp, Warning, TEXT("sc_elevator"));
 		player->GetMesh()->SetAnimInstanceClass(nullptr);

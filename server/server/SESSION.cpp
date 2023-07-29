@@ -291,6 +291,7 @@ void SESSION::send_elevator_ok_packet()
 	sc_elevator_packet pack;
 	pack.size = sizeof(pack);
 	pack.type = static_cast<char>(packet_type::sc_elevator);
+	pack.stage = db_stage;
 
 	send_packet(reinterpret_cast<char*>(&pack));
 
