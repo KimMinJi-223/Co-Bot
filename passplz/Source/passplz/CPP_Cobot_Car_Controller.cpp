@@ -119,13 +119,17 @@ void ACPP_Cobot_Car_Controller::RecvPacket()
 		GetLastError();
 		std::cout << "recv() fail!" << std::endl;
 		return;
+	} else if (ret > BUF_SIZE - prev_remain) {
+		UE_LOG(LogTemp, Warning, TEXT("in dat too big!!!!!!!!! recv data size: %d"), ret);
+		prev_remain = 0;
+		return;
 	}
-	if (prev_remain > 0) // 만약 전에 남아있는 데이터가 있다면
-	{
-		strcat_s(prev_packet_buff, buff);
-	}
-	else
-	{
+
+	if (prev_remain > 0) { // 만약 전에 남아있는 데이터가 있다면
+		UE_LOG(LogTemp, Warning, TEXT("in prev remain!!!!!!!!!!!!!!"));
+		// strcat_s(prev_packet_buff, ret, buff);
+		memcpy(prev_packet_buff + prev_remain, buff, ret);
+	} else {
 		memcpy(prev_packet_buff, buff, ret);
 	}
 	int remain_data = ret + prev_remain;
@@ -134,7 +138,7 @@ void ACPP_Cobot_Car_Controller::RecvPacket()
 	{
 		int packet_size = p[0];
 		if (0 == packet_size) {
-			UE_LOG(LogTemp, Warning, TEXT("packet size: 0!!!!!!!!!!!!"));
+			UE_LOG(LogTemp, Warning, TEXT("packet size: 0!!!!!!!!!!!! ret: %d"), ret);
 			prev_remain = 0;
 			return;
 		}
@@ -144,8 +148,7 @@ void ACPP_Cobot_Car_Controller::RecvPacket()
 			ProcessPacket(p);
 			p = p + packet_size;
 			remain_data -= packet_size;
-		}
-		else break;
+		} else break;
 	}
 	prev_remain = remain_data;
 	if (remain_data > 0)
