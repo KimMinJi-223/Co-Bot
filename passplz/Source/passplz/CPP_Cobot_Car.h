@@ -6,6 +6,7 @@
 #include "CPP_Stage3Cobot.h"
 #include "GameFramework/Character.h"
 #include "Components/DecalComponent.h"
+#include "PaperSpriteComponent.h"
 #include "CPP_Cobot_Car.generated.h"
 
 UCLASS()
@@ -46,6 +47,9 @@ public:
 
 	UPROPERTY(BlueprintReadWrite, VisibleAnywhere)
 		UStaticMeshComponent* lavaCapsule;
+
+	UPROPERTY(VisibleAnywhere)
+	UPaperSpriteComponent* paperLocation;
 
 private:
 

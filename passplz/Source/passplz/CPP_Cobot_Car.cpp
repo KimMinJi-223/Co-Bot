@@ -2,6 +2,7 @@
 
 
 #include "CPP_Cobot_Car.h"
+#include "PaperSprite.h"
 
 // Sets default values
 ACPP_Cobot_Car::ACPP_Cobot_Car()
@@ -16,6 +17,7 @@ ACPP_Cobot_Car::ACPP_Cobot_Car()
 	//Player2 = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Player2"));
 	Player1CarFoot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Player1CarFoot"));
 	Player2CarFoot = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Player2CarFoot"));
+	paperLocation = CreateDefaultSubobject<UPaperSpriteComponent>(TEXT("paperLocation"));
 
 	GetCapsuleComponent()->SetCapsuleSize(260.f, 260.f);
 
@@ -29,6 +31,7 @@ ACPP_Cobot_Car::ACPP_Cobot_Car()
 	//Player2->SetupAttachment(GetCapsuleComponent());
 	Player1CarFoot->SetupAttachment(GetCapsuleComponent());
 	Player2CarFoot->SetupAttachment(GetCapsuleComponent());
+	paperLocation->SetupAttachment(GetCapsuleComponent());
 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -240.0f), FRotator(0.0f, -90.0f, 0.0f));
 	SpringArm->TargetArmLength = 1000.0f;
@@ -39,6 +42,7 @@ ACPP_Cobot_Car::ACPP_Cobot_Car()
 	//Player2->SetRelativeLocation(FVector(90.f, -165.f, 20.0f));
 	Player1CarFoot->SetRelativeLocation(FVector(90.f, 165.f, -193.f));
 	Player2CarFoot->SetRelativeLocation(FVector(90.f, -165.f, -193.f));
+	paperLocation->SetRelativeRotation(FRotator(0.f, 90.f, 90.f));
 
 	static ConstructorHelpers::FObjectFinder<USkeletalMesh> SK_CAR(TEXT("/Game/K_Test/input/stage4_car.stage4_car"));
 	if (SK_CAR.Succeeded()) {
@@ -60,6 +64,12 @@ ACPP_Cobot_Car::ACPP_Cobot_Car()
 		lavaCapsule->SetStaticMesh(SM_LAVACAPSULE.Object);
 	}
 
+	static ConstructorHelpers::FObjectFinder<UPaperSprite> SM_PAPER(TEXT("/Game/3S_BP/location_7080179_Sprite.location_7080179_Sprite"));
+	if (SM_PAPER.Succeeded()) {
+		paperLocation->SetSprite(SM_PAPER.Object);
+	}
+
+	paperLocation->bVisibleInSceneCaptureOnly = true;
 	mode = 0;
 }
 
