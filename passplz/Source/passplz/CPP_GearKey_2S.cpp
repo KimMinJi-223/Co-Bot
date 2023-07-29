@@ -187,7 +187,7 @@ void ACPP_GearKey_2S::OnClearOverlap(UPrimitiveComponent* OverlappedComponent, A
 	FVector spawnLocation = GetActorLocation();
 	spawnLocation.X += 1000;
 	spawnLocation.Y -= 100;
-	spawnLocation.Z -= 1500;
+	spawnLocation.Z -= 2000;
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), fireNiagaraSystemAsset, spawnLocation);
 
 	blockCube->SetCollisionEnabled(ECollisionEnabled::NoCollision);

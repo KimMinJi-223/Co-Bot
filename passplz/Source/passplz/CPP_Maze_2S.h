@@ -39,8 +39,7 @@ private:
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* Maze;
 
-	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* Target;
+
 
 	UPROPERTY(VisibleAnywhere)
 		UBoxComponent* forward_target_collision;
@@ -74,4 +73,7 @@ public:
 		void OnComponentBeginOverlap_clear(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 
 	void BridgeTimer();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		UStaticMeshComponent* Target;
 }; 

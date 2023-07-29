@@ -32,6 +32,9 @@ public:
 	void target_right();
 	void target_left();
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+		UStaticMeshComponent* Key;
+
 
 private:
 	UPROPERTY(VisibleAnywhere)
@@ -48,11 +51,6 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 		UStaticMeshComponent* child_gear3;
-
-	UPROPERTY(VisibleAnywhere)
-		UStaticMeshComponent* Key;
-
-
 
 	UPROPERTY(VisibleAnywhere)
 		UBoxComponent* forward_Key_collision;
