@@ -83,7 +83,7 @@ void ACPP_Cobot_Car::BeginPlay()
 
 	isHaveCapsule = false;
 	lavaCapsule->SetVisibility(false);
-
+	paperLocation->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	/*Player1->SetChildActorClass(ACPP_Stage3Cobot::StaticClass());
 	Player2->SetChildActorClass(ACPP_Stage3Cobot::StaticClass());
 	Player1->RegisterComponent();
