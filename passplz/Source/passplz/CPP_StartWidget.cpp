@@ -111,7 +111,7 @@ bool UCPP_StartWidget::SendSingupIDPW()
 	ioctlsocket(*sock, FIONBIO, &nonBlockingMode); // sock을 논블로킹 모드로 설정
 
 	if (ret != buff[0]) {
-		UE_LOG(LogTemp, Warning, TEXT("start widget signup recv err"));
+		UE_LOG(LogTemp, Warning, TEXT("start widget signup recv err!!!! recv ret: %d"), ret);
 		return false;
 	}
 
@@ -159,8 +159,10 @@ void UCPP_StartWidget::CreateRoom()
 	u_long nonBlockingMode = 1;
 	ioctlsocket(*sock, FIONBIO, &nonBlockingMode); // sock을 논블로킹 모드로 설정
 
-	if (ret != buff[0])
-		UE_LOG(LogTemp, Warning, TEXT("create room recv err"));
+	if (ret != buff[0]) {
+		UE_LOG(LogTemp, Warning, TEXT("create room recv err!!! packet size: %d"), ret);
+		return;
+	}
 
 	switch (buff[1])
 	{
@@ -200,8 +202,10 @@ void UCPP_StartWidget::NormalModeRefresh()
 		char buff[BUF_SIZE];
 		ret = recv(*sock, reinterpret_cast<char*>(&buff), BUF_SIZE, 0);
 
-		if (ret != buff[0])
-			UE_LOG(LogTemp, Warning, TEXT("normal mode refresh recv err"));
+		if (ret != buff[0]) {
+			UE_LOG(LogTemp, Warning, TEXT("normal mode refresh recv err!!! recv packet size: %d"), ret);
+			break;
+		}
 
 		switch (buff[1])
 		{
@@ -297,7 +301,7 @@ void UCPP_StartWidget::PlayGame(int roomId)
 			return;
 		}
 	} else {
-		UE_LOG(LogTemp, Warning, TEXT("errerrerr ret: %d"), ret);
+		UE_LOG(LogTemp, Warning, TEXT("play game recv err!!!! ret: %d"), ret);
 	}
 }
 
