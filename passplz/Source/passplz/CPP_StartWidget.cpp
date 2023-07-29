@@ -312,3 +312,8 @@ void UCPP_StartWidget::DeleteRoom(int roomId)
 	int ret = send(*sock, reinterpret_cast<char*>(&pack), sizeof(pack), 0);
 }
 
+void UCPP_StartWidget::Logout()
+{
+
+}
+

@@ -56,6 +56,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 		void DeleteRoom(int roomId);
 
+	//로그아웃
+	UFUNCTION(BlueprintCallable)
+		void Logout();
+
 protected:
 	UPROPERTY(BlueprintReadWrite)
 		bool Is_start; //서버에게 이제 시작해도 되는 받는 불 변수이다.
