@@ -91,6 +91,11 @@ private:
 	void Run_Pressed();
 	void Run_Released();
 
+private:
+	float CalculateSpeedAndCurveValue();
+	void UpdateFootMovement(float& time, FVector& current, FVector& start, FVector& target, const FVector& forward_vector, int directionMultiplier);
+	void EndFootMovement(FVector& start, FVector& target, FVector& current, float& time, direction dir);
+
 public: //장애물과 서버 데이터 통신을 위해 필요한 API
 	SOCKET* GetSocket() { return sock; };
 	void SetWidget(UUserWidget* widget) { current_widget = widget; }
@@ -105,10 +110,6 @@ private:
 
 	class ACPP_Cobot* Player_2; //상대 플레이어 정보
 
-
-public:
-	bool Is_Set_IDPW(FString I, FString p);
-
 protected:
 	UPROPERTY(BlueprintReadWrite)
 		FString ID; //아이디
@@ -116,11 +117,7 @@ protected:
 		FString Passward; //비밀번호
 
 private:
-	int previous_input;
-	int current_input;
-	float rotate_min;
-	float rotate_max;
-
+	float curve_value;
 	bool isClear;
 
 

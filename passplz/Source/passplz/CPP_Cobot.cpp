@@ -17,8 +17,6 @@ ACPP_Cobot::ACPP_Cobot()
 
 	SpringArm->SetupAttachment(GetCapsuleComponent());
 	Camera->SetupAttachment(SpringArm);
-	Foot_left_Zone->SetupAttachment(RootComponent);
-	Foot_right_Zone->SetupAttachment(RootComponent);
 
 	Foot_left_Zone->SetBoxExtent(FVector(8.f, 8.f, 4.f));
 	Foot_right_Zone->SetBoxExtent(FVector(8.f, 8.f, 4.f));
@@ -33,6 +31,8 @@ ACPP_Cobot::ACPP_Cobot()
 		UE_LOG(LogTemp, Warning, TEXT("mesh ok"));
 
 		GetMesh()->SetSkeletalMesh(SK_COBOT.Object);
+		Foot_left_Zone->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "left");
+		Foot_right_Zone->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "right");
 	}
 
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
@@ -52,10 +52,11 @@ ACPP_Cobot::ACPP_Cobot()
 		colorChangeSound = colorChangeSoundAsset.Object;
 	}
 	
-
 	GetCharacterMovement()->MaxWalkSpeed = 100.f;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
 	GetCharacterMovement()->bUseControllerDesiredRotation = false;
+	GetCharacterMovement()->MaxAcceleration = FLT_MAX;
+	GetCharacterMovement()->BrakingDecelerationWalking = 0.0f;
 
 	bUseControllerRotationYaw = false;
 	SpringArm->bUsePawnControlRotation = true;
@@ -76,6 +77,9 @@ void ACPP_Cobot::BeginPlay()
 	Current_right = GetMesh()->GetSocketLocation("right");
 	Start_right = GetMesh()->GetSocketLocation("right");
 	Target_right = GetMesh()->GetSocketLocation("right");
+
+	
+
 	GetMesh()->SetAnimInstanceClass(AnimInstanceClass);
 
 	color = FVector(0.0f, 1.0f, 0.0f);

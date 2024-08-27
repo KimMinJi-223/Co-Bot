@@ -63,9 +63,6 @@ void ACPP_Cobot_Controller::BeginPlay()
 	if (!player)
 		return;
 	player->IsUnion_Jump_anim = false;
-	previous_input = 0;
-	current_input = 0;
-
 
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_Maze_2S::StaticClass(), maze_actor);
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ACPP_GearKey_2S::StaticClass(), gear_actor);
@@ -77,56 +74,6 @@ void ACPP_Cobot_Controller::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//if (is_maze_button_push_forward) {
-	//    Cast<ACPP_Maze_2S>(arrOutActors[0])->target_forward();
-	//}
-	//if (is_maze_button_push_back) {
-	//    Cast<ACPP_Maze_2S>(arrOutActors[0])->target_back();
-	//}
-	//if (is_maze_button_push_left) {
-	//    Cast<ACPP_Maze_2S>(arrOutActors[0])->target_left();
-	//}
-	//if (is_maze_button_push_right) {
-	//    Cast<ACPP_Maze_2S>(arrOutActors[0])->target_right();
-	//}
-
-	//if (IsUnion) {
-	//    UE_LOG(LogTemp, Warning, TEXT("Union"));
-	//    //합체 요청을 하는 곳, 스페이스 바를 계속 누르고 있으면 여기에 계속 들어온다.
-	//    //여기서 서버에 상대 플레이어에게 합체 요청을 보내고 서버는 상대방에게 합체 요청을 보내줘야함
-	//}
-	//else {
-	//    UE_LOG(LogTemp, Warning, TEXT("No Union"));
-	//    //스페이스바를 누르지 않으면 여기에 계속 들어온다.
-	//}
-   /* FHitResult HitResult;
-	FVector StartTraceLocation = player->Current_left + FVector(0.f, 0.f, 30.f);
-	FVector EndTraceLocation = player->Current_left + FVector(0.f, 0.f, -500.f);
-	GetWorld()->LineTraceSingleByChannel(
-		HitResult,
-		StartTraceLocation,
-		EndTraceLocation,
-		ECollisionChannel::ECC_Visibility
-	);
-	if (HitResult.IsValidBlockingHit()) {
-		player->Current_left = HitResult.Location;
-	}
-
-
-
-	StartTraceLocation = player->Current_right + FVector(0.f, 0.f, 30.f);
-	EndTraceLocation = player->Current_right + FVector(0.f, 0.f, -500.f);
-	GetWorld()->LineTraceSingleByChannel(
-		HitResult,
-		StartTraceLocation,
-		EndTraceLocation,
-		ECollisionChannel::ECC_Visibility
-	);
-	if (HitResult.IsValidBlockingHit()) {
-		player->Current_right = HitResult.Location;
-	}
- */
- //UE_LOG(LogTemp, Warning, TEXT("tick: %d"), id);
 	if (isClear) {
 		FVector P2Location = Player_2->GetActorLocation();
 		P2Location.Z = player->GetActorLocation().Z;
@@ -181,48 +128,6 @@ void ACPP_Cobot_Controller::RecvPacket()
 	{
 		memcpy(prev_packet_buff, p, remain_data);
 	}
-
-	/*char recv_buff[BUF_SIZE];
-
-	int recv_ret = recv(*sock, reinterpret_cast<char*>(&recv_buff), BUF_SIZE, 0);
-	if (recv_ret <= 0)
-	   return;
-
-	UE_LOG(LogTemp, Warning, TEXT("number of copies: %d"), ring_buff.number_of_copies);
-	UE_LOG(LogTemp, Warning, TEXT("write pos: %d"), ring_buff.write_pos);
-	UE_LOG(LogTemp, Warning, TEXT("read pos: %d"), ring_buff.read_pos);
-	int enqueue_ret = ring_buff.enqueue(recv_buff, recv_ret);
-	if (static_cast<int>(error::full_buffer) == enqueue_ret) {
-	   UE_LOG(LogTemp, Warning, TEXT("full buffer"));
-	   return;
-	} else if (static_cast<int>(error::in_data_is_too_big) == enqueue_ret) {
-	   UE_LOG(LogTemp, Warning, TEXT("in data is too big"));
-	   return;
-	} else if(static_cast<int>(error::no_seat_in_buffer) == enqueue_ret) {
-	   UE_LOG(LogTemp, Warning, TEXT("no seat in buffer"));
-	   return;
-	}
-
-	while ((ring_buff.remain_data() != 0 && ring_buff.peek_front() != 0) && (ring_buff.peek_front() <= ring_buff.remain_data()))
-	{
-	   char pack_size = ring_buff.peek_front();
-	   char dequeue_data[BUFFER_SIZE] = {};
-
-	   UE_LOG(LogTemp, Warning, TEXT("enqueue ret: %d"), enqueue_ret);
-	   UE_LOG(LogTemp, Warning, TEXT("remain data: %d"), ring_buff.remain_data());
-	   UE_LOG(LogTemp, Warning, TEXT("pack size: %d"), pack_size);
-	   int dequeue_ret = ring_buff.dequeue(reinterpret_cast<char*>(&dequeue_data), pack_size);
-	   if (static_cast<int>(error::no_data_in_buffer) == dequeue_ret) {
-		  UE_LOG(LogTemp, Warning, TEXT("no data in buffer"));
-		  break;
-	   } else if (static_cast<int>(error::out_data_is_too_big) == dequeue_ret) {
-		  UE_LOG(LogTemp, Warning, TEXT("out data is too buffer"));
-		  break;
-	   }
-	   UE_LOG(LogTemp, Warning, TEXT("dequeue ret: %d"), dequeue_ret);
-
-	   ProcessPacket(dequeue_data);
-	}*/
 }
 
 void ACPP_Cobot_Controller::ProcessPacket(char* packet)
@@ -448,7 +353,6 @@ void ACPP_Cobot_Controller::SendEnterPacket()
 	//enter_pack.size = sizeof(enter_pack);
 	//enter_pack.type = static_cast<char>(packet_type::cs_enter);
 
-	/* 로그인을 하기 전 임시로 구현해놓음. 이거 안하면 MATCHING이 안됨 */
 	cs_login_packet enter_pack;
 	enter_pack.size = sizeof(enter_pack);
 	enter_pack.type = static_cast<char>(packet_type::cs_login);
@@ -554,6 +458,50 @@ void ACPP_Cobot_Controller::Run_Released()
 	player->AnimatiomChange(0);
 }
 
+float ACPP_Cobot_Controller::CalculateSpeedAndCurveValue()
+{
+	// 두 발 사이의 거리 계산
+	float distance = (player->Current_left - player->Current_right).Size();
+
+	// 조건에 따른 속도와 curve_value 계산
+	if (distance < 60.f) {
+		curve_value = 50.f;
+		player->GetCharacterMovement()->MaxWalkSpeed = 120.f;
+	}
+	else {
+		curve_value = 0.f;
+		player->GetCharacterMovement()->MaxWalkSpeed = 0.f;
+	}
+
+	// curve_value 반환
+	return curve_value;
+}
+
+void ACPP_Cobot_Controller::UpdateFootMovement(float& time, FVector& current, FVector& start, FVector& target, const FVector& forward_vector, int directionMultiplier)
+{
+	float& otherTime = (directionMultiplier == -1) ? player->Time_left : player->Time_right;
+	otherTime += GetWorld()->GetDeltaSeconds() * 2;
+
+	if (otherTime < 1.0f) {
+		player->AddMovementInput(forward_vector);
+		target = player->GetActorLocation() + forward_vector * 60.f;
+
+		curve_value *= FMath::Sin(FMath::DegreesToRadians(otherTime * 180.f)) * 0.8f;
+		current = player->GetActorRightVector() * curve_value * directionMultiplier + UKismetMathLibrary::VLerp(start, target, otherTime);
+	}
+}
+
+void ACPP_Cobot_Controller::EndFootMovement(FVector& start, FVector& target, FVector& current, float& time, direction dir)
+{
+	if (start != current) {
+		start = current;
+		target = current;
+		time = 0.f;
+		SendMovePacket(dir);
+	}
+}
+
+
 void ACPP_Cobot_Controller::SendEsc()
 {
 	cs_esc_packet pack;
@@ -565,161 +513,34 @@ void ACPP_Cobot_Controller::SendEsc()
 
 void ACPP_Cobot_Controller::Left_Right(float NewAxisValue)
 {
-	//발 충돌 박스 위치 업데이트
-	player->Foot_left_Zone->SetWorldLocation(player->GetMesh()->GetSocketLocation("left"));
-	player->Foot_right_Zone->SetWorldLocation(player->GetMesh()->GetSocketLocation("right"));
-
 	if (player->IsUnion_Jump_anim) {
-		//위치를 계속 보내는거 필요(pawn위치만)
 		return;
 	}
 
-	// 이동하기 전에 캐릭터의 상태를 계산해서 보폭과 걸음 속도를 설정한다.
-	float distance_two_feet = 50.f;
-	if (60.f > (player->Current_left - player->Current_right).Size()) {
-		distance_two_feet = 50.f;
-		player->GetCharacterMovement()->MaxWalkSpeed = 200.f;
-	}
-	else {
-		distance_two_feet = 0.f;
-		player->GetCharacterMovement()->MaxWalkSpeed = 0.f;
-	}
 
 	FRotator rotator_controller = GetControlRotation();
 	FRotator rotator_forward = UKismetMathLibrary::MakeRotator(0.0f, 0.0f, rotator_controller.Yaw);
 	FVector forward_vector = UKismetMathLibrary::GetForwardVector(rotator_forward);
+	
+	// 이동하기 전에 캐릭터의 상태를 계산해서 보폭과 걸음 속도를 설정한다.
 
+	CalculateSpeedAndCurveValue();
 
 	if (((int)NewAxisValue) == 1) { // A key
-		player->Start_right = player->Current_right;
-		player->Time_right = 0.f;
-		player->Time_left += (GetWorld()->GetDeltaSeconds() * 2);
-		if (player->Time_left < 1.0f) {
-			//캐릭터를 움직인다.
-			player->AddMovementInput(forward_vector, 1.0f);
-
-			//목표 왼발 위치를 정한다.
-			player->Target_left = player->GetActorLocation() +
-				forward_vector * 50.f;
-
-
-			//현재 발의 위치를 업데이트 한다.
-			float curvevalue = FMath::Sin(FMath::DegreesToRadians(player->Time_left * 180.f)) * 0.8f;
-			player->Current_left = (player->GetActorRightVector() * -curvevalue * distance_two_feet) + (UKismetMathLibrary::VLerp(player->Start_left, player->Target_left, player->Time_left));
-
-			//UE_LOG(LogTemp, Warning, TEXT("Target_left %f"), player->Target_left.Z);
-			//UE_LOG(LogTemp, Warning, TEXT("Current_left %f"), player->Current_left.Z);
-
-			//FHitResult HitResult;
-			//FVector StartTraceLocation = player->Current_left + FVector(0.f, 0.f, 30.f);
-			//FVector EndTraceLocation = player->Current_left + FVector(0.f, 0.f, -500.f);
-
-			//트레이스로 다음 발의 위치를 찾는다.
-			//GetWorld()->LineTraceSingleByChannel(
-			//    HitResult,
-			//    StartTraceLocation,
-			//    EndTraceLocation,
-			//    ECollisionChannel::ECC_Visibility
-			//);
-			////그 값을 현재 발 위치로 넣어준다.
-			//if(HitResult.IsValidBlockingHit())
-			//    player->Current_left = HitResult.Location;
-
-		  //  UE_LOG(LogTemp, Warning, TEXT("%f"), HitResult.Location.Z);
-
-			SendMovePacket(direction::left);
-
-		}
+		UpdateFootMovement(player->Time_left, player->Current_left, player->Start_left, player->Target_left, forward_vector, -1);
+		SendMovePacket(direction::left);
 	}
 	else {
-		if (player->Start_left != player->Current_left) {
-			player->Start_left = player->Current_left;
-			player->Target_left = player->Current_left;
-			player->Time_left = 0.f;
-
-			SendMovePacket(direction::left);
-
-		}
-
-		if (((int)NewAxisValue) == 2) { // D key
-			player->Start_left = player->Current_left;
-			player->Time_left = 0.f;
-			player->Time_right += (GetWorld()->GetDeltaSeconds() * 2);
-			if (player->Time_right < 1.0f) {
-				//캐릭터를 움직인다.
-				player->AddMovementInput(forward_vector, 1.0f);
-
-				//목표 왼발 위치를 정한다.
-				player->Target_right = player->GetActorLocation() +
-					forward_vector * 50.f;
-
-
-				//현재 발의 위치를 업데이트 한다.
-				float curvevalue = FMath::Sin(FMath::DegreesToRadians(player->Time_right * 180.f)) * 0.8f;
-				player->Current_right = (player->GetActorRightVector() * curvevalue * distance_two_feet) + (UKismetMathLibrary::VLerp(player->Start_right, player->Target_right, player->Time_right));
-
-				FHitResult HitResult;
-				FVector StartTraceLocation = player->Current_right + FVector(0.f, 0.f, 30.f);
-				FVector EndTraceLocation = player->Current_right + FVector(0.f, 0.f, -500.f);
-
-				/*            GetWorld()->LineTraceSingleByChannel(
-								HitResult,
-								StartTraceLocation,
-								EndTraceLocation,
-								ECollisionChannel::ECC_Visibility
-							);
-							if (HitResult.IsValidBlockingHit())
-								player->Current_right = HitResult.Location;*/
-
-
-				SendMovePacket(direction::right);
-
-
-			}
-		}
-		else {
-			if (player->Start_right != player->Current_right) {
-				player->Start_right = player->Current_right;
-				player->Start_right = player->Current_right;
-
-				player->Time_right = 0.f;
-
-				SendMovePacket(direction::right);
-
-			}
-		}
+		EndFootMovement(player->Start_left, player->Target_left, player->Current_left, player->Time_left, direction::left);
 	}
 
-	previous_input = current_input;
-	current_input = ((int)NewAxisValue);
-	if (current_input != previous_input) {
-		rotate_min = GetControlRotation().Yaw - 90.f;
-		rotate_max = GetControlRotation().Yaw + 90.f;
-		// UE_LOG(LogTemp, Warning, TEXT("current_input"));
-
+	if (((int)NewAxisValue) == 2) { // D key
+		UpdateFootMovement(player->Time_right, player->Current_right, player->Start_right, player->Target_right, forward_vector, 1);
+		SendMovePacket(direction::right);
+	}
+	else {
+		EndFootMovement(player->Start_right, player->Target_right, player->Current_right, player->Time_right, direction::right);
 	}
 }
 
-bool ACPP_Cobot_Controller::Is_Set_IDPW(FString I, FString p)
-{
-	///*서버! 여기에 서버에 send해줘야함 false라면 바로 리턴 true면 아래 작업 후 리턴*/
-	////ID = I;
-	////Passward = p;
-
-	//wchar_t* input_id = TCHAR_TO_WCHAR(*I);
-	//wchar_t* input_pw = TCHAR_TO_WCHAR(*p);
-
-	//// 서버한테 들어왔다고 알려주는 거
-	//cs_login_packet login_pack;
-	//login_pack.size = sizeof(login_pack);
-	//login_pack.type = static_cast<char>(packet_type::cs_login);
-	//wcscpy_s(login_pack.id, MAX_NAME, input_id);
-	//wcscpy_s(login_pack.passward, MAX_NAME, input_pw);
-
-	//int ret = send(*sock, reinterpret_cast<char*>(&login_pack), sizeof(login_pack), 0);
-
-	// UE_LOG(LogTemp, Warning, TEXT("ID: %s, PW: %s"), input_id, input_pw);
-
-	return true;
-}
 
