@@ -280,19 +280,19 @@ void ACPP_Cobot_Controller::ProcessPacket(char* packet)
 	} break;
 	case static_cast<int>(packet_type::sc_push_button_Forklift_red):
 	{
-		Cast<ACPP_Color_Forklift>(forklift_actor[0])->RecvColor(0);
+		Cast<ACPP_Color_Forklift>(forklift_actor[0])->RecvColor(Red);
 	} break;
 	case static_cast<int>(packet_type::sc_push_button_Forklift_green):
 	{
-		Cast<ACPP_Color_Forklift>(forklift_actor[0])->RecvColor(1);
+		Cast<ACPP_Color_Forklift>(forklift_actor[0])->RecvColor(Green);
 	} break;
 	case static_cast<int>(packet_type::sc_push_button_Forklift_blue):
 	{
-		Cast<ACPP_Color_Forklift>(forklift_actor[0])->RecvColor(2);
+		Cast<ACPP_Color_Forklift>(forklift_actor[0])->RecvColor(Blue);
 	} break;
 	case static_cast<int>(packet_type::sc_push_button_Forklift_black):
 	{
-		Cast<ACPP_Color_Forklift>(forklift_actor[0])->RecvColor(3);
+		Cast<ACPP_Color_Forklift>(forklift_actor[0])->RecvColor(Black);
 	} break;
 	case static_cast<int>(packet_type::sc_push_button_cobot_red):
 	{
@@ -475,19 +475,26 @@ float ACPP_Cobot_Controller::CalculateSpeedAndCurveValue()
 
 	// curve_value ¹ÝÈ¯
 	return curve_value;
-}
+} 
+ 
+void ACPP_Cobot_Controller::UpdateFootMovement(float& time, 
+											   FVector& current, 
+											   FVector& start, 
+											   FVector& target, 
+											   const FVector& forward_vector, 
+											   int directionMultiplier)
 
-void ACPP_Cobot_Controller::UpdateFootMovement(float& time, FVector& current, FVector& start, FVector& target, const FVector& forward_vector, int directionMultiplier)
 {
-	float& otherTime = (directionMultiplier == -1) ? player->Time_left : player->Time_right;
-	otherTime += GetWorld()->GetDeltaSeconds() * 2;
+	time += GetWorld()->GetDeltaSeconds() * FOOTSTEP_SPEED;
 
-	if (otherTime < 1.0f) {
+	if (time < 1.0f) {
 		player->AddMovementInput(forward_vector);
-		target = player->GetActorLocation() + forward_vector * 60.f;
+		target = player->GetActorLocation() + forward_vector * FOOTSTEP_LENGTH;
 
-		curve_value *= FMath::Sin(FMath::DegreesToRadians(otherTime * 180.f)) * 0.8f;
-		current = player->GetActorRightVector() * curve_value * directionMultiplier + UKismetMathLibrary::VLerp(start, target, otherTime);
+		curve_value *= FMath::Sin(FMath::DegreesToRadians(time * 180.f)) * STEP_HEIGHT;
+
+		current = player->GetActorRightVector() * curve_value * directionMultiplier 
+			      + UKismetMathLibrary::VLerp(start, target, time);
 	}
 }
 

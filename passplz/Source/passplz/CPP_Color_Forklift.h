@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "CPP_Color_Forklift.generated.h"
 
+enum Color { Red, Green, Blue, Black };
+
 UCLASS()
 class PASSPLZ_API ACPP_Color_Forklift : public AActor
 {
@@ -59,5 +61,5 @@ public:
 	void SetPillarColor();
 	void FindAndMoveForkliftByColor();
 	void ForkliftMoveTimer();
-	void RecvColor(int color);
+	void RecvColor(Color color);
 };

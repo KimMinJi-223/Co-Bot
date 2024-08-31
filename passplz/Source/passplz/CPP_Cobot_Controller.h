@@ -23,6 +23,10 @@
 
 #include "CPP_Cobot_Controller.generated.h"
 
+#define FOOTSTEP_SPEED 2
+#define STEP_HEIGHT 0.8f;
+#define FOOTSTEP_LENGTH 60.f
+
 /**
  *
  */
