@@ -62,4 +62,6 @@ private:
 	FVector crashLocation;
 	UMaterialInterface* brushMaterial;
 	UNiagaraSystem* lavaNiagaraSystemAsset;
+	
+	FVector2D collisionUV;
 };

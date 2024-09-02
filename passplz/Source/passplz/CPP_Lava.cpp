@@ -67,6 +67,7 @@ void ACPP_Lava::BeginPlay()
 	DynamicMaterial = UMaterialInstanceDynamic::Create(brushMaterial, nullptr);
 }
 
+
 // Called every frame
 void ACPP_Lava::Tick(float DeltaTime)
 {
@@ -76,7 +77,7 @@ void ACPP_Lava::Tick(float DeltaTime)
 		UE_LOG(LogTemp, Warning, TEXT("ACPP_Lava::Tick"));
 		explosionDecal->SetWorldLocation(crashLocation);
 		explosionDecal->SetWorldRotation(FRotator(90.f, 0.f, 0.f));
-
+		
 		MeltLavaFloor();
 		explosionDecalDynamicMaterial->SetScalarParameterValue(TEXT("opacityValue"), opacityValue);
 		opacityValue -= DeltaTime/7;
@@ -88,6 +89,28 @@ void ACPP_Lava::Tick(float DeltaTime)
 
 void ACPP_Lava::MeltLavaFloor()
 {
+	
+
+	if (!DynamicMaterial)
+		UE_LOG(LogTemp, Warning, TEXT("DynamicMaterial NO"));
+	if (!RenderTargetTexture)
+		UE_LOG(LogTemp, Warning, TEXT("RenderTargetTexture NO"));
+
+	DynamicMaterial->SetVectorParameterValue(TEXT("Location"), FLinearColor(collisionUV.X, collisionUV.Y, 0.f, 1.0f));
+	UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), RenderTargetTexture, DynamicMaterial);
+	UE_LOG(LogTemp, Warning, TEXT("%f, %f"), collisionUV.X, collisionUV.Y);
+
+	
+}
+
+void ACPP_Lava::MeltLavaFloorLocation()
+{
+	UE_LOG(LogTemp, Warning, TEXT("FindCollisionUV %f, %f"), collisionUV.X, collisionUV.Y);
+
+	crashLocation = GetActorLocation();
+	explosionDecal->SetVisibility(true);
+	lavaBall->SetVisibility(false);
+	
 
 	FHitResult HitResult;
 	FVector StartTraceLocation = crashLocation + FVector(0.f, 0.f, 500.f);
@@ -103,29 +126,12 @@ void ACPP_Lava::MeltLavaFloor()
 		ECollisionChannel::ECC_Visibility,
 		TraceParams
 	);
-	
-	FVector2D collisionUV(0.f, 0.f);
+
 	UGameplayStatics::FindCollisionUV(HitResult, 0, collisionUV);
 
-	if (!DynamicMaterial)
-		UE_LOG(LogTemp, Warning, TEXT("DynamicMaterial NO"));
-	if (!RenderTargetTexture)
-		UE_LOG(LogTemp, Warning, TEXT("RenderTargetTexture NO"));
+	UE_LOG(LogTemp, Warning, TEXT("FindCollisionUV %f, %f"), collisionUV.X, collisionUV.Y);
 
-	DynamicMaterial->SetVectorParameterValue(TEXT("Location"), FLinearColor(collisionUV.X, collisionUV.Y, 0.f, 1.0f));
-	if (result) {
-		UKismetRenderingLibrary::DrawMaterialToRenderTarget(GetWorld(), RenderTargetTexture, DynamicMaterial);
-		UE_LOG(LogTemp, Warning, TEXT("%f, %f"), collisionUV.X, collisionUV.Y);
-		UE_LOG(LogTemp, Warning, TEXT("%f, %f, %f"), crashLocation.X, crashLocation.Y, crashLocation.Z);
-		UE_LOG(LogTemp, Warning, TEXT("%f, %f, %f"), HitResult.Location.X, HitResult.Location.Y, HitResult.Location.Z);
-	}
-}
 
-void ACPP_Lava::MeltLavaFloorLocation()
-{
-	crashLocation = GetActorLocation();
-	explosionDecal->SetVisibility(true);
-	lavaBall->SetVisibility(false);
 	isExplosion = true;
 }
 

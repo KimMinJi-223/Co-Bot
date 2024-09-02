@@ -31,8 +31,6 @@ ACPP_Cobot::ACPP_Cobot()
 		UE_LOG(LogTemp, Warning, TEXT("mesh ok"));
 
 		GetMesh()->SetSkeletalMesh(SK_COBOT.Object);
-		Foot_left_Zone->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "left");
-		Foot_right_Zone->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "right");
 	}
 
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
@@ -78,7 +76,8 @@ void ACPP_Cobot::BeginPlay()
 	Start_right = GetMesh()->GetSocketLocation("right");
 	Target_right = GetMesh()->GetSocketLocation("right");
 
-	
+	Foot_left_Zone->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "left");
+	Foot_right_Zone->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, "right");
 
 	GetMesh()->SetAnimInstanceClass(AnimInstanceClass);
 
